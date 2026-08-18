@@ -23,6 +23,41 @@ class PeriodoController extends Controller {
         $periodoModel = new PeriodoModel();
         $error = '';
 
+        $sugerencias = [
+            'tipo_periodo' => 'Quincenal',
+            'fecha_inicio' => date('Y-m-d'),
+            'fecha_fin' => date('Y-m-d', strtotime('+14 days')),
+            'anio' => date('Y'),
+            'mes' => date('n'),
+            'numero_quincena' => 1,
+            'descripcion' => ''
+        ];
+
+        $ultimoPeriodo = $periodoModel->getUltimo();
+        if ($ultimoPeriodo) {
+            $sugerencias['tipo_periodo'] = $ultimoPeriodo['tipo_periodo'];
+            $inicioAnterior = strtotime($ultimoPeriodo['fecha_inicio']);
+            $finAnterior = strtotime($ultimoPeriodo['fecha_fin']);
+
+            // Calculate differences to project next dates
+            $diffDias = round(($finAnterior - $inicioAnterior) / 86400) + 1;
+
+            $sugerencias['fecha_inicio'] = date('Y-m-d', strtotime($ultimoPeriodo['fecha_fin'] . ' +1 day'));
+            $sugerencias['fecha_fin'] = date('Y-m-d', strtotime($sugerencias['fecha_inicio'] . ' +' . ($diffDias - 1) . ' days'));
+
+            // Update month/year/quincena based on new start date
+            $sugerencias['anio'] = date('Y', strtotime($sugerencias['fecha_inicio']));
+            $sugerencias['mes'] = date('n', strtotime($sugerencias['fecha_inicio']));
+
+            if ($sugerencias['tipo_periodo'] === 'Quincenal') {
+                $dia = (int)date('j', strtotime($sugerencias['fecha_inicio']));
+                $sugerencias['numero_quincena'] = ($dia <= 15) ? 1 : 2;
+                $sugerencias['descripcion'] = $sugerencias['numero_quincena'] . 'ra Quincena ' . date('M Y', strtotime($sugerencias['fecha_inicio']));
+            } elseif ($sugerencias['tipo_periodo'] === 'Mensual') {
+                $sugerencias['descripcion'] = 'Mes ' . date('M Y', strtotime($sugerencias['fecha_inicio']));
+            }
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $descripcion = trim($_POST['descripcion'] ?? '');
             $tipo = trim($_POST['tipo_periodo'] ?? '');
@@ -53,7 +88,8 @@ class PeriodoController extends Controller {
         }
 
         $this->render('periodos/crear', [
-            'error' => $error
+            'error' => $error,
+            'sugerencias' => $sugerencias
         ], 'Nuevo periodo');
     }
 

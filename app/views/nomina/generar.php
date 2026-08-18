@@ -13,27 +13,27 @@
     <div class="form-grid">
       <div>
         <label>Salario minimo vigente *</label>
-        <input type="number" step="0.01" min="0" name="salario_minimo_vigente" required>
+        <input type="number" step="0.01" min="0" name="salario_minimo_vigente" value="<?= htmlspecialchars($sugerencias['salario_minimo_vigente']) ?>" required>
       </div>
       <div>
         <label>Semanas a descontar IVSS (# de lunes en el periodo) *</label>
-        <input type="number" step="1" min="0" name="semanas_descontar_ivss" value="2" required>
+        <input type="number" step="1" min="0" name="semanas_descontar_ivss" value="<?= htmlspecialchars($sugerencias['semanas_descontar_ivss']) ?>" required>
       </div>
       <div>
         <label>Factor de semanas por mes *</label>
-        <input type="number" step="0.000001" min="0.1" name="factor_semanas_mes" value="4.333333" required>
+        <input type="number" step="0.000001" min="0.1" name="factor_semanas_mes" value="<?= htmlspecialchars($sugerencias['factor_semanas_mes']) ?>" required>
       </div>
       <div>
         <label>Tasa S.S.O (%) *</label>
-        <input type="number" step="0.01" min="0" name="tasa_sso" value="4.0" required>
+        <input type="number" step="0.01" min="0" name="tasa_sso" value="<?= htmlspecialchars($sugerencias['tasa_sso']) ?>" required>
       </div>
       <div>
         <label>Tasa R.P.E (%) *</label>
-        <input type="number" step="0.01" min="0" name="tasa_rpe" value="0.5" required>
+        <input type="number" step="0.01" min="0" name="tasa_rpe" value="<?= htmlspecialchars($sugerencias['tasa_rpe']) ?>" required>
       </div>
       <div>
         <label>Tasa L.P.H (%) *</label>
-        <input type="number" step="0.01" min="0" name="tasa_lph" value="1.0" required>
+        <input type="number" step="0.01" min="0" name="tasa_lph" value="<?= htmlspecialchars($sugerencias['tasa_lph']) ?>" required>
       </div>
     </div>
     <br>

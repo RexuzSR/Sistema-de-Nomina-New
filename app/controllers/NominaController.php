@@ -25,6 +25,25 @@ class NominaController extends Controller {
         $ultimaTasa = $tasaModel->getUltima();
         $error = '';
 
+        $ultimaNomina = $nominaModel->getUltimaNominaGenerada();
+        $sugerencias = [
+            'salario_minimo_vigente' => '',
+            'semanas_descontar_ivss' => '2',
+            'factor_semanas_mes' => '4.333333',
+            'tasa_sso' => '4.0',
+            'tasa_rpe' => '0.5',
+            'tasa_lph' => '1.0'
+        ];
+
+        if ($ultimaNomina) {
+            $sugerencias['salario_minimo_vigente'] = $ultimaNomina['salario_minimo_vigente'];
+            $sugerencias['semanas_descontar_ivss'] = $ultimaNomina['semanas_descontar_ivss'];
+            $sugerencias['factor_semanas_mes'] = $ultimaNomina['factor_semanas_mes'];
+            $sugerencias['tasa_sso'] = (float)$ultimaNomina['tasa_sso'] * 100;
+            $sugerencias['tasa_rpe'] = (float)$ultimaNomina['tasa_rpe'] * 100;
+            $sugerencias['tasa_lph'] = (float)$ultimaNomina['tasa_lph'] * 100;
+        }
+
         if (!$nomina && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $salario_minimo = $_POST['salario_minimo_vigente'] ?? '';
             $semanas = $_POST['semanas_descontar_ivss'] ?? '';
@@ -76,7 +95,8 @@ class NominaController extends Controller {
             'periodo' => $periodo,
             'ultimaTasa' => $ultimaTasa,
             'error' => $error,
-            'id_periodo' => $id_periodo
+            'id_periodo' => $id_periodo,
+            'sugerencias' => $sugerencias
         ], 'Generar Nomina');
     }
 
