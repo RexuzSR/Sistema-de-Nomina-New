@@ -1,0 +1,26 @@
+<table border="1">
+  <tr><td colspan="7"><strong>Nomina: 2026-08-11 al 2026-08-12</strong></td></tr>
+  <tr><td colspan="7"></td></tr>
+  <tr>
+    <th>Nombres y Apellidos</th>
+    <th>Cedula</th>
+    <th>Dias trabajados</th>
+    <th>Total Asignaciones</th>
+    <th>Total Deducciones</th>
+    <th>Neto a Pagar</th>
+  </tr>
+    <tr>
+    <td>gian antonio rivas rengel</td>
+    <td>31964582</td>
+    <td>0</td>
+    <td>0.00</td>
+    <td>23.08</td>
+    <td>-23.08</td>
+  </tr>
+    <tr>
+    <td colspan="3"><strong>TOTAL GENERAL</strong></td>
+    <td><strong>0</strong></td>
+    <td><strong>23.08</strong></td>
+    <td><strong>-23.08</strong></td>
+  </tr>
+</table>

@@ -1,0 +1,286 @@
+<?php
+
+require_once __DIR__ . '/../../core/Model.php';
+require_once __DIR__ . '/EmpleadoModel.php';
+require_once __DIR__ . '/PeriodoModel.php';
+require_once __DIR__ . '/TasaModel.php';
+
+class NominaModel extends Model {
+    public function __construct() {
+        parent::__construct();
+        $this->ensureDetalleColumns();
+    }
+
+    private function ensureDetalleColumns(): void {
+        try {
+            $cols = $this->db->query("SHOW COLUMNS FROM tb_nomina_detalle LIKE 'dias_inasistencia'")->fetchAll();
+            if (empty($cols)) {
+                $this->db->exec("ALTER TABLE tb_nomina_detalle ADD COLUMN dias_inasistencia INT NOT NULL DEFAULT 0");
+            }
+        } catch (\Throwable $e) {
+            // Silently ignore if already exists or table issue
+        }
+    }
+
+    public function getById(int $idNomina): ?array {
+        $stmt = $this->db->prepare("SELECT * FROM tb_nomina WHERE id_nomina = ?");
+        $stmt->execute([$idNomina]);
+        $res = $stmt->fetch();
+        return $res ?: null;
+    }
+
+    public function getByPeriodo(int $idPeriodo): ?array {
+        $stmt = $this->db->prepare("SELECT * FROM tb_nomina WHERE id_periodo = ?");
+        $stmt->execute([$idPeriodo]);
+        $res = $stmt->fetch();
+        return $res ?: null;
+    }
+
+    public function createNomina(int $idPeriodo, int $idUsuario, float $salarioMinimo, float $semanasIvss, float $factorSemanasMes, float $tasaSso, float $tasaRpe, float $tasaLph): int {
+        $ins = $this->db->prepare("
+            INSERT INTO tb_nomina (id_periodo, id_usuario_genera, salario_minimo_vigente, semanas_descontar_ivss, factor_semanas_mes, tasa_sso, tasa_rpe, tasa_lph, estado, fecha_generacion)
+            VALUES (?,?,?,?,?,?,?,?,'Generada', NOW())
+        ");
+        $ins->execute([$idPeriodo, $idUsuario, $salarioMinimo, $semanasIvss, $factorSemanasMes, $tasaSso, $tasaRpe, $tasaLph]);
+        return (int)$this->db->lastInsertId();
+    }
+
+    public function agregarTrabajadoresANomina(int $idNomina, array $idEmpleados): void {
+        foreach ($idEmpleados as $idEmp) {
+            $idEmp = (int)$idEmp;
+            if ($idEmp > 0) {
+                $stmt = $this->db->prepare("SELECT id_detalle FROM tb_nomina_detalle WHERE id_nomina = ? AND id_empleado = ?");
+                $stmt->execute([$idNomina, $idEmp]);
+                if (!$stmt->fetch()) {
+                    $this->calcularYGuardarDetalle($idNomina, $idEmp, []);
+                }
+            }
+        }
+    }
+
+    public function eliminarEmpleadoDeNomina(int $idNomina, int $idEmpleado): void {
+        $stmt = $this->db->prepare("SELECT id_detalle FROM tb_nomina_detalle WHERE id_nomina = ? AND id_empleado = ?");
+        $stmt->execute([$idNomina, $idEmpleado]);
+        $row = $stmt->fetch();
+        if ($row) {
+            $id_detalle = $row['id_detalle'];
+            $this->db->prepare("DELETE FROM tb_nomina_asignacion WHERE id_detalle = ?")->execute([$id_detalle]);
+            $this->db->prepare("DELETE FROM tb_nomina_deduccion WHERE id_detalle = ?")->execute([$id_detalle]);
+            $this->db->prepare("DELETE FROM tb_nomina_detalle WHERE id_detalle = ?")->execute([$id_detalle]);
+        }
+    }
+
+    public function getTasasDeduccion(): array {
+        $rows = $this->db->query("SELECT * FROM tb_concepto_deduccion")->fetchAll();
+        $out = [];
+        foreach ($rows as $r) { $out[$r['nombre']] = $r; }
+        return $out;
+    }
+
+    public function getDetallesByNomina(int $idNomina): array {
+        $stmt = $this->db->prepare("
+            SELECT d.*, e.cedula, e.primer_nombre, e.segundo_nombre, e.primer_apellido, e.segundo_apellido, e.sueldo_divisa, e.foto,
+                   c.nombre_cargo
+            FROM tb_nomina_detalle d
+            JOIN tb_empleado e ON e.id_empleado = d.id_empleado
+            LEFT JOIN tb_cargo c ON c.id_cargo = d.id_cargo
+            WHERE d.id_nomina = ?
+            ORDER BY e.primer_nombre
+        ");
+        $stmt->execute([$idNomina]);
+        return $stmt->fetchAll();
+    }
+
+    public function getAsignacionMonto(int $idDetalle, int $idConcepto): float {
+        if (!$idDetalle) return 0.0;
+        $s = $this->db->prepare("SELECT monto FROM tb_nomina_asignacion WHERE id_detalle=? AND id_concepto=?");
+        $s->execute([$idDetalle, $idConcepto]);
+        $r = $s->fetch();
+        return (float)($r['monto'] ?? 0);
+    }
+
+    public function getAsignacionCantidad(int $idDetalle, int $idConcepto): float {
+        if (!$idDetalle) return 0.0;
+        $s = $this->db->prepare("SELECT cantidad FROM tb_nomina_asignacion WHERE id_detalle=? AND id_concepto=?");
+        $s->execute([$idDetalle, $idConcepto]);
+        $r = $s->fetch();
+        return (float)($r['cantidad'] ?? 0);
+    }
+
+    public function getDeduccionMonto(int $idDetalle, int $idConcepto): float {
+        if (!$idDetalle) return 0.0;
+        $s = $this->db->prepare("SELECT monto FROM tb_nomina_deduccion WHERE id_detalle=? AND id_concepto=?");
+        $s->execute([$idDetalle, $idConcepto]);
+        $r = $s->fetch();
+        return (float)($r['monto'] ?? 0);
+    }
+
+    public function getDetalleEmpleado(int $idNomina, int $idEmpleado): ?array {
+        $stmt = $this->db->prepare("
+            SELECT d.*, e.*, c.nombre_cargo, t.valor_tasa
+            FROM tb_nomina_detalle d
+            JOIN tb_empleado e ON e.id_empleado = d.id_empleado
+            LEFT JOIN tb_cargo c ON c.id_cargo = d.id_cargo
+            LEFT JOIN tb_tasa_cambio t ON t.id_tasa = d.id_tasa
+            WHERE d.id_nomina = ? AND d.id_empleado = ?
+        ");
+        $stmt->execute([$idNomina, $idEmpleado]);
+        $res = $stmt->fetch();
+        return $res ?: null;
+    }
+
+    public function getAsignacionesDetalle(int $idDetalle): array {
+        $stmt = $this->db->prepare("
+            SELECT a.*, c.nombre AS nombre_concepto
+            FROM tb_nomina_asignacion a
+            JOIN tb_concepto_asignacion c ON c.id_concepto = a.id_concepto
+            WHERE a.id_detalle = ?
+        ");
+        $stmt->execute([$idDetalle]);
+        return $stmt->fetchAll();
+    }
+
+    public function getDeduccionesDetalle(int $idDetalle): array {
+        $stmt = $this->db->prepare("
+            SELECT d.*, c.nombre
+            FROM tb_nomina_deduccion d
+            JOIN tb_concepto_deduccion c ON c.id_concepto = d.id_concepto
+            WHERE d.id_detalle = ?
+        ");
+        $stmt->execute([$idDetalle]);
+        return $stmt->fetchAll();
+    }
+
+    public function calcularYGuardarDetalle(int $idNomina, int $idEmpleado, array $datos): array {
+        $nomina = $this->getById($idNomina);
+        $empleadoModel = new EmpleadoModel();
+        $tasaModel = new TasaModel();
+
+        $empleado = $empleadoModel->getById($idEmpleado);
+        $cargo = $empleadoModel->getCargoActual($idEmpleado);
+        $tasas = $this->getTasasDeduccion();
+        $tasaCambio = $tasaModel->getUltima();
+
+        $dias_trabajados = (float)($datos['dias_trabajados'] ?? 0);
+        $dias_inasistencia = (float)($datos['dias_inasistencia'] ?? 0);
+        $horas_extra_qty = (float)($datos['horas_extra_qty'] ?? 0);
+        $bono_nocturno_qty = (float)($datos['bono_nocturno_qty'] ?? 0);
+        $feriados_qty = (float)($datos['feriados_qty'] ?? 0);
+
+        $otras_asignaciones = (float)($datos['otras_asignaciones'] ?? 0);
+        $prestamo = (float)($datos['prestamo'] ?? 0);
+        $islr = (float)($datos['islr'] ?? 0);
+
+        $sueldo_diario = round(($empleado['sueldo_divisa'] ?? 0) / 30, 4);
+        $monto_dias_trabajados = round($sueldo_diario * $dias_trabajados, 2);
+
+        // formulas based on Excel:
+        // Bono Nocturno: (Sueldo Diario / 7.5) * 0.3 * Horas
+        $bono_nocturno_monto = round(($sueldo_diario / 7.5) * 0.3 * $bono_nocturno_qty, 2);
+
+        // Horas Extra: ((Sueldo Diario * 1.5) / 7.5) * Horas
+        $horas_extra_monto = round((($sueldo_diario * 1.5) / 7.5) * $horas_extra_qty, 2);
+
+        // Dias Feriados: (Sueldo Diario * 1.5) * Dias
+        $feriados_monto = round(($sueldo_diario * 1.5) * $feriados_qty, 2);
+
+        $total_asignaciones = round(
+            $monto_dias_trabajados + $horas_extra_monto + $bono_nocturno_monto + $feriados_monto + $otras_asignaciones,
+            2
+        );
+
+        $factor_semanas_mes = (float)($nomina['factor_semanas_mes'] ?? 4.333333);
+        $prorrateo = ($nomina['semanas_descontar_ivss'] ?? 0) / $factor_semanas_mes;
+
+        $tasa_sso = (float)($nomina['tasa_sso'] ?? $tasas['S.S.O']['valor_default'] ?? 0.0400);
+        $tasa_rpe = (float)($nomina['tasa_rpe'] ?? $tasas['R.P.E']['valor_default'] ?? 0.0050);
+        $tasa_lph = (float)($nomina['tasa_lph'] ?? $tasas['L.P.H']['valor_default'] ?? 0.0100);
+
+        $sso = 0.0;
+        $rpe = 0.0;
+        if ($dias_trabajados > 0) {
+            $sso = round($tasa_sso * ($nomina['salario_minimo_vigente'] ?? 0) * $prorrateo, 2);
+            $rpe = round($tasa_rpe * ($nomina['salario_minimo_vigente'] ?? 0) * $prorrateo, 2);
+        }
+        $lph = round($tasa_lph * $total_asignaciones, 2);
+        $inasistencia_monto = round($sueldo_diario * $dias_inasistencia, 2);
+
+        $total_deducciones = round($sso + $rpe + $lph + $prestamo + $inasistencia_monto + $islr, 2);
+        $neto_pagar = round($total_asignaciones - $total_deducciones, 2);
+
+        // upsert tb_nomina_detalle
+        $stmt = $this->db->prepare("SELECT id_detalle FROM tb_nomina_detalle WHERE id_nomina = ? AND id_empleado = ?");
+        $stmt->execute([$idNomina, $idEmpleado]);
+        $existe = $stmt->fetch();
+
+        if ($existe) {
+            $id_detalle = $existe['id_detalle'];
+            $upd = $this->db->prepare("
+                UPDATE tb_nomina_detalle SET
+                    id_cargo = ?, id_tasa = ?, sueldo_diario = ?, dias_trabajados = ?, dias_inasistencia = ?,
+                    sueldo_bss = ?, total_asignaciones = ?, total_deducciones = ?, neto_pagar = ?
+                WHERE id_detalle = ?
+            ");
+            $upd->execute([
+                $cargo['id_cargo'] ?? null, $tasaCambio['id_tasa'] ?? null, $sueldo_diario, $dias_trabajados, $dias_inasistencia,
+                $monto_dias_trabajados, $total_asignaciones, $total_deducciones, $neto_pagar, $id_detalle
+            ]);
+            $this->db->prepare("DELETE FROM tb_nomina_asignacion WHERE id_detalle = ?")->execute([$id_detalle]);
+            $this->db->prepare("DELETE FROM tb_nomina_deduccion WHERE id_detalle = ?")->execute([$id_detalle]);
+        } else {
+            $ins = $this->db->prepare("
+                INSERT INTO tb_nomina_detalle
+                    (id_nomina, id_empleado, id_cargo, id_tasa, sueldo_diario, dias_trabajados, dias_inasistencia,
+                     sueldo_bss, total_asignaciones, total_deducciones, neto_pagar)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?)
+            ");
+            $ins->execute([
+                $idNomina, $idEmpleado, $cargo['id_cargo'] ?? null, $tasaCambio['id_tasa'] ?? null,
+                $sueldo_diario, $dias_trabajados, $dias_inasistencia, $monto_dias_trabajados, $total_asignaciones, $total_deducciones, $neto_pagar
+            ]);
+            $id_detalle = (int)$this->db->lastInsertId();
+        }
+
+        // Asignaciones
+        $asig = $this->db->prepare("INSERT INTO tb_nomina_asignacion (id_detalle, id_concepto, cantidad, monto) VALUES (?,?,?,?)");
+        $asig->execute([$id_detalle, 1, $dias_trabajados, $monto_dias_trabajados]);
+        if ($bono_nocturno_qty > 0 || $bono_nocturno_monto > 0) $asig->execute([$id_detalle, 2, $bono_nocturno_qty, $bono_nocturno_monto]);
+        if ($horas_extra_qty > 0 || $horas_extra_monto > 0)   $asig->execute([$id_detalle, 3, $horas_extra_qty, $horas_extra_monto]);
+        if ($feriados_qty > 0 || $feriados_monto > 0)      $asig->execute([$id_detalle, 4, $feriados_qty, $feriados_monto]);
+
+        // Deducciones
+        $ded = $this->db->prepare("INSERT INTO tb_nomina_deduccion (id_detalle, id_concepto, porcentaje_aplicado, monto) VALUES (?,?,?,?)");
+        $ded->execute([$id_detalle, 1, $tasa_sso, $sso]);
+        $ded->execute([$id_detalle, 2, $tasa_rpe, $rpe]);
+        $ded->execute([$id_detalle, 3, $tasa_lph, $lph]);
+        if ($prestamo > 0) $ded->execute([$id_detalle, 4, null, $prestamo]);
+        if ($inasistencia_monto > 0) $ded->execute([$id_detalle, 5, null, $inasistencia_monto]);
+        if ($islr > 0) $ded->execute([$id_detalle, 6, null, $islr]);
+
+        return [
+            'sueldo_diario' => $sueldo_diario, 'monto_dias_trabajados' => $monto_dias_trabajados,
+            'total_asignaciones' => $total_asignaciones, 'sso' => $sso, 'rpe' => $rpe, 'lph' => $lph,
+            'inasistencia_monto' => $inasistencia_monto, 'total_deducciones' => $total_deducciones,
+            'neto_pagar' => $neto_pagar,
+        ];
+    }
+
+    public function getTotalNominasCount(): int {
+        $s = $this->db->query("SELECT COUNT(*) FROM tb_nomina");
+        return (int)$s->fetchColumn();
+    }
+
+    public function getMontoTotalHistorico(): float {
+        $s = $this->db->query("SELECT SUM(neto_pagar) FROM tb_nomina_detalle");
+        return (float)($s->fetchColumn() ?: 0.0);
+    }
+
+    public function getMontoUltimaNomina(): float {
+        $s = $this->db->query("
+            SELECT SUM(d.neto_pagar) 
+            FROM tb_nomina_detalle d
+            WHERE d.id_nomina = (SELECT id_nomina FROM tb_nomina ORDER BY id_nomina DESC LIMIT 1)
+        ");
+        return (float)($s->fetchColumn() ?: 0.0);
+    }
+}

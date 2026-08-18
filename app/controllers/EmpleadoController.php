@@ -1,0 +1,167 @@
+<?php
+
+require_once __DIR__ . '/../../core/Controller.php';
+require_once __DIR__ . '/../models/EmpleadoModel.php';
+
+class EmpleadoController extends Controller {
+    public function index(): void {
+        $this->requireLogin();
+
+        $empleadoModel = new EmpleadoModel();
+        $empleados = $empleadoModel->getAll();
+        $msg = $_GET['msg'] ?? '';
+
+        $this->render('empleados/listar', [
+            'empleados' => $empleados,
+            'msg' => $msg
+        ], 'Empleados');
+    }
+
+    private function handlePhotoUpload(?string $fotoActual = null): ?string {
+        if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+            $file = $_FILES['foto'];
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+            
+            if (in_array($ext, $allowed, true) && $file['size'] <= 5 * 1024 * 1024) {
+                $mimeMap = [
+                    'jpg' => 'image/jpeg',
+                    'jpeg' => 'image/jpeg',
+                    'png' => 'image/png',
+                    'webp' => 'image/webp',
+                    'gif' => 'image/gif'
+                ];
+                $mime = $mimeMap[$ext] ?? 'image/jpeg';
+                $binary = file_get_contents($file['tmp_name']);
+                if ($binary !== false) {
+                    return 'data:' . $mime . ';base64,' . base64_encode($binary);
+                }
+            }
+        }
+        return $fotoActual;
+    }
+
+    public function crear(): void {
+        $this->requireLogin();
+
+        $empleadoModel = new EmpleadoModel();
+        $error = '';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $cedula = trim($_POST['cedula'] ?? '');
+            $p_nombre = trim($_POST['primer_nombre'] ?? '');
+            $s_nombre = trim($_POST['segundo_nombre'] ?? '');
+            $p_apellido = trim($_POST['primer_apellido'] ?? '');
+            $s_apellido = trim($_POST['segundo_apellido'] ?? '');
+            $id_tipo = (int)($_POST['id_tipo_empleado'] ?? 0);
+            $id_jornada = (int)($_POST['id_jornada'] ?? 0);
+            $id_cargo = (int)($_POST['id_cargo'] ?? 0);
+            $sueldo = $_POST['sueldo_divisa'] ?? '';
+            $fecha_ingreso = $_POST['fecha_ingreso'] ?? '';
+            $email = trim($_POST['email'] ?? '');
+
+            if ($cedula === '' || $p_nombre === '' || $p_apellido === '' || !$id_tipo || !$id_jornada || !$id_cargo
+                || $sueldo === '' || !is_numeric($sueldo) || $fecha_ingreso === '') {
+                $error = 'Completa todos los campos obligatorios (*) con valores válidos.';
+            } else {
+                $fotoFilename = $this->handlePhotoUpload(null);
+
+                $empleadoModel->create([
+                    'cedula' => $cedula,
+                    'primer_nombre' => $p_nombre,
+                    'segundo_nombre' => $s_nombre,
+                    'primer_apellido' => $p_apellido,
+                    'segundo_apellido' => $s_apellido,
+                    'email' => $email,
+                    'foto' => $fotoFilename,
+                    'id_tipo_empleado' => $id_tipo,
+                    'id_jornada' => $id_jornada,
+                    'id_cargo' => $id_cargo,
+                    'sueldo_divisa' => $sueldo,
+                    'fecha_ingreso' => $fecha_ingreso
+                ]);
+
+                $this->redirect('index.php?r=empleados&msg=' . urlencode('Empleado creado correctamente.'));
+            }
+        }
+
+        $this->render('empleados/crear', [
+            'tipos' => $empleadoModel->getTipos(),
+            'jornadas' => $empleadoModel->getJornadas(),
+            'cargos' => $empleadoModel->getCargos(),
+            'error' => $error
+        ], 'Nuevo empleado');
+    }
+
+    public function editar(): void {
+        $this->requireLogin();
+
+        $empleadoModel = new EmpleadoModel();
+        $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+        $empleado = $empleadoModel->getById($id);
+
+        if (!$empleado) {
+            $this->redirect('index.php?r=empleados&msg=' . urlencode('Empleado no encontrado.'));
+        }
+
+        $error = '';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $cedula = trim($_POST['cedula'] ?? '');
+            $p_nombre = trim($_POST['primer_nombre'] ?? '');
+            $s_nombre = trim($_POST['segundo_nombre'] ?? '');
+            $p_apellido = trim($_POST['primer_apellido'] ?? '');
+            $s_apellido = trim($_POST['segundo_apellido'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $id_tipo = (int)($_POST['id_tipo_empleado'] ?? 0);
+            $id_jornada = (int)($_POST['id_jornada'] ?? 0);
+            $id_cargo = (int)($_POST['id_cargo'] ?? 0);
+            $sueldo = $_POST['sueldo_divisa'] ?? '';
+            $fecha_ingreso = $_POST['fecha_ingreso'] ?? '';
+
+            if ($cedula === '' || $p_nombre === '' || $p_apellido === '' || !$id_tipo || !$id_jornada || !$id_cargo
+                || $sueldo === '' || !is_numeric($sueldo) || $fecha_ingreso === '') {
+                $error = 'Completa todos los campos obligatorios (*) con valores válidos.';
+            } else {
+                $fotoFilename = $this->handlePhotoUpload($empleado['foto'] ?? null);
+
+                $empleadoModel->update($id, [
+                    'cedula' => $cedula,
+                    'primer_nombre' => $p_nombre,
+                    'segundo_nombre' => $s_nombre,
+                    'primer_apellido' => $p_apellido,
+                    'segundo_apellido' => $s_apellido,
+                    'email' => $email,
+                    'foto' => $fotoFilename,
+                    'id_tipo_empleado' => $id_tipo,
+                    'id_jornada' => $id_jornada,
+                    'id_cargo' => $id_cargo,
+                    'sueldo_divisa' => $sueldo,
+                    'fecha_ingreso' => $fecha_ingreso
+                ]);
+
+                $this->redirect('index.php?r=empleados&msg=' . urlencode('Empleado actualizado correctamente.'));
+            }
+            $empleado = array_merge($empleado, $_POST);
+        }
+
+        $this->render('empleados/editar', [
+            'empleado' => $empleado,
+            'tipos' => $empleadoModel->getTipos(),
+            'jornadas' => $empleadoModel->getJornadas(),
+            'cargos' => $empleadoModel->getCargos(),
+            'cargoActual' => $empleadoModel->getCargoActual($id),
+            'error' => $error
+        ], 'Editar empleado');
+    }
+
+    public function cambiarEstado(): void {
+        $this->requireLogin();
+
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id) {
+            $empleadoModel = new EmpleadoModel();
+            $empleadoModel->toggleEstado($id);
+        }
+        $this->redirect('index.php?r=empleados&msg=' . urlencode('Estado actualizado.'));
+    }
+}
