@@ -36,23 +36,49 @@ class NominaModel extends Model {
         return $res ?: null;
     }
 
+    public function getUltimaNominaGenerada(): ?array {
+        $stmt = $this->db->query("SELECT * FROM tb_nomina ORDER BY id_nomina DESC LIMIT 1");
+        $res = $stmt->fetch();
+        return $res ?: null;
+    }
+
     public function createNomina(int $idPeriodo, int $idUsuario, float $salarioMinimo, float $semanasIvss, float $factorSemanasMes, float $tasaSso, float $tasaRpe, float $tasaLph): int {
         $ins = $this->db->prepare("
             INSERT INTO tb_nomina (id_periodo, id_usuario_genera, salario_minimo_vigente, semanas_descontar_ivss, factor_semanas_mes, tasa_sso, tasa_rpe, tasa_lph, estado, fecha_generacion)
             VALUES (?,?,?,?,?,?,?,?,'Generada', NOW())
         ");
         $ins->execute([$idPeriodo, $idUsuario, $salarioMinimo, $semanasIvss, $factorSemanasMes, $tasaSso, $tasaRpe, $tasaLph]);
-        return (int)$this->db->lastInsertId();
+        $idNomina = (int)$this->db->lastInsertId();
+
+        // Autocompletar trabajadores activos en la nómina
+        $empleadoModel = new EmpleadoModel();
+        $allEmpleados = $empleadoModel->getAll();
+        $empleadosActivos = array_values(array_filter($allEmpleados, fn($e) => $e['estado'] == 1));
+
+        $periodoModel = new PeriodoModel();
+        $periodo = $periodoModel->getById($idPeriodo);
+        $diasPeriodo = 0;
+
+        if ($periodo) {
+            $inicio = strtotime($periodo['fecha_inicio']);
+            $fin = strtotime($periodo['fecha_fin']);
+            $diasPeriodo = round(($fin - $inicio) / 86400) + 1;
+        }
+
+        $idEmpleados = array_column($empleadosActivos, 'id_empleado');
+        $this->agregarTrabajadoresANomina($idNomina, $idEmpleados, $diasPeriodo);
+
+        return $idNomina;
     }
 
-    public function agregarTrabajadoresANomina(int $idNomina, array $idEmpleados): void {
+    public function agregarTrabajadoresANomina(int $idNomina, array $idEmpleados, int $diasTrabajadosPorDefecto = 0): void {
         foreach ($idEmpleados as $idEmp) {
             $idEmp = (int)$idEmp;
             if ($idEmp > 0) {
                 $stmt = $this->db->prepare("SELECT id_detalle FROM tb_nomina_detalle WHERE id_nomina = ? AND id_empleado = ?");
                 $stmt->execute([$idNomina, $idEmp]);
                 if (!$stmt->fetch()) {
-                    $this->calcularYGuardarDetalle($idNomina, $idEmp, []);
+                    $this->calcularYGuardarDetalle($idNomina, $idEmp, ['dias_trabajados' => $diasTrabajadosPorDefecto]);
                 }
             }
         }
