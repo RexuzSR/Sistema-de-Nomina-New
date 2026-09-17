@@ -13,19 +13,56 @@ $currentRoute = $_GET['r'] ?? 'dashboard';
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
 <link rel="stylesheet" href="assets/css/style.css">
+<?php if (empty($currentRoute) || strpos($currentRoute, 'dashboard') === 0): ?>
+<link rel="stylesheet" href="assets/css/dashboard.css">
+<?php elseif (strpos($currentRoute, 'nomina') === 0 || strpos($currentRoute, 'periodos') === 0): ?>
+<link rel="stylesheet" href="assets/css/nomina.css">
+<?php elseif (strpos($currentRoute, 'empleados') === 0): ?>
+<link rel="stylesheet" href="assets/css/empleados.css">
+<?php endif; ?>
+<script>
+(function() {
+  if (localStorage.getItem('dash-theme') === 'dark') {
+    document.documentElement.classList.add('dark-theme');
+  }
+})();
+</script>
 </head>
 <body>
 <header class="topbar">
-  <a href="index.php?r=dashboard" class="brand">
-    <i class="fa-solid fa-calculator brand-icon"></i>
-    <span class="brand-text">NÓMINA</span>
-  </a>
+  <div class="topbar-left-group">
+    <a href="index.php?r=dashboard" class="brand">
+      <i class="fa-solid fa-calculator brand-icon"></i>
+      <span class="brand-text">NÓMINA</span>
+    </a>
+    <span class="topbar-divider" aria-hidden="true"></span>
+    <!-- Barra de búsqueda ejecutiva entre Nómina e Inicio -->
+    <button class="header-cmdk-trigger" onclick="openCommandPalette()" type="button" title="Buscar en el sistema (Ctrl + K)">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span class="header-cmdk-text">Buscar empleados, nóminas, periodos…</span>
+      <kbd class="header-cmdk-kbd">Ctrl K</kbd>
+    </button>
+  </div>
   <nav class="topbar-nav">
     <a href="index.php?r=dashboard" class="nav-btn <?= strpos($currentRoute, 'dashboard') === 0 ? 'active' : '' ?>"><i class="fa-solid fa-house"></i> Inicio</a>
+    <span class="nav-divider" aria-hidden="true"></span>
     <a href="index.php?r=empleados" class="nav-btn <?= strpos($currentRoute, 'empleados') === 0 ? 'active' : '' ?>"><i class="fa-solid fa-users"></i> Empleados</a>
+    <span class="nav-divider" aria-hidden="true"></span>
     <a href="index.php?r=permisos" class="nav-btn <?= strpos($currentRoute, 'permisos') === 0 ? 'active' : '' ?>"><i class="fa-solid fa-file-signature"></i> Permisos</a>
+    <span class="nav-divider" aria-hidden="true"></span>
     <a href="index.php?r=periodos" class="nav-btn <?= (strpos($currentRoute, 'periodos') === 0 || strpos($currentRoute, 'nomina') === 0) ? 'active' : '' ?>"><i class="fa-solid fa-calendar-days"></i> Periodos</a>
+    <span class="nav-divider" aria-hidden="true"></span>
     <a href="index.php?r=tasas" class="nav-btn <?= strpos($currentRoute, 'tasas') === 0 ? 'active' : '' ?>"><i class="fa-solid fa-money-bill-transfer"></i> Tasa de cambio</a>
+
+    <span class="nav-divider nav-divider-lg" aria-hidden="true"></span>
+
+    <!-- Botón de Modo Oscuro al lado del perfil con transición animada -->
+    <button class="header-theme-toggle" id="headerThemeBtn" title="Alternar modo oscuro" onclick="toggleTheme()" type="button" aria-label="Alternar modo oscuro">
+      <span class="theme-icon-viewport">
+        <i class="fa-solid fa-moon theme-icon moon-icon"></i>
+        <i class="fa-solid fa-sun theme-icon sun-icon"></i>
+      </span>
+    </button>
     <?php if (!empty($_SESSION['usuario'])):
       $uNombre = $_SESSION['user_nombre'] ?? $_SESSION['usuario'];
       $uInicial = strtoupper(substr($uNombre, 0, 1));
@@ -86,4 +123,3 @@ $currentRoute = $_GET['r'] ?? 'dashboard';
   </nav>
 </header>
 <main class="container">
-<h1><?= htmlspecialchars($pageTitle) ?></h1>

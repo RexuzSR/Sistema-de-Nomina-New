@@ -132,6 +132,17 @@ class NominaController extends Controller {
                     $nominaModel->eliminarEmpleadoDeNomina($id_nomina, $id_empleado_del);
                 }
                 $this->redirect('index.php?r=nomina/detalle&id_nomina=' . $id_nomina . '&msg=' . urlencode('Trabajador removido de la nómina.'));
+            } elseif ($action === 'actualizar_tasas_ley') {
+                $raw_sso = str_replace(',', '.', $_POST['tasa_sso'] ?? '4.0');
+                $raw_rpe = str_replace(',', '.', $_POST['tasa_rpe'] ?? '0.5');
+                $raw_lph = str_replace(',', '.', $_POST['tasa_lph'] ?? '1.0');
+
+                $tasa_sso = max(0, min(100, (float)$raw_sso)) / 100;
+                $tasa_rpe = max(0, min(100, (float)$raw_rpe)) / 100;
+                $tasa_lph = max(0, min(100, (float)$raw_lph)) / 100;
+
+                $nominaModel->actualizarTasasLey($id_nomina, $tasa_sso, $tasa_rpe, $tasa_lph);
+                $this->redirect('index.php?r=nomina/detalle&id_nomina=' . $id_nomina . '&msg=' . urlencode('Tasas de Ley actualizadas y deducciones recalculadas exitosamente.'));
             } else {
                 // Save worker detail calculations
                 $id_empleado = (int)($_POST['id_empleado'] ?? 0);

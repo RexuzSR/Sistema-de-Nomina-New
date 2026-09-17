@@ -1,5 +1,13 @@
 <?php if (!empty($error)): ?><div class="alert error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
+<div class="view-header-bar" style="margin-bottom:20px;">
+  <div>
+    <h2 style="margin:0;"><i class="fa-solid fa-file-signature" style="color:var(--primary); margin-right:8px;"></i> Solicitar o Registrar Permiso</h2>
+    <p style="margin:4px 0 0; color:var(--text-muted); font-size:13px;">Ingrese el empleado y las fechas de ausencia</p>
+  </div>
+  <a class="btn secondary" href="index.php?r=permisos"><i class="fa-solid fa-arrow-left"></i> Volver a permisos</a>
+</div>
+
 <div class="card">
   <form method="post" action="index.php?r=permisos/solicitar">
     <div class="form-grid">

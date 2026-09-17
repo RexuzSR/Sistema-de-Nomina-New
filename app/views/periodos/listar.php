@@ -28,14 +28,25 @@
       <?php if (!$periodos): ?>
         <tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:30px;">Aún no hay periodos creados.</td></tr>
       <?php endif; ?>
-      <?php foreach ($periodos as $p): ?>
-        <tr>
+      <?php foreach ($periodos as $p): 
+        $pJsonData = [
+          'id_periodo' => $p['id_periodo'],
+          'descripcion' => $p['descripcion'] ?? 'Sin descripción',
+          'tipo_periodo' => $p['tipo_periodo'],
+          'fecha_inicio' => $p['fecha_inicio'],
+          'fecha_fin' => $p['fecha_fin'],
+          'anio' => $p['anio'],
+          'mes' => $p['mes'],
+          'numero_quincena' => $p['numero_quincena'] ?? '—'
+        ];
+      ?>
+        <tr onclick="abrirVerPeriodoModal(this)" data-periodo="<?= htmlspecialchars(json_encode($pJsonData), ENT_QUOTES, 'UTF-8') ?>" title="Clic para ver detalles completos del periodo">
           <td><strong style="color:var(--text); font-size:13.5px;"><?= htmlspecialchars($p['descripcion'] ?? 'Sin descripción') ?></strong></td>
-          <td><span class="badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;"><?= htmlspecialchars($p['tipo_periodo']) ?></span></td>
-          <td><span style="font-size:13px; color:#475569;"><?= htmlspecialchars($p['fecha_inicio']) ?> &rarr; <?= htmlspecialchars($p['fecha_fin']) ?></span></td>
-          <td><?= htmlspecialchars($p['anio']) ?> / <?= htmlspecialchars($p['mes']) ?></td>
-          <td><?= htmlspecialchars($p['numero_quincena'] ?? '—') ?></td>
-          <td style="text-align:right;">
+          <td><span class="badge" style="background:rgba(2, 132, 199, 0.12); color:#0284c7; border:1px solid rgba(2, 132, 199, 0.25);"><?= htmlspecialchars($p['tipo_periodo']) ?></span></td>
+          <td><span style="font-size:13px; color:var(--text-muted);"><?= htmlspecialchars($p['fecha_inicio']) ?> &rarr; <?= htmlspecialchars($p['fecha_fin']) ?></span></td>
+          <td><span style="color:var(--text); font-weight:600;"><?= htmlspecialchars($p['anio']) ?> / <?= htmlspecialchars($p['mes']) ?></span></td>
+          <td><span style="color:var(--text); font-weight:600;"><?= htmlspecialchars($p['numero_quincena'] ?? '—') ?></span></td>
+          <td style="text-align:right;" onclick="event.stopPropagation()">
             <a class="btn small" href="index.php?r=nomina/generar&id_periodo=<?= $p['id_periodo'] ?>"><i class="fa-solid fa-folder-open"></i> Generar / Ver Nómina</a>
             <a class="btn small secondary" style="margin-left:4px;" href="index.php?r=periodos/enviarCorreos&id_periodo=<?= $p['id_periodo'] ?>" onclick="return confirm('¿Desea enviar el comprobante de pago individual por correo a todos los empleados de este periodo?');"><i class="fa-solid fa-paper-plane"></i> Enviar Correo</a>
           </td>
@@ -44,3 +55,6 @@
     </tbody>
   </table>
 </div>
+
+<?php require __DIR__ . '/VerModal.php'; ?>
+

@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../../core/Controller.php';
 require_once __DIR__ . '/../models/EmpleadoModel.php';
+require_once __DIR__ . '/../models/TasaModel.php';
 
 class EmpleadoController extends Controller {
     public function index(): void {
@@ -11,11 +12,17 @@ class EmpleadoController extends Controller {
         $empleados = $empleadoModel->getAll();
         $msg = $_GET['msg'] ?? '';
 
+        $tasaModel = new TasaModel();
+        $ultimaTasa = $tasaModel->getUltima();
+        $tasaBcv = $ultimaTasa ? (float)$ultimaTasa['valor_tasa'] : 0.0;
+
         $this->render('empleados/listar', [
             'empleados' => $empleados,
-            'msg' => $msg
+            'msg' => $msg,
+            'tasaBcv' => $tasaBcv
         ], 'Empleados');
     }
+
 
     private function handlePhotoUpload(?string $fotoActual = null): ?string {
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {

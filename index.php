@@ -19,6 +19,7 @@ $router->add('auth/login', 'AuthController', 'login');
 $router->add('auth/logout', 'AuthController', 'logout');
 
 $router->add('dashboard', 'DashboardController', 'index');
+$router->add('api/search', 'DashboardController', 'search');
 
 $router->add('empleados', 'EmpleadoController', 'index');
 $router->add('empleados/crear', 'EmpleadoController', 'crear');

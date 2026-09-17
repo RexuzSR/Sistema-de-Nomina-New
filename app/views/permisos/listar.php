@@ -32,32 +32,40 @@
       <?php foreach ($permisos as $p): 
         $nombreComp = trim(preg_replace('/\s+/', ' ', implode(' ', array_filter([$p['primer_nombre'], $p['segundo_nombre'] ?? '', $p['primer_apellido'], $p['segundo_apellido'] ?? '']))));
         $inicial = strtoupper(substr($p['primer_nombre'] ?? 'E', 0, 1));
-        $badgeStyle = '';
+        $pJsonData = [
+          'id_permiso' => $p['id_permiso'],
+          'empleado_nombre' => $nombreComp,
+          'primer_nombre' => $p['primer_nombre'] ?? '',
+          'fecha_inicio' => $p['fecha_inicio'],
+          'fecha_fin' => $p['fecha_fin'],
+          'dias_solicitados' => $p['dias_solicitados'],
+          'motivo' => $p['motivo'],
+          'estado' => $p['estado']
+        ];
+        $badgeClass = 'badge';
         if ($p['estado'] === 'Aprobado') {
-          $badgeStyle = 'background:#dcfce7; color:#15803d; border:1px solid #86efac;';
+          $badgeClass .= ' activo';
         } elseif ($p['estado'] === 'Rechazado') {
-          $badgeStyle = 'background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;';
-        } else {
-          $badgeStyle = 'background:#fef3c7; color:#b45309; border:1px solid #fde68a;';
+          $badgeClass .= ' inactivo';
         }
       ?>
-        <tr>
+        <tr onclick="abrirVerPermisoModal(this)" data-permiso="<?= htmlspecialchars(json_encode($pJsonData), ENT_QUOTES, 'UTF-8') ?>" title="Clic para ver detalles completos del permiso">
           <td>
             <div class="emp-avatar-wrapper">
               <div class="emp-avatar"><?= $inicial ?></div>
               <strong style="font-size:14px; color:var(--text);"><?= htmlspecialchars($nombreComp) ?></strong>
             </div>
           </td>
-          <td><span style="font-size:13px; color:#475569;"><?= htmlspecialchars($p['fecha_inicio']) ?></span></td>
-          <td><span style="font-size:13px; color:#475569;"><?= htmlspecialchars($p['fecha_fin']) ?></span></td>
+          <td><span style="font-size:13px; color:var(--text-muted);"><?= htmlspecialchars($p['fecha_inicio']) ?></span></td>
+          <td><span style="font-size:13px; color:var(--text-muted);"><?= htmlspecialchars($p['fecha_fin']) ?></span></td>
           <td><strong style="color:var(--text);"><?= htmlspecialchars($p['dias_solicitados']) ?> d</strong></td>
-          <td><span style="font-size:13px; color:#334155;"><?= htmlspecialchars($p['motivo']) ?></span></td>
+          <td><span style="font-size:13px; color:var(--text);"><?= htmlspecialchars($p['motivo']) ?></span></td>
           <td>
-            <span class="badge" style="<?= $badgeStyle ?>">
+            <span class="<?= $badgeClass ?>">
               <?= htmlspecialchars($p['estado']) ?>
             </span>
           </td>
-          <td style="text-align:right;">
+          <td style="text-align:right;" onclick="event.stopPropagation()">
             <?php if ($p['estado'] === 'Pendiente'): ?>
               <a class="btn small" href="index.php?r=permisos/aprobar&id=<?= $p['id_permiso'] ?>&accion=Aprobado"><i class="fa-solid fa-check"></i> Aprobar</a>
               <a class="btn small danger" href="index.php?r=permisos/aprobar&id=<?= $p['id_permiso'] ?>&accion=Rechazado"><i class="fa-solid fa-xmark"></i> Rechazar</a>
@@ -70,3 +78,6 @@
     </tbody>
   </table>
 </div>
+
+<?php require __DIR__ . '/VerModal.php'; ?>
+

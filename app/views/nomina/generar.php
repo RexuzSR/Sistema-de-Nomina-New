@@ -1,5 +1,10 @@
-<p><a href="index.php?r=periodos">&larr; Volver a periodos</a></p>
-<h2><?= htmlspecialchars($periodo['tipo_periodo']) ?>: <?= htmlspecialchars($periodo['fecha_inicio']) ?> al <?= htmlspecialchars($periodo['fecha_fin']) ?></h2>
+<div class="view-header-bar" style="margin-bottom:20px;">
+  <div>
+    <h2 style="margin:0;"><i class="fa-solid fa-calculator" style="color:var(--primary); margin-right:8px;"></i> Generar Nómina: <?= htmlspecialchars($periodo['tipo_periodo']) ?></h2>
+    <p style="margin:4px 0 0; color:var(--text-muted); font-size:13px;">Ciclo del <?= htmlspecialchars($periodo['fecha_inicio']) ?> al <?= htmlspecialchars($periodo['fecha_fin']) ?></p>
+  </div>
+  <a class="btn secondary" href="index.php?r=periodos"><i class="fa-solid fa-arrow-left"></i> Volver a periodos</a>
+</div>
 
 <?php if (!empty($error)): ?><div class="alert error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 

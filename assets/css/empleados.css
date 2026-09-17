@@ -1,0 +1,199 @@
+/* ==========================================================================
+   MÓDULO: Empleados (Gestión de Personal, Fotos y Cargos)
+   ========================================================================== */
+
+/* Employee Photo Upload Widget UX/UI */
+.avatar-upload-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 18px 24px;
+  margin-bottom: 24px;
+  transition: all 0.25s ease;
+}
+
+.avatar-upload-card:hover {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.08);
+}
+
+.avatar-preview-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+}
+
+.avatar-preview-box {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface);
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--primary);
+  overflow: hidden;
+  transition: transform 0.25s ease;
+}
+
+.avatar-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-camera-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #ffffff;
+  border: 2.5px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.avatar-camera-btn:hover {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+.avatar-upload-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.avatar-upload-info h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.avatar-upload-info p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.btn-file-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+  width: fit-content;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.btn-file-select:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #f8fafc;
+}
+
+/* Avatar Badges & Cargo Tag in Lists */
+.emp-avatar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.emp-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #eef7f3;
+  color: var(--primary-dark);
+  font-weight: 700;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #ccebdc;
+}
+
+.emp-avatar-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+.cargo-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--primary);
+  background: #eef7f3;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+/* Modo oscuro para Empleados */
+.dark-theme .emp-avatar {
+  background: #1e293b;
+  color: #2dd4bf;
+  border-color: #334155;
+}
+
+.dark-theme .cargo-tag {
+  background: rgba(45, 212, 191, 0.15);
+  color: #2dd4bf;
+  border: 1px solid rgba(45, 212, 191, 0.3);
+}
+
+.dark-theme .avatar-upload-card {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+.dark-theme .avatar-preview-box {
+  background: #182234;
+  border-color: #334155;
+}
+
+.dark-theme .btn-file-select {
+  background: #182234;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+.dark-theme .btn-file-select:hover {
+  background: #1e293b;
+  border-color: #2dd4bf;
+  color: #2dd4bf;
+}
+

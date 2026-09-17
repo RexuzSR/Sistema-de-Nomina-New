@@ -23,16 +23,35 @@ class EmpleadoModel extends Model {
 
     public function getAll(): array {
         $stmt = $this->db->query("
-            SELECT e.*, t.nombre_tipo, j.nombre_jornada, c.nombre_cargo
+            SELECT 
+                e.*,
+                t.nombre_tipo,
+                j.nombre_jornada,
+                c.nombre_cargo,
+                b.nombre_banco,
+                b.codigo_banco,
+                cb.numero_cuenta,
+                cb.tipo_cuenta,
+                u.nombre_usuario,
+                r.nombre_rol,
+                (SELECT COUNT(*) FROM tb_nomina_detalle nd WHERE nd.id_empleado = e.id_empleado) as total_nominas,
+                (SELECT COUNT(*) FROM tb_permiso_empleado p WHERE p.id_empleado = e.id_empleado) as total_permisos,
+                (SELECT COUNT(*) FROM tb_permiso_empleado p WHERE p.id_empleado = e.id_empleado AND p.estado = 'Aprobado') as permisos_aprobados,
+                (SELECT COUNT(*) FROM tb_permiso_empleado p WHERE p.id_empleado = e.id_empleado AND p.estado = 'Pendiente') as permisos_pendientes
             FROM tb_empleado e
             LEFT JOIN tb_tipo_empleado t ON t.id_tipo_empleado = e.id_tipo_empleado
             LEFT JOIN tb_jornada j ON j.id_jornada = e.id_jornada
             LEFT JOIN tb_empleado_cargo ec ON ec.id_empleado = e.id_empleado AND ec.es_actual = 1
             LEFT JOIN tb_cargo c ON c.id_cargo = ec.id_cargo
+            LEFT JOIN tb_cuenta_bancaria cb ON cb.id_empleado = e.id_empleado
+            LEFT JOIN tb_banco b ON b.id_banco = cb.id_banco
+            LEFT JOIN tb_usuario u ON u.id_empleado = e.id_empleado
+            LEFT JOIN tb_rol r ON r.id_rol = u.id_rol
             ORDER BY e.primer_apellido, e.primer_nombre
         ");
         return $stmt->fetchAll();
     }
+
 
     public function getById(int $id): ?array {
         $stmt = $this->db->prepare("SELECT * FROM tb_empleado WHERE id_empleado = ?");

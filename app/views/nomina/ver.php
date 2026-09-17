@@ -1,9 +1,13 @@
-<p><a href="index.php?r=periodos">&larr; Volver a periodos</a></p>
-<h2><?= htmlspecialchars($periodo['tipo_periodo']) ?>: <?= htmlspecialchars($periodo['fecha_inicio']) ?> al <?= htmlspecialchars($periodo['fecha_fin']) ?></h2>
-
-<div class="actions-row">
-  <a class="btn" href="index.php?r=nomina/detalle&id_nomina=<?= $id_nomina ?>">Editar detalle</a>
-  <a class="btn secondary" href="index.php?r=nomina/exportExcel&id_nomina=<?= $id_nomina ?>">Exportar a Excel</a>
+<div class="view-header-bar" style="margin-bottom:20px;">
+  <div>
+    <h2 style="margin:0;"><i class="fa-solid fa-file-invoice-dollar" style="color:var(--primary); margin-right:8px;"></i> Resumen de Nómina: <?= htmlspecialchars($periodo['tipo_periodo']) ?></h2>
+    <p style="margin:4px 0 0; color:var(--text-muted); font-size:13px;">Ciclo del <?= htmlspecialchars($periodo['fecha_inicio']) ?> al <?= htmlspecialchars($periodo['fecha_fin']) ?></p>
+  </div>
+  <div class="actions-row" style="margin-bottom:0;">
+    <a class="btn" href="index.php?r=nomina/detalle&id_nomina=<?= $id_nomina ?>"><i class="fa-solid fa-pen-to-square"></i> Editar detalle</a>
+    <a class="btn secondary" href="index.php?r=nomina/exportExcel&id_nomina=<?= $id_nomina ?>"><i class="fa-solid fa-file-excel"></i> Exportar a Excel</a>
+    <a class="btn secondary" href="index.php?r=periodos"><i class="fa-solid fa-arrow-left"></i> Volver a periodos</a>
+  </div>
 </div>
 
 <table>

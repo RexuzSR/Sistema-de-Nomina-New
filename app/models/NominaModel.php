@@ -291,6 +291,34 @@ class NominaModel extends Model {
         ];
     }
 
+    public function actualizarTasasLey(int $idNomina, float $tasa_sso, float $tasa_rpe, float $tasa_lph): bool {
+        $stmt = $this->db->prepare("UPDATE tb_nomina SET tasa_sso = ?, tasa_rpe = ?, tasa_lph = ? WHERE id_nomina = ?");
+        $stmt->execute([$tasa_sso, $tasa_rpe, $tasa_lph, $idNomina]);
+
+        $detalles = $this->getDetallesByNomina($idNomina);
+        foreach ($detalles as $d) {
+            $idDetalle = (int)$d['id_detalle'];
+            $horas_nocturnas = $this->getAsignacionCantidad($idDetalle, 2);
+            $horas_extra = $this->getAsignacionCantidad($idDetalle, 3);
+            $feriados = $this->getAsignacionCantidad($idDetalle, 4);
+            $otras_asig = $this->getAsignacionMonto($idDetalle, 5);
+            $prestamo = $this->getDeduccionMonto($idDetalle, 4);
+            $islr = $this->getDeduccionMonto($idDetalle, 6);
+
+            $this->calcularYGuardarDetalle($idNomina, (int)$d['id_empleado'], [
+                'dias_trabajados' => (float)$d['dias_trabajados'],
+                'dias_inasistencia' => (float)$d['dias_inasistencia'],
+                'bono_nocturno_qty' => $horas_nocturnas,
+                'horas_extra_qty' => $horas_extra,
+                'feriados_qty' => $feriados,
+                'otras_asignaciones' => $otras_asig,
+                'prestamo' => $prestamo,
+                'islr' => $islr
+            ]);
+        }
+        return true;
+    }
+
     public function getTotalNominasCount(): int {
         $s = $this->db->query("SELECT COUNT(*) FROM tb_nomina");
         return (int)$s->fetchColumn();
@@ -308,5 +336,80 @@ class NominaModel extends Model {
             WHERE d.id_nomina = (SELECT id_nomina FROM tb_nomina ORDER BY id_nomina DESC LIMIT 1)
         ");
         return (float)($s->fetchColumn() ?: 0.0);
+    }
+
+    public function getHistoricoNominasParaGrafico(int $limite = 6): array {
+        $stmt = $this->db->prepare("
+            SELECT 
+                n.id_nomina,
+                n.fecha_generacion,
+                p.id_periodo,
+                p.tipo_periodo,
+                p.fecha_inicio,
+                p.fecha_fin,
+                p.anio,
+                p.mes,
+                p.numero_quincena,
+                COALESCE(SUM(d.total_asignaciones), 0) AS total_asignaciones,
+                COALESCE(SUM(d.total_deducciones), 0) AS total_deducciones,
+                COALESCE(SUM(d.neto_pagar), 0) AS total_neto,
+                COUNT(d.id_detalle) AS total_empleados
+            FROM tb_nomina n
+            JOIN tb_periodo_nomina p ON p.id_periodo = n.id_periodo
+            LEFT JOIN tb_nomina_detalle d ON d.id_nomina = n.id_nomina
+            GROUP BY n.id_nomina, p.id_periodo
+            ORDER BY n.id_nomina DESC
+            LIMIT ?
+        ");
+        $stmt->bindValue(1, $limite, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+        return array_reverse($rows);
+    }
+
+    public function getDistribucionPorCargo(): array {
+        $sql = "
+            SELECT 
+                c.id_cargo,
+                c.nombre_cargo,
+                COUNT(DISTINCT e.id_empleado) AS total_empleados,
+                COALESCE(SUM(e.sueldo_divisa), 0) AS total_presupuesto_usd
+            FROM tb_cargo c
+            JOIN tb_empleado_cargo ec ON ec.id_cargo = c.id_cargo AND ec.es_actual = 1
+            JOIN tb_empleado e ON e.id_empleado = ec.id_empleado AND e.estado = 1
+            GROUP BY c.id_cargo, c.nombre_cargo
+            ORDER BY total_presupuesto_usd DESC
+        ";
+        return $this->db->query($sql)->fetchAll();
+    }
+
+    public function getResumenFinancieroUltimaNomina(): array {
+        $stmt = $this->db->query("
+            SELECT 
+                COALESCE(SUM(d.total_asignaciones), 0) AS asignaciones,
+                COALESCE(SUM(d.total_deducciones), 0) AS deducciones,
+                COALESCE(SUM(d.neto_pagar), 0) AS neto,
+                COALESCE(SUM(d.sueldo_bss), 0) AS neto_bs,
+                COUNT(d.id_detalle) AS trabajadores_procesados
+            FROM tb_nomina_detalle d
+            WHERE d.id_nomina = (SELECT id_nomina FROM tb_nomina ORDER BY id_nomina DESC LIMIT 1)
+        ");
+        $res = $stmt->fetch();
+        if (!$res) {
+            return [
+                'asignaciones' => 0.0,
+                'deducciones' => 0.0,
+                'neto' => 0.0,
+                'neto_bs' => 0.0,
+                'trabajadores_procesados' => 0
+            ];
+        }
+        return [
+            'asignaciones' => (float)$res['asignaciones'],
+            'deducciones' => (float)$res['deducciones'],
+            'neto' => (float)$res['neto'],
+            'neto_bs' => (float)$res['neto_bs'],
+            'trabajadores_procesados' => (int)$res['trabajadores_procesados']
+        ];
     }
 }
