@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 31-07-2026 a las 18:29:19
+-- Tiempo de generación: 17-09-2026 a las 23:42:45
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -36,6 +36,132 @@ CREATE TABLE `tb_auditoria` (
   `fecha_hora` datetime DEFAULT current_timestamp(),
   `detalle` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `tb_auditoria_seguridad`
+--
+
+CREATE TABLE `tb_auditoria_seguridad` (
+  `id` int(11) NOT NULL,
+  `id_usuario` int(11) DEFAULT NULL,
+  `username` varchar(50) DEFAULT NULL,
+  `evento` varchar(50) NOT NULL,
+  `ip` varchar(45) NOT NULL,
+  `user_agent` text DEFAULT NULL,
+  `detalles` text DEFAULT NULL,
+  `fecha_hora` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_auditoria_seguridad`
+--
+
+INSERT INTO `tb_auditoria_seguridad` (`id`, `id_usuario`, `username`, `evento`, `ip`, `user_agent`, `detalles`, `fecha_hora`) VALUES
+(1, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 16:15:55'),
+(2, NULL, 'payroll_admin_1789676155', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789676155\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 16:15:55'),
+(3, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 16:15:55'),
+(4, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 16:16:10'),
+(5, NULL, 'payroll_admin_1789676170', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789676170\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 16:16:10'),
+(6, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 16:16:11'),
+(7, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 16:16:33'),
+(8, NULL, 'payroll_admin_1789676193', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789676193\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 16:16:33'),
+(9, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 16:16:34'),
+(10, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '127.0.0.1', 'curl/8.13.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:18:25'),
+(11, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:19:33'),
+(12, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:19:40'),
+(13, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:19:49'),
+(14, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:19:50'),
+(15, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:20:07'),
+(16, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:21:52'),
+(17, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:21:53'),
+(18, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:23:36'),
+(19, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:23:53'),
+(20, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 16:23:56'),
+(21, NULL, 'payroll_admin_1789676636', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789676636\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 16:23:56'),
+(22, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 16:23:57'),
+(23, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:24:01'),
+(24, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:24:20'),
+(25, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:24:25'),
+(26, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:26:01'),
+(27, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:26:07'),
+(28, 1, 'samu', 'LOGIN_SUCCESS', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'Inicio de sesión exitoso desde IP 127.0.0.1', '2026-09-17 16:30:21'),
+(29, 1, 'samu', 'LOGOUT_BEACON', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:35:42'),
+(30, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:36:45'),
+(31, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:37:32'),
+(32, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-17 16:38:11'),
+(33, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:38:34'),
+(34, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:39:28'),
+(35, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:39:39'),
+(36, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:41:04'),
+(37, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:41:29'),
+(38, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:41:34'),
+(39, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:42:27'),
+(40, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:42:31'),
+(41, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:42:55'),
+(42, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-17 16:43:01'),
+(43, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:43:07'),
+(44, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-17 16:43:44'),
+(45, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:43:54'),
+(46, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-17 16:45:07'),
+(47, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:45:13'),
+(48, NULL, 'samu', 'LOGIN_FAILED', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'Credenciales incorrectas para usuario \'samu\' desde IP 127.0.0.1', '2026-09-17 16:46:08'),
+(49, NULL, 'samu', 'LOGIN_FAILED', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'Credenciales incorrectas para usuario \'samu\' desde IP 127.0.0.1', '2026-09-17 16:48:47'),
+(50, 1, 'samu', 'LOGIN_SUCCESS', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'Inicio de sesión exitoso desde IP 127.0.0.1', '2026-09-17 16:48:51'),
+(51, 1, 'samu', 'LOGOUT_BEACON', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:49:15'),
+(52, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:50:23'),
+(53, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:50:24'),
+(54, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:50:38'),
+(55, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:50:42'),
+(56, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:51:44'),
+(57, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:51:51'),
+(58, 1, 'samu', 'LOGIN_SUCCESS', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'Inicio de sesión exitoso desde IP 127.0.0.1', '2026-09-17 16:52:45'),
+(59, 1, 'samu', 'LOGOUT_BEACON', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:53:28'),
+(60, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 16:55:18'),
+(61, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:57:22'),
+(62, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 16:57:27'),
+(63, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 16:57:44'),
+(64, NULL, 'samu', 'LOGIN_FAILED', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'Credenciales incorrectas para usuario \'samu\' desde IP 127.0.0.1', '2026-09-17 16:59:42'),
+(65, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión automático por baliza al abandonar ventana', '2026-09-17 17:00:36'),
+(66, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 17:00:42'),
+(67, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-17 17:00:47'),
+(68, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 17:01:01'),
+(69, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 17:03:19'),
+(70, NULL, 'payroll_admin_1789678999', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789678999\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 17:03:19'),
+(71, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 17:03:19'),
+(72, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Sesión cerrada automáticamente por baliza al abandonar la pestaña', '2026-09-17 17:03:46'),
+(73, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 17:03:46'),
+(74, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 17:03:52'),
+(75, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-17 17:04:05'),
+(76, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 17:07:46'),
+(77, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-17 17:07:50'),
+(78, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 17:07:55'),
+(79, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 17:14:45'),
+(80, NULL, 'payroll_admin_1789679685', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789679685\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 17:14:45'),
+(81, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 17:14:45'),
+(82, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 17:18:23'),
+(83, NULL, 'payroll_admin_1789679903', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789679903\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 17:18:23'),
+(84, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 17:18:23'),
+(85, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 17:21:27'),
+(86, NULL, 'payroll_admin_1789680087', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789680087\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 17:21:27'),
+(87, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 17:21:28'),
+(88, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 17:23:20'),
+(89, NULL, 'payroll_admin_1789680200', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789680200\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 17:23:20'),
+(90, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 17:23:20'),
+(91, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 17:27:52'),
+(92, NULL, 'payroll_admin_1789680472', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789680472\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 17:27:52'),
+(93, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 17:27:53'),
+(94, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Sesión cerrada automáticamente por baliza al abandonar la pestaña', '2026-09-17 17:28:47'),
+(95, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 17:28:54'),
+(96, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 17:31:43'),
+(97, NULL, 'payroll_admin_1789680703', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789680703\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 17:31:43'),
+(98, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 17:31:44'),
+(99, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 17:34:57'),
+(100, NULL, 'payroll_admin_1789680897', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789680897\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 17:34:57'),
+(101, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 17:34:58'),
+(102, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-17 17:39:36'),
+(103, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 17:39:42');
 
 -- --------------------------------------------------------
 
@@ -125,9 +251,9 @@ CREATE TABLE `tb_concepto_deduccion` (
 --
 
 INSERT INTO `tb_concepto_deduccion` (`id_concepto`, `nombre`, `tipo_calculo`, `valor_default`, `descripcion`) VALUES
-(1, 'S.S.O', 'Porcentaje', 0.00, 'Seguro Social Obligatorio'),
-(2, 'R.P.E', 'Porcentaje', 0.00, 'Régimen Prestacional de Empleo'),
-(3, 'L.P.H', 'Porcentaje', 0.00, 'Ley de Política Habitacional'),
+(1, 'S.S.O', 'Porcentaje', 0.04, 'Seguro Social Obligatorio'),
+(2, 'R.P.E', 'Porcentaje', 0.01, 'Régimen Prestacional de Empleo'),
+(3, 'L.P.H', 'Porcentaje', 0.01, 'Ley de Política Habitacional'),
 (4, 'Préstamo', 'Monto Fijo', 0.00, 'Descuento por préstamo concedido'),
 (5, 'Inasistencia', 'Monto Fijo', 0.00, 'Descuento por días no trabajados sin justificar'),
 (6, 'ISLR', 'Monto Fijo', 0.00, 'Impuesto sobre la Renta retenido');
@@ -160,13 +286,20 @@ CREATE TABLE `tb_empleado` (
   `segundo_nombre` varchar(50) DEFAULT NULL,
   `primer_apellido` varchar(50) NOT NULL,
   `segundo_apellido` varchar(50) DEFAULT NULL,
-  `email` varchar(150) DEFAULT NULL,
   `id_tipo_empleado` int(11) NOT NULL,
   `id_jornada` int(11) NOT NULL,
   `sueldo_divisa` decimal(12,2) NOT NULL,
   `fecha_ingreso` date NOT NULL,
-  `estado` tinyint(1) DEFAULT 1
+  `estado` tinyint(1) DEFAULT 1,
+  `foto` longtext DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_empleado`
+--
+
+INSERT INTO `tb_empleado` (`id_empleado`, `cedula`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `id_tipo_empleado`, `id_jornada`, `sueldo_divisa`, `fecha_ingreso`, `estado`, `foto`) VALUES
+(1, '30635942', 'samu', 'jose', 'Rivas', 'rengel', 1, 1, 500.00, '2026-08-11', 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -182,6 +315,13 @@ CREATE TABLE `tb_empleado_cargo` (
   `fecha_fin` date DEFAULT NULL,
   `es_actual` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_empleado_cargo`
+--
+
+INSERT INTO `tb_empleado_cargo` (`id_empleado_cargo`, `id_empleado`, `id_cargo`, `fecha_asignacion`, `fecha_fin`, `es_actual`) VALUES
+(1, 1, 5, '2026-08-12', NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -208,6 +348,29 @@ INSERT INTO `tb_jornada` (`id_jornada`, `nombre_jornada`, `horas_por_dia`, `dias
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `tb_login_intentos`
+--
+
+CREATE TABLE `tb_login_intentos` (
+  `id` int(11) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `username` varchar(50) DEFAULT NULL,
+  `intentos` int(11) NOT NULL DEFAULT 1,
+  `primer_intento` datetime NOT NULL,
+  `ultimo_intento` datetime NOT NULL,
+  `bloqueado_hasta` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_login_intentos`
+--
+
+INSERT INTO `tb_login_intentos` (`id`, `ip_address`, `username`, `intentos`, `primer_intento`, `ultimo_intento`, `bloqueado_hasta`) VALUES
+(6, '127.0.0.1', 'samu', 1, '2026-09-17 16:59:42', '2026-09-17 16:59:42', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `tb_nomina`
 --
 
@@ -218,12 +381,19 @@ CREATE TABLE `tb_nomina` (
   `fecha_generacion` datetime DEFAULT current_timestamp(),
   `salario_minimo_vigente` decimal(12,2) NOT NULL,
   `semanas_descontar_ivss` int(11) DEFAULT 0,
-  `factor_semanas_mes` decimal(10,6) NOT NULL DEFAULT 4.333333,
-  `tasa_sso` decimal(5,4) NOT NULL DEFAULT 0.0400,
-  `tasa_rpe` decimal(5,4) NOT NULL DEFAULT 0.0050,
-  `tasa_lph` decimal(5,4) NOT NULL DEFAULT 0.0100,
-  `estado` varchar(20) DEFAULT 'Borrador'
+  `estado` varchar(20) DEFAULT 'Borrador',
+  `factor_semanas_mes` decimal(6,4) DEFAULT 4.3333,
+  `tasa_sso` decimal(5,4) DEFAULT 0.0400,
+  `tasa_rpe` decimal(5,4) DEFAULT 0.0050,
+  `tasa_lph` decimal(5,4) DEFAULT 0.0100
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_nomina`
+--
+
+INSERT INTO `tb_nomina` (`id_nomina`, `id_periodo`, `id_usuario_genera`, `fecha_generacion`, `salario_minimo_vigente`, `semanas_descontar_ivss`, `estado`, `factor_semanas_mes`, `tasa_sso`, `tasa_rpe`, `tasa_lph`) VALUES
+(1, 1, 1, '2026-08-12 20:03:41', 1000.00, 2, 'Generada', 4.3333, 0.0400, 0.0050, 0.0100);
 
 -- --------------------------------------------------------
 
@@ -239,6 +409,13 @@ CREATE TABLE `tb_nomina_asignacion` (
   `monto` decimal(12,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `tb_nomina_asignacion`
+--
+
+INSERT INTO `tb_nomina_asignacion` (`id_asignacion`, `id_detalle`, `id_concepto`, `cantidad`, `monto`) VALUES
+(8, 1, 1, 0.00, 0.00);
+
 -- --------------------------------------------------------
 
 --
@@ -252,6 +429,16 @@ CREATE TABLE `tb_nomina_deduccion` (
   `porcentaje_aplicado` decimal(5,2) DEFAULT NULL,
   `monto` decimal(12,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_nomina_deduccion`
+--
+
+INSERT INTO `tb_nomina_deduccion` (`id_deduccion`, `id_detalle`, `id_concepto`, `porcentaje_aplicado`, `monto`) VALUES
+(26, 1, 1, 0.04, 0.00),
+(27, 1, 2, 0.01, 0.00),
+(28, 1, 3, 0.01, 0.00),
+(29, 1, 6, NULL, 7.00);
 
 -- --------------------------------------------------------
 
@@ -267,12 +454,19 @@ CREATE TABLE `tb_nomina_detalle` (
   `id_tasa` int(11) NOT NULL,
   `sueldo_diario` decimal(10,2) NOT NULL,
   `dias_trabajados` int(11) NOT NULL,
-  `dias_inasistencia` int(11) DEFAULT 0,
   `sueldo_bss` decimal(12,2) NOT NULL,
   `total_asignaciones` decimal(12,2) DEFAULT 0.00,
   `total_deducciones` decimal(12,2) DEFAULT 0.00,
-  `neto_pagar` decimal(12,2) DEFAULT 0.00
+  `neto_pagar` decimal(12,2) DEFAULT 0.00,
+  `dias_inasistencia` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_nomina_detalle`
+--
+
+INSERT INTO `tb_nomina_detalle` (`id_detalle`, `id_nomina`, `id_empleado`, `id_cargo`, `id_tasa`, `sueldo_diario`, `dias_trabajados`, `sueldo_bss`, `total_asignaciones`, `total_deducciones`, `neto_pagar`, `dias_inasistencia`) VALUES
+(1, 1, 1, 5, 2, 16.67, 0, 0.00, 0.00, 7.00, -7.00, 0);
 
 -- --------------------------------------------------------
 
@@ -282,7 +476,6 @@ CREATE TABLE `tb_nomina_detalle` (
 
 CREATE TABLE `tb_periodo_nomina` (
   `id_periodo` int(11) NOT NULL,
-  `descripcion` varchar(255) DEFAULT NULL,
   `tipo_periodo` varchar(20) NOT NULL,
   `fecha_inicio` date NOT NULL,
   `fecha_fin` date NOT NULL,
@@ -290,6 +483,13 @@ CREATE TABLE `tb_periodo_nomina` (
   `mes` int(11) NOT NULL,
   `numero_quincena` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_periodo_nomina`
+--
+
+INSERT INTO `tb_periodo_nomina` (`id_periodo`, `tipo_periodo`, `fecha_inicio`, `fecha_fin`, `anio`, `mes`, `numero_quincena`) VALUES
+(1, 'Quincenal', '2026-08-12', '2026-08-13', 2026, 8, 1);
 
 -- --------------------------------------------------------
 
@@ -342,6 +542,14 @@ CREATE TABLE `tb_tasa_cambio` (
   `fuente` varchar(50) DEFAULT 'BCV'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `tb_tasa_cambio`
+--
+
+INSERT INTO `tb_tasa_cambio` (`id_tasa`, `fecha`, `valor_tasa`, `fuente`) VALUES
+(1, '2026-08-13', 500.0000, 'BCV'),
+(2, '2026-09-16', 846.5131, 'BCV Oficial (DolarApi)');
+
 -- --------------------------------------------------------
 
 --
@@ -379,6 +587,13 @@ CREATE TABLE `tb_usuario` (
   `fecha_creacion` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `tb_usuario`
+--
+
+INSERT INTO `tb_usuario` (`id_usuario`, `id_rol`, `id_empleado`, `nombre_usuario`, `correo`, `password_hash`, `estado`, `fecha_creacion`) VALUES
+(1, 1, NULL, 'samu', 'samueljosealexander@gmail.com', '$2y$12$amtgduIUNABRSkknwOyHbuAOcfT6XNXCVUnlO908I1Srqu1u5b6k6', 1, '2026-08-10 11:43:56');
+
 -- --------------------------------------------------------
 
 --
@@ -412,6 +627,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 ALTER TABLE `tb_auditoria`
   ADD PRIMARY KEY (`id_auditoria`),
   ADD KEY `id_usuario` (`id_usuario`);
+
+--
+-- Indices de la tabla `tb_auditoria_seguridad`
+--
+ALTER TABLE `tb_auditoria_seguridad`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_evento` (`evento`),
+  ADD KEY `idx_usuario` (`id_usuario`),
+  ADD KEY `idx_fecha` (`fecha_hora`);
 
 --
 -- Indices de la tabla `tb_banco`
@@ -469,6 +693,15 @@ ALTER TABLE `tb_empleado_cargo`
 --
 ALTER TABLE `tb_jornada`
   ADD PRIMARY KEY (`id_jornada`);
+
+--
+-- Indices de la tabla `tb_login_intentos`
+--
+ALTER TABLE `tb_login_intentos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_ip_user` (`ip_address`,`username`),
+  ADD KEY `idx_ip` (`ip_address`),
+  ADD KEY `idx_bloqueo` (`bloqueado_hasta`);
 
 --
 -- Indices de la tabla `tb_nomina`
@@ -558,6 +791,12 @@ ALTER TABLE `tb_auditoria`
   MODIFY `id_auditoria` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `tb_auditoria_seguridad`
+--
+ALTER TABLE `tb_auditoria_seguridad`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
+
+--
 -- AUTO_INCREMENT de la tabla `tb_banco`
 --
 ALTER TABLE `tb_banco`
@@ -591,13 +830,13 @@ ALTER TABLE `tb_cuenta_bancaria`
 -- AUTO_INCREMENT de la tabla `tb_empleado`
 --
 ALTER TABLE `tb_empleado`
-  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_empleado_cargo`
 --
 ALTER TABLE `tb_empleado_cargo`
-  MODIFY `id_empleado_cargo` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_empleado_cargo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_jornada`
@@ -606,34 +845,40 @@ ALTER TABLE `tb_jornada`
   MODIFY `id_jornada` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT de la tabla `tb_login_intentos`
+--
+ALTER TABLE `tb_login_intentos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
 -- AUTO_INCREMENT de la tabla `tb_nomina`
 --
 ALTER TABLE `tb_nomina`
-  MODIFY `id_nomina` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_nomina` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_nomina_asignacion`
 --
 ALTER TABLE `tb_nomina_asignacion`
-  MODIFY `id_asignacion` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_asignacion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_nomina_deduccion`
 --
 ALTER TABLE `tb_nomina_deduccion`
-  MODIFY `id_deduccion` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_deduccion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_nomina_detalle`
 --
 ALTER TABLE `tb_nomina_detalle`
-  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_periodo_nomina`
 --
 ALTER TABLE `tb_periodo_nomina`
-  MODIFY `id_periodo` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_periodo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_permiso_empleado`
@@ -651,7 +896,7 @@ ALTER TABLE `tb_rol`
 -- AUTO_INCREMENT de la tabla `tb_tasa_cambio`
 --
 ALTER TABLE `tb_tasa_cambio`
-  MODIFY `id_tasa` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_tasa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_tipo_empleado`
@@ -663,7 +908,7 @@ ALTER TABLE `tb_tipo_empleado`
 -- AUTO_INCREMENT de la tabla `tb_usuario`
 --
 ALTER TABLE `tb_usuario`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Restricciones para tablas volcadas

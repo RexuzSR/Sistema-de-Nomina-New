@@ -151,14 +151,21 @@ function initDashboardCharts() {
                     scales: {
                         x: {
                             grid: { display: false },
-                            ticks: { font: { size: 11, weight: '600' } }
+                            ticks: {
+                                font: { size: 11, weight: '600' },
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 6
+                            }
                         },
                         y: {
                             border: { display: false },
                             grid: { color: 'rgba(226, 232, 240, 0.6)' },
+                            beginAtZero: true,
                             ticks: {
                                 font: { size: 11 },
-                                callback: (v) => '$' + v.toLocaleString('es-VE')
+                                precision: 0,
+                                callback: (v) => '$ ' + Number(v).toLocaleString('es-VE')
                             }
                         }
                     }
@@ -190,7 +197,7 @@ function initDashboardCharts() {
                 Chart.defaults.elements.arc.borderWidth = 0;
             }
 
-            // Plugin para texto central dentro de la dona (estilo Rounded Donut)
+            // Plugin para texto central dentro de la dona (estilo Rounded Donut con tamaño elástico al zoom)
             const roundedDonutCenterPlugin = {
                 id: 'roundedDonutCenter',
                 beforeDraw(chart) {
@@ -204,20 +211,24 @@ function initDashboardCharts() {
                     const total = dataset.data.reduce((a, b) => a + Number(b || 0), 0);
                     const isDark = document.documentElement.classList.contains('dark-theme');
                     const centerX = (left + right) / 2;
-                    const centerY = (top + bottom) / 2 - 2;
+                    const centerY = (top + bottom) / 2;
+
+                    const innerR = chart.innerRadius || (Math.min(right - left, bottom - top) * 0.35);
+                    const valSize = Math.max(13, Math.min(22, Math.round(innerR * 0.36)));
+                    const lblSize = Math.max(9, Math.min(12, Math.round(innerR * 0.2)));
 
                     ctx.save();
                     // Subtítulo central
-                    ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
+                    ctx.font = `600 ${lblSize}px "Plus Jakarta Sans", sans-serif`;
                     ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText('Presupuesto', centerX, centerY - 10);
+                    ctx.fillText('Presupuesto', centerX, centerY - (valSize * 0.7));
 
                     // Valor principal destacado en el centro
-                    ctx.font = '800 16px "Plus Jakarta Sans", sans-serif';
+                    ctx.font = `800 ${valSize}px "Plus Jakarta Sans", sans-serif`;
                     ctx.fillStyle = isDark ? '#f8fafc' : '#0f172a';
-                    ctx.fillText(formatUSD(total), centerX, centerY + 10);
+                    ctx.fillText(formatUSD(total), centerX, centerY + (valSize * 0.7));
                     ctx.restore();
                 }
             };
@@ -240,6 +251,14 @@ function initDashboardCharts() {
                     responsive: true,
                     maintainAspectRatio: false,
                     cutout: '72%',
+                    layout: {
+                        padding: {
+                            bottom: 10,
+                            top: 4,
+                            left: 6,
+                            right: 6
+                        }
+                    },
                     plugins: {
                         legend: {
                             position: 'bottom',
@@ -262,6 +281,67 @@ function initDashboardCharts() {
             });
         }
     }
+
+    setupChartResponsiveSync();
+}
+
+/* ─── RESPONSIVE SYNC (ZOOM, UNZOOM, MOBILE) ────────────── */
+function setupChartResponsiveSync() {
+    let resizeTimer = null;
+    const triggerResize = () => {
+        if (resizeTimer) cancelAnimationFrame(resizeTimer);
+        resizeTimer = requestAnimationFrame(() => {
+            if (window._chartEvo && typeof window._chartEvo.resize === 'function') {
+                const wrapEvo = document.getElementById('chartEvolucion')?.parentElement;
+                if (wrapEvo && wrapEvo.clientWidth > 0) {
+                    window._chartEvo.resize();
+                }
+            }
+            if (window._chartCargos && typeof window._chartCargos.resize === 'function') {
+                const wrapCargos = document.getElementById('chartCargos')?.parentElement;
+                if (wrapCargos && wrapCargos.clientWidth > 0) {
+                    window._chartCargos.resize();
+                }
+            }
+        });
+    };
+
+    // 1. ResizeObserver en cada wrap de canvas
+    if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => {
+            triggerResize();
+        });
+        document.querySelectorAll('.chart-canvas-wrap').forEach(wrap => {
+            ro.observe(wrap);
+        });
+        const grid = document.querySelector('.analytics-grid');
+        if (grid) ro.observe(grid);
+        const container = document.querySelector('main.container');
+        if (container) ro.observe(container);
+    }
+
+    // 2. Escuchar resize de la ventana
+    window.addEventListener('resize', triggerResize, { passive: true });
+
+    // 3. Escuchar visualViewport para zoom (Ctrl + / Ctrl - / pinch to zoom)
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', triggerResize, { passive: true });
+    }
+
+    // 4. Orientación móvil y cambios de visibilidad
+    window.addEventListener('orientationchange', () => {
+        setTimeout(triggerResize, 100);
+        setTimeout(triggerResize, 300);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            triggerResize();
+        }
+    });
+
+    // 5. Ajuste diferido tras completar renderizado inicial
+    setTimeout(triggerResize, 150);
 }
 
 /* ─── RANGE TOGGLE (6Q / 12Q / Todo) ────────────────────── */

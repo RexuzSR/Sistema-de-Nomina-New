@@ -10,6 +10,7 @@
 
 <div class="card">
   <form method="post" action="index.php?r=periodos/crear">
+    <?= Security::csrfField() ?>
     <div class="form-grid">
       <div class="full">
         <label>Nombre descriptivo / Descripción</label>

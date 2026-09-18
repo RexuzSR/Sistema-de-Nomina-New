@@ -12,6 +12,7 @@
 
 <div class="card">
   <form method="post" action="index.php?r=empleados/editar" enctype="multipart/form-data">
+    <?= Security::csrfField() ?>
     <input type="hidden" name="id" value="<?= $empleado['id_empleado'] ?>">
     
     <!-- WIDGET DE FOTO DE PERFIL -->

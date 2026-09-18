@@ -45,6 +45,7 @@ class NominaController extends Controller {
         }
 
         if (!$nomina && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $salario_minimo = $_POST['salario_minimo_vigente'] ?? '';
             $semanas = $_POST['semanas_descontar_ivss'] ?? '';
             $factor_semanas = $_POST['factor_semanas_mes'] ?? '4.333333';
@@ -115,6 +116,7 @@ class NominaController extends Controller {
         $periodo = $periodoModel->getById($nomina['id_periodo']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $action = $_POST['action'] ?? '';
             
             if ($action === 'agregar_trabajadores') {

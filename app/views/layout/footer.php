@@ -75,7 +75,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<?= Security::getCspNonce() ?>">
 (function() {
   var searchDebounceTimer = null;
   var currentSearchAbort = null;
@@ -329,67 +329,22 @@
   window.closeCommandPalette = closeCommandPalette;
 })();
 
-function updateThemeButtonState(animate) {
-  var btn = document.getElementById('headerThemeBtn');
-  if (!btn) return;
-  var moon = btn.querySelector('.moon-icon');
-  var sun = btn.querySelector('.sun-icon');
-  if (!moon || !sun) return;
-
+function updateThemeButtonState() {
   var isDark = document.documentElement.classList.contains('dark-theme');
-  btn.title = isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
-
-  if (!animate) {
-    if (isDark) {
-      moon.style.transform = 'translate(calc(-50% - 28px), -50%)';
-      moon.style.opacity = '0';
-      sun.style.transform = 'translate(-50%, -50%)';
-      sun.style.opacity = '1';
-    } else {
-      sun.style.transform = 'translate(calc(-50% + 28px), -50%)';
-      sun.style.opacity = '0';
-      moon.style.transform = 'translate(-50%, -50%)';
-      moon.style.opacity = '1';
-    }
-    return;
-  }
-
-  // Animación: el icono actual se desplaza hacia la IZQUIERDA y sale,
-  // y el nuevo icono entra desde la derecha hacia el centro.
-  if (isDark) {
-    // Luna sale desplazándose hacia la izquierda
-    moon.animate([
-      { transform: 'translate(-50%, -50%) rotate(0deg) scale(1)', opacity: 1 },
-      { transform: 'translate(calc(-50% - 28px), -50%) rotate(-45deg) scale(0.5)', opacity: 0 }
-    ], { duration: 300, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'forwards' });
-
-    // Sol entra desde la derecha al centro
-    sun.animate([
-      { transform: 'translate(calc(-50% + 28px), -50%) rotate(45deg) scale(0.5)', opacity: 0 },
-      { transform: 'translate(-50%, -50%) rotate(0deg) scale(1)', opacity: 1 }
-    ], { duration: 300, delay: 60, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' });
-  } else {
-    // Sol sale desplazándose hacia la izquierda
-    sun.animate([
-      { transform: 'translate(-50%, -50%) rotate(0deg) scale(1)', opacity: 1 },
-      { transform: 'translate(calc(-50% - 28px), -50%) rotate(-45deg) scale(0.5)', opacity: 0 }
-    ], { duration: 300, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'forwards' });
-
-    // Luna entra desde la derecha al centro
-    moon.animate([
-      { transform: 'translate(calc(-50% + 28px), -50%) rotate(45deg) scale(0.5)', opacity: 0 },
-      { transform: 'translate(-50%, -50%) rotate(0deg) scale(1)', opacity: 1 }
-    ], { duration: 300, delay: 60, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' });
-  }
+  var btns = document.querySelectorAll('.header-theme-orb, .header-theme-capsule, .header-theme-toggle');
+  btns.forEach(function(btn) {
+    btn.title = isDark ? 'Cambiar a modo claro (Día)' : 'Cambiar a modo oscuro (Noche)';
+    btn.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+  });
 }
 
 function toggleTheme() {
   document.documentElement.classList.toggle('dark-theme');
   var isDark = document.documentElement.classList.contains('dark-theme');
   localStorage.setItem('dash-theme', isDark ? 'dark' : 'light');
-  updateThemeButtonState(true);
+  updateThemeButtonState();
   if (typeof showToast === 'function') {
-    showToast(isDark ? 'Modo oscuro activado' : 'Modo claro activado');
+    showToast(isDark ? '🌙 Modo noche activado' : '☀️ Modo día activado');
   }
   if (window._chartCargos) {
     window._chartCargos.update();
@@ -403,5 +358,38 @@ document.addEventListener('DOMContentLoaded', function() {
 window.toggleTheme = toggleTheme;
 window.updateThemeButtonState = updateThemeButtonState;
 </script>
+
+<!-- ═══════════════ MODAL DE SEGURIDAD / TIMEOUT DE INACTIVIDAD ═══════════════ -->
+<div class="security-modal-overlay" id="security-timeout-modal" role="dialog" aria-modal="true" aria-labelledby="timeoutModalTitle">
+  <div class="security-modal-card">
+    <div class="security-icon-circle">
+      <i class="fa-solid fa-clock"></i>
+    </div>
+    <h3 class="security-modal-title" id="timeoutModalTitle">Tu sesión está a punto de vencer</h3>
+    <p class="security-modal-desc">
+      Por razones de seguridad laboral y financiera, tu sesión se cerrará automáticamente si no detectamos actividad.
+    </p>
+
+    <div class="timeout-countdown-badge">
+      <i class="fa-solid fa-hourglass-half"></i>
+      <span>Expira en 00:<span id="timeout-countdown-seconds">60</span></span>
+    </div>
+
+    <div class="timeout-progress-track">
+      <div class="timeout-progress-bar" id="timeout-progress-bar"></div>
+    </div>
+
+    <div class="security-modal-actions">
+      <button type="button" class="btn security-btn-secondary" id="btn-security-logout">
+        <i class="fa-solid fa-power-off"></i> Salir ahora
+      </button>
+      <button type="button" class="btn security-btn-primary" id="btn-security-extend">
+        <i class="fa-solid fa-arrow-rotate-right"></i> Continuar sesión
+      </button>
+    </div>
+  </div>
+</div>
+
+<script nonce="<?= Security::getCspNonce() ?>" src="assets/js/security.js"></script>
 </body>
 </html>

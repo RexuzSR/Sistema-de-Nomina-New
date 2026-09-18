@@ -23,13 +23,14 @@ class PeriodoController extends Controller {
         $periodoModel = new PeriodoModel();
         $error = '';
 
+        $hoy = date('Y-m-d');
         $sugerencias = [
             'tipo_periodo' => 'Quincenal',
-            'fecha_inicio' => date('Y-m-d'),
+            'fecha_inicio' => $hoy,
             'fecha_fin' => date('Y-m-d', strtotime('+14 days')),
-            'anio' => date('Y'),
-            'mes' => date('n'),
-            'numero_quincena' => 1,
+            'anio' => (int)date('Y'),
+            'mes' => (int)date('n'),
+            'numero_quincena' => ((int)date('j') <= 15) ? 1 : 2,
             'descripcion' => ''
         ];
 
@@ -39,26 +40,31 @@ class PeriodoController extends Controller {
             $inicioAnterior = strtotime($ultimoPeriodo['fecha_inicio']);
             $finAnterior = strtotime($ultimoPeriodo['fecha_fin']);
 
-            // Calculate differences to project next dates
-            $diffDias = round(($finAnterior - $inicioAnterior) / 86400) + 1;
+            $diffDias = max(1, round(($finAnterior - $inicioAnterior) / 86400) + 1);
 
-            $sugerencias['fecha_inicio'] = date('Y-m-d', strtotime($ultimoPeriodo['fecha_fin'] . ' +1 day'));
-            $sugerencias['fecha_fin'] = date('Y-m-d', strtotime($sugerencias['fecha_inicio'] . ' +' . ($diffDias - 1) . ' days'));
+            // La fecha de inicio SIEMPRE debe ser hoy (fecha actual)
+            $sugerencias['fecha_inicio'] = $hoy;
+            $sugerencias['fecha_fin'] = date('Y-m-d', strtotime($hoy . ' +' . ($diffDias - 1) . ' days'));
 
-            // Update month/year/quincena based on new start date
-            $sugerencias['anio'] = date('Y', strtotime($sugerencias['fecha_inicio']));
-            $sugerencias['mes'] = date('n', strtotime($sugerencias['fecha_inicio']));
+            // Actualizar mes/año/quincena según la fecha de hoy
+            $sugerencias['anio'] = (int)date('Y', strtotime($hoy));
+            $sugerencias['mes'] = (int)date('n', strtotime($hoy));
 
             if ($sugerencias['tipo_periodo'] === 'Quincenal') {
-                $dia = (int)date('j', strtotime($sugerencias['fecha_inicio']));
+                $dia = (int)date('j', strtotime($hoy));
                 $sugerencias['numero_quincena'] = ($dia <= 15) ? 1 : 2;
-                $sugerencias['descripcion'] = $sugerencias['numero_quincena'] . 'ra Quincena ' . date('M Y', strtotime($sugerencias['fecha_inicio']));
+                $sugerencias['descripcion'] = $sugerencias['numero_quincena'] . 'ra Quincena ' . date('M Y', strtotime($hoy));
             } elseif ($sugerencias['tipo_periodo'] === 'Mensual') {
-                $sugerencias['descripcion'] = 'Mes ' . date('M Y', strtotime($sugerencias['fecha_inicio']));
+                $sugerencias['descripcion'] = 'Mes ' . date('M Y', strtotime($hoy));
             }
+        } else {
+            $dia = (int)date('j', strtotime($hoy));
+            $sugerencias['numero_quincena'] = ($dia <= 15) ? 1 : 2;
+            $sugerencias['descripcion'] = $sugerencias['numero_quincena'] . 'ra Quincena ' . date('M Y', strtotime($hoy));
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $descripcion = trim($_POST['descripcion'] ?? '');
             $tipo = trim($_POST['tipo_periodo'] ?? '');
             $inicio = $_POST['fecha_inicio'] ?? '';

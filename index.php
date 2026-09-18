@@ -3,9 +3,11 @@
  * Front Controller principal para la arquitectura MVC
  */
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/core/Security.php';
+
+// Inicializar sesión segura y aplicar cabeceras HTTP de protección (CSP con nonce, etc.)
+Security::initSecureSession();
+Security::setSecurityHeaders();
 
 require_once __DIR__ . '/core/Database.php';
 require_once __DIR__ . '/core/Controller.php';
@@ -14,10 +16,13 @@ require_once __DIR__ . '/core/Router.php';
 
 $router = new Router();
 
-// Definición de Rutas MVC
+// Definición de Rutas de Autenticación y Seguridad
 $router->add('auth/login', 'AuthController', 'login');
 $router->add('auth/logout', 'AuthController', 'logout');
+$router->add('auth/ping', 'AuthController', 'ping');
+$router->add('auth/beaconLogout', 'AuthController', 'beaconLogout');
 
+// Módulos del Sistema
 $router->add('dashboard', 'DashboardController', 'index');
 $router->add('api/search', 'DashboardController', 'search');
 
@@ -41,6 +46,15 @@ $router->add('nomina/detalle', 'NominaController', 'detalle');
 $router->add('nomina/ver', 'NominaController', 'ver');
 $router->add('nomina/recibo', 'NominaController', 'recibo');
 $router->add('nomina/exportExcel', 'NominaController', 'exportExcel');
+
+// Perfil de Usuario y Preferencias de Diseño
+$router->add('perfil', 'PerfilController', 'index');
+$router->add('perfil/actualizar', 'PerfilController', 'actualizar');
+$router->add('perfil/actualizarPassword', 'PerfilController', 'actualizarPassword');
+$router->add('perfil/actualizarFoto', 'PerfilController', 'actualizarFoto');
+$router->add('perfil/eliminarFoto', 'PerfilController', 'eliminarFoto');
+$router->add('perfil/guardarPreferencias', 'PerfilController', 'guardarPreferencias');
+$router->add('perfil/revertirPreferencias', 'PerfilController', 'revertirPreferencias');
 
 // Obtener ruta desde parámetro query 'r' (ej: index.php?r=empleados) o 'dashboard' por defecto
 $route = isset($_GET['r']) ? trim($_GET['r'], '/') : 'dashboard';

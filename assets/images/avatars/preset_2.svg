@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="60" fill="url(#bg2)"/>
+  <circle cx="60" cy="46" r="21" fill="#fde68a"/>
+  <!-- Hair long -->
+  <path d="M37,42 C36,22 84,22 83,42 C85,62 82,68 80,72 C75,54 75,34 60,34 C45,34 45,54 40,72 C38,68 35,62 37,42 Z" fill="#78350f"/>
+  <!-- Jacket -->
+  <path d="M28,106 C28,78 44,72 60,72 C76,72 92,78 92,106 Z" fill="#0c4a6e"/>
+  <polygon points="60,74 52,90 60,105 68,90" fill="#38bdf8"/>
+</svg>

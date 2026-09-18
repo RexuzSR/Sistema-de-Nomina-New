@@ -26,6 +26,7 @@ class TasaController extends Controller {
         $error = '';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $fecha = $_POST['fecha'] ?? '';
             $valor = $_POST['valor_tasa'] ?? '';
             $fuente = trim($_POST['fuente'] ?? 'BCV');

@@ -11,7 +11,6 @@
   });
 </script>
 <?php endif; ?>
-<link rel="stylesheet" href="assets/css/dashboard.css">
 
 <!-- ═══════════════ FONDO AURORA ANIMADO ═══════════════ -->
 <div class="aurora-bg" aria-hidden="true">
@@ -292,30 +291,59 @@
   </div>
 
   <div class="ops-grid">
-    <!-- Periodo activo con anillo grande -->
+    <!-- Periodo activo con diseño expandido, rico y balanceado -->
+    <?php
+      $diasCiclo = 15;
+      if (!empty($ultimoPeriodo['fecha_inicio']) && !empty($ultimoPeriodo['fecha_fin'])) {
+        $iniTs = strtotime($ultimoPeriodo['fecha_inicio']);
+        $finTs = strtotime($ultimoPeriodo['fecha_fin']);
+        $diasCiclo = max(1, round(($finTs - $iniTs) / 86400) + 1);
+      }
+    ?>
     <div class="ops-card ops-card-hero">
       <div class="ops-hero-inner">
         <div class="ops-hero-text">
-          <div class="ops-label">Periodo actual</div>
+          <div class="ops-hero-badge-row">
+            <span class="ops-hero-label-pill">
+              <i class="fa-solid fa-calendar-check"></i> Periodo Actual
+            </span>
+            <?php if (!empty($ultimoPeriodo)): ?>
+              <span class="ops-period-tag">
+                Quincena <?= $ultimoPeriodo['numero_quincena'] ?? '1' ?> · <?= $ultimoPeriodo['anio'] ?>
+              </span>
+              <span class="ops-status-pill <?= $diasRestantes > 0 ? 'pill-active' : 'pill-done' ?>">
+                <span class="status-dot"></span> <?= $diasRestantes > 0 ? 'En curso' : 'Concluido' ?>
+              </span>
+            <?php endif; ?>
+          </div>
+
           <?php if (!empty($ultimoPeriodo)): ?>
             <h3 class="ops-period-title">
-              <?= htmlspecialchars($ultimoPeriodo['fecha_inicio']) ?>
-              <i class="fa-solid fa-arrow-right" style="color:#cbd5e1;font-size:12px;"></i>
-              <?= htmlspecialchars($ultimoPeriodo['fecha_fin']) ?>
+              <span><?= htmlspecialchars($ultimoPeriodo['fecha_inicio']) ?></span>
+              <i class="fa-solid fa-arrow-right-long ops-period-arrow"></i>
+              <span><?= htmlspecialchars($ultimoPeriodo['fecha_fin']) ?></span>
             </h3>
-            <div class="ops-period-tag">
-              Quincena <?= $ultimoPeriodo['numero_quincena'] ?? '1' ?> · <?= $ultimoPeriodo['anio'] ?>
-            </div>
           <?php else: ?>
             <h3 class="ops-period-title">Sin periodo abierto</h3>
           <?php endif; ?>
-          <div class="ops-detail">
-            <div class="ops-detail-item">
+
+          <!-- Fila de chips informativos que llenan el espacio con valor operativo -->
+          <div class="ops-chips-row">
+            <div class="ops-chip">
               <i class="fa-solid fa-hourglass-half"></i>
               <span><?= $diasRestantes > 0 ? "Faltan {$diasRestantes} días para el cierre" : "Cierre concluido" ?></span>
             </div>
+            <div class="ops-chip">
+              <i class="fa-regular fa-calendar-days"></i>
+              <span><?= $diasCiclo ?> días de ciclo</span>
+            </div>
+            <div class="ops-chip">
+              <i class="fa-solid fa-layer-group"></i>
+              <span>Tipo: <?= htmlspecialchars($ultimoPeriodo['tipo_periodo'] ?? 'Quincenal') ?></span>
+            </div>
           </div>
         </div>
+
         <!-- Anillo grande de progreso -->
         <div class="ops-hero-ring">
           <svg viewBox="0 0 120 120">
@@ -331,10 +359,10 @@
                 <stop offset="100%" stop-color="#0284c7"/>
               </linearGradient>
             </defs>
-            <text x="60" y="58" text-anchor="middle" font-size="22" font-weight="800" fill="#0f172a">
+            <text class="ops-ring-text-pct" x="60" y="58" text-anchor="middle" font-size="24" font-weight="800">
               <?= $periodoProgreso ?>%
             </text>
-            <text x="60" y="76" text-anchor="middle" font-size="9" font-weight="600" fill="#64748b" letter-spacing="0.5">
+            <text class="ops-ring-text-sub" x="60" y="76" text-anchor="middle" font-size="9.5" font-weight="700" letter-spacing="0.5">
               TRANSCURRIDO
             </text>
           </svg>
@@ -635,4 +663,4 @@
     headcount: <?= $cargoHeadcountJson ?>
   };
 </script>
-<script src="assets/js/dashboard.js"></script>
+<script src="assets/js/dashboard.js?v=2.3"></script>

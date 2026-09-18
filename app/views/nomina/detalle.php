@@ -190,6 +190,7 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
         <tr>
             <td class="emp-cell sticky-col">
               <form id="form_row_<?= $empId ?>" method="post" action="index.php?r=nomina/detalle" style="display:none;">
+                <?= Security::csrfField() ?>
                 <input type="hidden" name="id_nomina" value="<?= $nomina['id_nomina'] ?>">
                 <input type="hidden" name="id_empleado" value="<?= $empId ?>">
                 <input type="hidden" name="action" value="guardar_detalle">
@@ -258,6 +259,7 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
             <td style="text-align: center; white-space: nowrap;">
               <button type="submit" class="btn-row-action btn-save" title="Guardar y recalcular asignaciones, deducciones y neto del trabajador" form="form_row_<?= $empId ?>"><i class="fa-solid fa-floppy-disk" style="color:var(--primary);"></i></button>
               <form method="post" action="index.php?r=nomina/detalle" style="display:inline;" onsubmit="return confirm('¿Quitar a este trabajador de esta nómina?');">
+                <?= Security::csrfField() ?>
                 <input type="hidden" name="id_nomina" value="<?= $nomina['id_nomina'] ?>">
                 <input type="hidden" name="id_empleado" value="<?= $empId ?>">
                 <input type="hidden" name="action" value="eliminar_trabajador">
@@ -280,6 +282,7 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
       <span class="modal-close" onclick="cerrarModalTrabajadores()">&times;</span>
     </div>
     <form method="post" action="index.php?r=nomina/detalle">
+      <?= Security::csrfField() ?>
       <input type="hidden" name="id_nomina" value="<?= $nomina['id_nomina'] ?>">
       <input type="hidden" name="action" value="agregar_trabajadores">
 
@@ -339,6 +342,7 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
     </div>
 
     <form method="post" action="index.php?r=nomina/detalle" id="formTasasLey">
+      <?= Security::csrfField() ?>
       <input type="hidden" name="id_nomina" value="<?= $nomina['id_nomina'] ?>">
       <input type="hidden" name="action" value="actualizar_tasas_ley">
 

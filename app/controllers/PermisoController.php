@@ -26,6 +26,7 @@ class PermisoController extends Controller {
         $error = '';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $id_empleado = (int)($_POST['id_empleado'] ?? 0);
             $fecha_inicio = $_POST['fecha_inicio'] ?? '';
             $fecha_fin = $_POST['fecha_fin'] ?? '';

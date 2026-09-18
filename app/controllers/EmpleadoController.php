@@ -55,6 +55,7 @@ class EmpleadoController extends Controller {
         $error = '';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $cedula = trim($_POST['cedula'] ?? '');
             $p_nombre = trim($_POST['primer_nombre'] ?? '');
             $s_nombre = trim($_POST['segundo_nombre'] ?? '');
@@ -113,6 +114,7 @@ class EmpleadoController extends Controller {
 
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $cedula = trim($_POST['cedula'] ?? '');
             $p_nombre = trim($_POST['primer_nombre'] ?? '');
             $s_nombre = trim($_POST['segundo_nombre'] ?? '');

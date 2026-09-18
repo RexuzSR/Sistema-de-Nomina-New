@@ -14,6 +14,7 @@
 
 <div class="card">
   <form method="post" action="index.php?r=nomina/generar">
+    <?= Security::csrfField() ?>
     <input type="hidden" name="id_periodo" value="<?= $id_periodo ?>">
     <div class="form-grid">
       <div>

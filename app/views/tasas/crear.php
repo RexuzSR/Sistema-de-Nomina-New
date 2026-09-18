@@ -10,6 +10,7 @@
 
 <div class="card">
   <form method="post" action="index.php?r=tasas/crear">
+    <?= Security::csrfField() ?>
     <div class="form-grid">
       <div><label>Fecha *</label><input type="date" name="fecha" value="<?= date('Y-m-d') ?>" required></div>
       <div><label>Valor de la tasa (Bs por unidad de divisa) *</label><input type="number" step="0.0001" min="0" name="valor_tasa" required></div>

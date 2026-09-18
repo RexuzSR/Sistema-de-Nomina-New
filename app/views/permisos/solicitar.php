@@ -10,6 +10,7 @@
 
 <div class="card">
   <form method="post" action="index.php?r=permisos/solicitar">
+    <?= Security::csrfField() ?>
     <div class="form-grid">
       <div class="full">
         <label>Empleado *</label>

@@ -12,6 +12,7 @@
 
 <div class="card">
   <form method="post" action="index.php?r=empleados/crear" enctype="multipart/form-data">
+    <?= Security::csrfField() ?>
     <!-- WIDGET DE FOTO DE PERFIL -->
     <div style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
       <h3 style="margin:0; font-size:15px; color:var(--primary); display:flex; align-items:center; gap:8px;">
