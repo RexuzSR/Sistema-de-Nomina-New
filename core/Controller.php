@@ -89,6 +89,37 @@ abstract class Controller {
         require __DIR__ . '/../app/views/layout/footer.php';
     }
 
+    /**
+     * Verifica que el usuario logueado tenga uno de los roles permitidos.
+     * Aborta con 403 si el rol no está autorizado.
+     * 
+     * @param array $allowedRoles Nombres de roles permitidos (ej: ['Administrador', 'Operador'])
+     */
+    protected function requireRole(array $allowedRoles): void {
+        $this->requireLogin();
+        $userRole = $_SESSION['user_rol'] ?? '';
+
+        if (!in_array($userRole, $allowedRoles, true)) {
+            $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+                   || (isset($_GET['format']) && $_GET['format'] === 'json')
+                   || (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false);
+
+            if ($isAjax) {
+                header('Content-Type: application/json', true, 403);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'No tienes permisos para realizar esta acción.',
+                    'required_role' => $allowedRoles
+                ]);
+                exit;
+            }
+
+            // Redirigir al dashboard con aviso
+            $_SESSION['flash_error'] = 'No tienes permisos para acceder a esa sección.';
+            $this->redirect('index.php?r=dashboard');
+        }
+    }
+
     protected function redirect(string $url): void {
         header('Location: ' . $url);
         exit;

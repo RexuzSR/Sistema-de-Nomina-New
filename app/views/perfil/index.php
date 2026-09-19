@@ -29,15 +29,19 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
   <!-- ═══════════════ HERO BANNER DE PERFIL ═══════════════ -->
   <div class="perfil-hero">
     <div class="perfil-hero-left">
-      <div class="perfil-avatar-wrapper">
+      <div class="perfil-avatar-wrapper" onclick="abrirModalAvatar()" role="button" tabindex="0" title="Haz clic para cambiar tu foto o avatar" onkeydown="if(event.key==='Enter'||event.key===' ')abrirModalAvatar()">
         <?php if (!empty($foto)): ?>
           <img src="<?= htmlspecialchars($foto) ?>" alt="<?= htmlspecialchars($nombre) ?>" class="perfil-avatar-img" id="heroAvatarImg">
         <?php else: ?>
           <div class="perfil-avatar-img" id="heroAvatarFallback"><?= $inicial ?></div>
         <?php endif; ?>
-        <label for="fotoInputFile" class="perfil-avatar-edit-badge" title="Cambiar foto de perfil">
+        <div class="perfil-avatar-overlay">
           <i class="fa-solid fa-camera"></i>
-        </label>
+          <span>Cambiar</span>
+        </div>
+        <button type="button" class="perfil-avatar-edit-badge" onclick="event.stopPropagation(); abrirModalAvatar();" title="Cambiar foto de perfil">
+          <i class="fa-solid fa-camera"></i>
+        </button>
       </div>
       <div class="perfil-user-meta">
         <h1 id="heroUsernameDisplay"><?= htmlspecialchars($nombre) ?></h1>
@@ -180,62 +184,7 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
       </div>
     </div>
 
-    <!-- ── PANEL 3: FOTO DE PERFIL Y AVATARES ── -->
-    <div class="perfil-col-12">
-      <div class="perfil-card">
-        <div class="perfil-card-header">
-          <div>
-            <h2 class="perfil-card-title">
-              <i class="fa-solid fa-camera-retro"></i>
-              <span>Foto de Perfil y Avatares</span>
-            </h2>
-            <p class="perfil-card-subtitle">Sube tu fotografía corporativa o escoge un avatar ejecutivo ilustrado</p>
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:24px; align-items:start;">
-          <!-- Subida personalizada -->
-          <div>
-            <span class="form-label-perfil">Subir foto desde tu dispositivo</span>
-            <form id="formSubirFoto" method="POST" action="index.php?r=perfil/actualizarFoto" enctype="multipart/form-data" style="margin-top:8px;">
-              <?= Security::csrfField() ?>
-              <input type="file" id="fotoInputFile" name="foto" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;" onchange="previewAndSubmitPhoto(this)">
-              <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button type="button" class="btn-perfil-secondary" onclick="document.getElementById('fotoInputFile').click()">
-                  <i class="fa-solid fa-arrow-up-from-bracket"></i>
-                  <span>Seleccionar imagen (JPG, PNG, WebP)</span>
-                </button>
-                <?php if (!empty($foto)): ?>
-                  <button type="button" class="btn-perfil-secondary" style="color:var(--danger); border-color:rgba(239,68,68,0.3);" onclick="eliminarFotoPerfil()">
-                    <i class="fa-solid fa-trash-can"></i>
-                    <span>Eliminar foto</span>
-                  </button>
-                <?php endif; ?>
-              </div>
-              <small style="display:block; margin-top:8px; color:var(--text-muted); font-size:12px;">Tamaño máximo: 4MB. La imagen se optimiza para el header y credenciales.</small>
-            </form>
-          </div>
-
-          <!-- Selección rápida de Avatares Ejecutivos -->
-          <div>
-            <span class="form-label-perfil">O elige un avatar profesional predeterminado</span>
-            <div class="avatar-presets-grid">
-              <?php for ($i = 1; $i <= 6; $i++): 
-                $presetFile = "assets/images/avatars/preset_{$i}.svg";
-                $isActivePreset = ($foto === $presetFile);
-              ?>
-                <button type="button" class="avatar-preset-btn <?= $isActivePreset ? 'active' : '' ?>" 
-                        onclick="seleccionarAvatarPreset('preset_<?= $i ?>')" title="Avatar Ejecutivo <?= $i ?>">
-                  <img src="<?= $presetFile ?>" alt="Preset <?= $i ?>">
-                </button>
-              <?php endfor; ?>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── PANEL 4: PERSONALIZACIÓN DE COLOR DE HEADER Y BOTONES ── -->
+    <!-- ── PANEL 3: PERSONALIZACIÓN DE COLOR DE HEADER Y BOTONES ── -->
     <div class="perfil-col-12">
       <div class="perfil-card">
         <div class="perfil-card-header">
@@ -339,8 +288,12 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
               </div>
             </div>
 
-            <div style="margin-left:auto; display:flex; gap:10px;">
-              <button type="button" class="btn-perfil-primary" onclick="guardarPreferenciasServidor()">
+            <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
+              <button type="button" class="btn-perfil-secondary" id="btnDescartarPreviewColores" style="display:none;" onclick="descartarPreviewColores()" title="Descartar vista previa y volver a tus colores guardados">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Descartar</span>
+              </button>
+              <button type="button" class="btn-perfil-primary" id="btnConfirmarColores" onclick="confirmarColores()">
                 <i class="fa-solid fa-check"></i>
                 <span>Confirmar Colores</span>
               </button>
@@ -350,7 +303,7 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
       </div>
     </div>
 
-    <!-- ── PANEL 5: SELECTOR DE ESTRUCTURA CON SKELETONS (HEADER VS SIDEBAR) ── -->
+    <!-- ── PANEL 4: SELECTOR DE ESTRUCTURA CON SKELETONS (HEADER VS SIDEBAR) ── -->
     <div class="perfil-col-12">
       <div class="perfil-card">
         <div class="perfil-card-header">
@@ -503,11 +456,129 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid var(--border);">
-          <button type="button" class="btn-perfil-primary" onclick="guardarPreferenciasServidor()">
+          <button type="button" class="btn-perfil-primary" id="btnAplicarEstructura" onclick="confirmarEstructura()">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
             <span>Aplicar Estructura Seleccionada</span>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL UNIFICADO: FOTO DE PERFIL Y AVATARES ═══════════════ -->
+<div class="avatar-modal-backdrop" id="modalAvatarBackdrop" onclick="cerrarModalAvatarOnClickOut(event)">
+  <div class="avatar-modal-card" role="dialog" aria-modal="true" aria-labelledby="modalAvatarTitle">
+    
+    <!-- Header del Modal -->
+    <div class="avatar-modal-header">
+      <div>
+        <h3 class="avatar-modal-title" id="modalAvatarTitle">
+          <i class="fa-solid fa-camera-retro"></i>
+          <span>Foto de Perfil y Avatares</span>
+        </h3>
+        <p class="avatar-modal-subtitle">Personaliza tu imagen corporativa o elige un avatar ejecutivo</p>
+      </div>
+      <button type="button" class="avatar-modal-close" onclick="cerrarModalAvatar()" title="Cerrar ventana">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Contenido del Modal -->
+    <div class="avatar-modal-body">
+      
+      <!-- Vista previa activa -->
+      <div class="avatar-modal-preview-box">
+        <div id="modalPreviewContainer">
+          <?php if (!empty($foto)): ?>
+            <img src="<?= htmlspecialchars($foto) ?>" alt="<?= htmlspecialchars($nombre) ?>" class="avatar-modal-preview-img" id="modalAvatarPreviewImg">
+          <?php else: ?>
+            <div class="avatar-modal-preview-img" id="modalAvatarPreviewFallback"><?= $inicial ?></div>
+          <?php endif; ?>
+        </div>
+        <div class="avatar-modal-preview-info">
+          <span class="avatar-modal-preview-name"><?= htmlspecialchars($nombre) ?></span>
+          <span class="avatar-modal-preview-badge" id="modalAvatarStatusBadge">
+            <i class="fa-solid <?= !empty($foto) ? (strpos($foto, 'preset_') !== false ? 'fa-user-tie' : 'fa-image') : 'fa-font' ?>"></i>
+            <span id="modalAvatarStatusText">
+              <?php 
+                if (empty($foto)) {
+                  echo 'Inicial de usuario';
+                } elseif (strpos($foto, 'preset_') !== false) {
+                  echo 'Avatar ejecutivo';
+                } else {
+                  echo 'Fotografía personalizada';
+                }
+              ?>
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Sección 1: Subir Fotografía con Dropzone -->
+      <div>
+        <div class="avatar-modal-section-title">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Subir fotografía desde tu equipo</span>
+        </div>
+        
+        <form id="formModalSubirFoto" method="POST" action="index.php?r=perfil/actualizarFoto" enctype="multipart/form-data">
+          <?= Security::csrfField() ?>
+          <input type="file" id="modalFotoInput" name="foto" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;" onchange="subirFotoAjax(this)">
+          
+          <div class="avatar-dropzone" id="avatarDropzone" onclick="document.getElementById('modalFotoInput').click()">
+            <div class="avatar-dropzone-icon">
+              <i class="fa-solid fa-arrow-up-from-bracket"></i>
+            </div>
+            <div class="avatar-dropzone-text">
+              Arrastra tu imagen aquí o <strong>haz clic para examinar</strong>
+            </div>
+            <div class="avatar-dropzone-hint">
+              Formatos JPG, PNG, WebP o GIF (Tamaño máximo: 4MB)
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sección 2: Selección rápida de Avatares Ejecutivos -->
+      <div>
+        <div class="avatar-modal-section-title">
+          <i class="fa-solid fa-users-viewfinder"></i>
+          <span>O selecciona un avatar ejecutivo prediseñado</span>
+        </div>
+
+        <div class="avatar-presets-modal-grid">
+          <?php for ($i = 1; $i <= 6; $i++): 
+            $presetFile = "assets/images/avatars/preset_{$i}.svg";
+            $isActivePreset = ($foto === $presetFile);
+          ?>
+            <button type="button" class="avatar-preset-modal-btn <?= $isActivePreset ? 'active' : '' ?>" 
+                    id="presetBtn_<?= $i ?>"
+                    data-preset="preset_<?= $i ?>"
+                    onclick="seleccionarAvatarPresetAjax('preset_<?= $i ?>', this)" 
+                    title="Avatar Ejecutivo <?= $i ?>">
+              <img src="<?= $presetFile ?>" alt="Avatar Ejecutivo <?= $i ?>">
+            </button>
+          <?php endfor; ?>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer del Modal -->
+    <div class="avatar-modal-footer">
+      <div>
+        <button type="button" class="btn-perfil-secondary" id="btnModalEliminarFoto" 
+                style="color:var(--danger); border-color:rgba(239,68,68,0.3); <?= empty($foto) ? 'display:none;' : '' ?>" 
+                onclick="eliminarFotoPerfilAjax()">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Eliminar foto</span>
+        </button>
+      </div>
+      <div>
+        <button type="button" class="btn-perfil-secondary" onclick="cerrarModalAvatar()">
+          <span>Cerrar</span>
+        </button>
       </div>
     </div>
 
@@ -517,13 +588,19 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
 <!-- ═══════════════ SCRIPT INTERACTIVO DEL PERFIL ═══════════════ -->
 <script nonce="<?= Security::getCspNonce() ?>">
 (function() {
-  var currentHeaderColor = <?= json_encode($headerColor) ?>;
-  var currentPrimaryColor = <?= json_encode($primaryColor) ?>;
-  var currentNavLayout = <?= json_encode($navLayout) ?>;
+  // Estado guardado en base de datos / aplicado actualmente
+  var savedHeaderColor = <?= json_encode($headerColor) ?>;
+  var savedPrimaryColor = <?= json_encode($primaryColor) ?>;
+  var savedNavLayout = <?= json_encode($navLayout) ?>;
+
+  // Estado en selección (staged: pendiente de confirmación mediante botón)
+  var stagedHeaderColor = savedHeaderColor;
+  var stagedPrimaryColor = savedPrimaryColor;
+  var stagedNavLayout = savedNavLayout;
 
   // Actualizar indicadores según valores actuales
   window.addEventListener('DOMContentLoaded', function() {
-    highlightMatchingPreset(currentHeaderColor, currentPrimaryColor);
+    highlightMatchingPreset(stagedHeaderColor, stagedPrimaryColor);
   });
 
   // Mostrar u ocultar contraseña
@@ -584,32 +661,178 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
     }
   };
 
-  // Previsualización y subida de foto
-  window.previewAndSubmitPhoto = function(input) {
-    if (input.files && input.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var heroImg = document.getElementById('heroAvatarImg');
-        var heroFallback = document.getElementById('heroAvatarFallback');
-        if (heroImg) {
-          heroImg.src = e.target.result;
-        } else if (heroFallback) {
-          var newImg = document.createElement('img');
-          newImg.src = e.target.result;
-          newImg.id = 'heroAvatarImg';
-          newImg.className = 'perfil-avatar-img';
-          heroFallback.replaceWith(newImg);
-        }
-      };
-      reader.readAsDataURL(input.files[0]);
-      document.getElementById('formSubirFoto').submit();
+  // ═══════════════ MODAL UNIFICADO DE AVATAR Y FOTO ═══════════════
+  var userInitialFallback = <?= json_encode($inicial) ?>;
+  var userNameDisplay = <?= json_encode($nombre) ?>;
+
+  window.abrirModalAvatar = function() {
+    var modal = document.getElementById('modalAvatarBackdrop');
+    if (modal) {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
   };
 
-  // Seleccionar avatar preset
-  window.seleccionarAvatarPreset = function(presetName) {
+  window.cerrarModalAvatar = function() {
+    var modal = document.getElementById('modalAvatarBackdrop');
+    if (modal) {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  };
+
+  window.cerrarModalAvatarOnClickOut = function(e) {
+    if (e.target === e.currentTarget) {
+      cerrarModalAvatar();
+    }
+  };
+
+  // Cerrar con tecla Escape
+  window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      cerrarModalAvatar();
+    }
+  });
+
+  // Notificaciones Toast fluidas
+  function showPerfilToast(msg, isError) {
+    var toast = document.getElementById('perfilToastAlert');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'perfilToastAlert';
+      toast.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:100000; padding:14px 20px; border-radius:12px; font-size:13.5px; font-weight:700; color:#fff; display:flex; align-items:center; gap:10px; box-shadow:0 10px 25px rgba(0,0,0,0.2); transform:translateY(30px); opacity:0; transition:all 0.25s cubic-bezier(0.16,1,0.3,1); pointer-events:none;';
+      document.body.appendChild(toast);
+    }
+    toast.style.background = isError ? '#ef4444' : '#0f766e';
+    toast.innerHTML = (isError ? '<i class="fa-solid fa-triangle-exclamation"></i> ' : '<i class="fa-solid fa-circle-check"></i> ') + msg;
+    
+    requestAnimationFrame(function() {
+      toast.style.transform = 'translateY(0)';
+      toast.style.opacity = '1';
+    });
+
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function() {
+      toast.style.transform = 'translateY(20px)';
+      toast.style.opacity = '0';
+    }, 3500);
+  }
+
+  // Sincronizar avatares en todo el DOM (Hero, Modal, Navbar)
+  function syncAvatarsInDom(fotoUrl, isPreset, presetNumber) {
+    // 1. Hero Avatar
+    var heroWrap = document.querySelector('.perfil-avatar-wrapper');
+    if (heroWrap) {
+      var heroImg = document.getElementById('heroAvatarImg');
+      var heroFallback = document.getElementById('heroAvatarFallback');
+      if (fotoUrl) {
+        if (heroImg) {
+          heroImg.src = fotoUrl + '?t=' + Date.now();
+        } else if (heroFallback) {
+          var newImg = document.createElement('img');
+          newImg.src = fotoUrl + '?t=' + Date.now();
+          newImg.alt = userNameDisplay;
+          newImg.className = 'perfil-avatar-img';
+          newImg.id = 'heroAvatarImg';
+          heroFallback.replaceWith(newImg);
+        }
+      } else {
+        // Volver a inicial
+        if (heroImg) {
+          var newFallback = document.createElement('div');
+          newFallback.className = 'perfil-avatar-img';
+          newFallback.id = 'heroAvatarFallback';
+          newFallback.textContent = userInitialFallback;
+          heroImg.replaceWith(newFallback);
+        }
+      }
+    }
+
+    // 2. Modal Avatar Preview
+    var modalContainer = document.getElementById('modalPreviewContainer');
+    if (modalContainer) {
+      if (fotoUrl) {
+        modalContainer.innerHTML = '<img src="' + fotoUrl + '?t=' + Date.now() + '" alt="' + userNameDisplay + '" class="avatar-modal-preview-img" id="modalAvatarPreviewImg">';
+      } else {
+        modalContainer.innerHTML = '<div class="avatar-modal-preview-img" id="modalAvatarPreviewFallback">' + userInitialFallback + '</div>';
+      }
+    }
+
+    // 3. Status Badge en el Modal
+    var statusBadge = document.getElementById('modalAvatarStatusBadge');
+    var statusText = document.getElementById('modalAvatarStatusText');
+    if (statusBadge && statusText) {
+      if (!fotoUrl) {
+        statusBadge.querySelector('i').className = 'fa-solid fa-font';
+        statusText.textContent = 'Inicial de usuario';
+      } else if (isPreset) {
+        statusBadge.querySelector('i').className = 'fa-solid fa-user-tie';
+        statusText.textContent = 'Avatar ejecutivo' + (presetNumber ? ' #' + presetNumber : '');
+      } else {
+        statusBadge.querySelector('i').className = 'fa-solid fa-image';
+        statusText.textContent = 'Fotografía personalizada';
+      }
+    }
+
+    // 4. Botón Eliminar Foto en el modal
+    var btnEliminar = document.getElementById('btnModalEliminarFoto');
+    if (btnEliminar) {
+      btnEliminar.style.display = fotoUrl ? 'inline-flex' : 'none';
+    }
+
+    // 5. Barra de Navegación superior (header)
+    var navAvatarPill = document.querySelector('.user-avatar-pill');
+    if (navAvatarPill) {
+      if (fotoUrl) {
+        navAvatarPill.classList.add('has-img');
+        navAvatarPill.innerHTML = '<img src="' + fotoUrl + '?t=' + Date.now() + '" alt="' + userNameDisplay + '">';
+      } else {
+        navAvatarPill.classList.remove('has-img');
+        navAvatarPill.textContent = userInitialFallback;
+      }
+    }
+
+    var uCardAvatar = document.querySelector('.u-card-avatar');
+    if (uCardAvatar) {
+      if (fotoUrl) {
+        uCardAvatar.classList.add('has-img');
+        uCardAvatar.innerHTML = '<img src="' + fotoUrl + '?t=' + Date.now() + '" alt="' + userNameDisplay + '">';
+      } else {
+        uCardAvatar.classList.remove('has-img');
+        uCardAvatar.textContent = userInitialFallback;
+      }
+    }
+  }
+
+  // Subir foto mediante AJAX con Drag & Drop o Input
+  window.subirFotoAjax = function(fileOrInput) {
+    var file = null;
+    if (fileOrInput instanceof File) {
+      file = fileOrInput;
+    } else if (fileOrInput && fileOrInput.files && fileOrInput.files[0]) {
+      file = fileOrInput.files[0];
+    }
+    if (!file) return;
+
+    var validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (validTypes.indexOf(file.type) === -1) {
+      showPerfilToast('Formato no compatible. Usa JPG, PNG, WebP o GIF.', true);
+      return;
+    }
+
+    if (file.size > 4 * 1024 * 1024) {
+      showPerfilToast('El archivo supera el límite de 4MB.', true);
+      return;
+    }
+
+    var dropzone = document.getElementById('avatarDropzone');
+    var originalDropHtml = dropzone ? dropzone.innerHTML : '';
+    if (dropzone) {
+      dropzone.innerHTML = '<div style="display:flex; align-items:center; gap:10px; color:var(--primary);"><i class="fa-solid fa-spinner fa-spin" style="font-size:20px;"></i> <span>Optimizando y subiendo foto...</span></div>';
+    }
+
     var formData = new FormData();
-    formData.append('avatar_preset', presetName);
+    formData.append('foto', file);
     var csrf = document.querySelector('meta[name="csrf-token"]');
     if (csrf) formData.append('csrf_token', csrf.content);
 
@@ -620,21 +843,62 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
+      if (dropzone) dropzone.innerHTML = originalDropHtml;
       if (data.success) {
-        window.location.reload();
+        document.querySelectorAll('.avatar-preset-modal-btn').forEach(function(b) {
+          b.classList.remove('active');
+        });
+
+        syncAvatarsInDom(data.foto_perfil, false, null);
+        showPerfilToast(data.message || '¡Fotografía actualizada con éxito!');
       } else {
-        alert(data.error || 'No se pudo seleccionar el avatar.');
+        showPerfilToast(data.error || 'Error al subir la imagen.', true);
+      }
+    })
+    .catch(function(err) {
+      if (dropzone) dropzone.innerHTML = originalDropHtml;
+      console.error(err);
+      showPerfilToast('No se pudo completar la subida.', true);
+    });
+  };
+
+  // Seleccionar avatar preset por AJAX
+  window.seleccionarAvatarPresetAjax = function(presetName, btn) {
+    var formData = new FormData();
+    formData.append('avatar_preset', presetName);
+    var csrf = document.querySelector('meta[name="csrf-token"]');
+    if (csrf) formData.append('csrf_token', csrf.content);
+
+    document.querySelectorAll('.avatar-preset-modal-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    if (btn) btn.classList.add('active');
+
+    fetch('index.php?r=perfil/actualizarFoto', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        var num = presetName.replace('preset_', '');
+        syncAvatarsInDom(data.foto_perfil, true, num);
+        showPerfilToast('¡Avatar corporativo seleccionado!');
+      } else {
+        showPerfilToast(data.error || 'No se pudo seleccionar el avatar.', true);
       }
     })
     .catch(function(err) {
       console.error(err);
-      window.location.reload();
+      showPerfilToast('Error de conexión al seleccionar avatar.', true);
     });
   };
 
   // Eliminar foto de perfil
-  window.eliminarFotoPerfil = function() {
-    if (!confirm('¿Deseas eliminar tu foto y volver a la inicial de tu nombre?')) return;
+  window.eliminarFotoPerfilAjax = function() {
+    if (!confirm('¿Deseas eliminar tu foto de perfil y volver a la inicial?')) return;
+    
     var formData = new FormData();
     var csrf = document.querySelector('meta[name="csrf-token"]');
     if (csrf) formData.append('csrf_token', csrf.content);
@@ -644,38 +908,130 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
       body: formData,
       headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
-    .then(function() { window.location.reload(); })
-    .catch(function() { window.location.reload(); });
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        document.querySelectorAll('.avatar-preset-modal-btn').forEach(function(b) {
+          b.classList.remove('active');
+        });
+        syncAvatarsInDom(null, false, null);
+        showPerfilToast('Foto eliminada. Se usará la inicial de tu nombre.');
+      } else {
+        showPerfilToast(data.error || 'Error al eliminar foto.', true);
+      }
+    })
+    .catch(function(err) {
+      console.error(err);
+      showPerfilToast('Error de conexión al eliminar foto.', true);
+    });
   };
 
-  // Aplicar paleta preset
+  // Drag and drop para la Dropzone
+  window.addEventListener('DOMContentLoaded', function() {
+    var dropzone = document.getElementById('avatarDropzone');
+    if (dropzone) {
+      ['dragenter', 'dragover'].forEach(function(eventName) {
+        dropzone.addEventListener(eventName, function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.add('dragover');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(function(eventName) {
+        dropzone.addEventListener(eventName, function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.remove('dragover');
+        }, false);
+      });
+
+      dropzone.addEventListener('drop', function(e) {
+        var dt = e.dataTransfer;
+        if (dt && dt.files && dt.files[0]) {
+          subirFotoAjax(dt.files[0]);
+        }
+      }, false);
+    }
+  });
+
+  // ═══════════════ VISTA PREVIA TEMPORAL EN VIVO DE COLORES ═══════════════
+  // Aplica temporalmente al DOM para que el usuario aprecie el contraste, pero NO persiste en localStorage ni BD
+  function actualizarLivePreviewColores(hColor, pColor) {
+    document.documentElement.style.setProperty('--topbar-custom-bg', hColor);
+    document.documentElement.style.setProperty('--primary-custom-color', pColor);
+
+    // Detectar si hay cambios respecto a los colores guardados
+    var isChanged = (hColor.toLowerCase() !== savedHeaderColor.toLowerCase() || pColor.toLowerCase() !== savedPrimaryColor.toLowerCase());
+    var btnDescartar = document.getElementById('btnDescartarPreviewColores');
+    var btnConfirmar = document.getElementById('btnConfirmarColores');
+    if (btnDescartar) {
+      btnDescartar.style.display = isChanged ? 'inline-flex' : 'none';
+    }
+    if (btnConfirmar) {
+      if (isChanged) {
+        btnConfirmar.classList.add('pulse-highlight');
+      } else {
+        btnConfirmar.classList.remove('pulse-highlight');
+      }
+    }
+  }
+
+  // ═══════════════ SELECCIÓN DE PALETA (PRESET) ═══════════════
   window.aplicarPaletaPreset = function(btn) {
     var hColor = btn.getAttribute('data-header');
     var pColor = btn.getAttribute('data-primary');
-    aplicarColoresEnVivo(hColor, pColor);
+    
+    stagedHeaderColor = hColor;
+    stagedPrimaryColor = pColor;
+
+    var inpHeader = document.getElementById('inputHeaderColor');
+    var inpPrimary = document.getElementById('inputPrimaryColor');
+    if (inpHeader) inpHeader.value = hColor;
+    if (inpPrimary) inpPrimary.value = pColor;
+
+    var lblH = document.getElementById('labelHeaderHex');
+    var lblP = document.getElementById('labelPrimaryHex');
+    if (lblH) lblH.textContent = hColor;
+    if (lblP) lblP.textContent = pColor;
 
     document.querySelectorAll('.color-preset-card').forEach(function(c) {
       c.classList.remove('active');
     });
     btn.classList.add('active');
+
+    // Mostrar vista previa en vivo temporal
+    actualizarLivePreviewColores(hColor, pColor);
   };
 
-  // Color Pickers personalizados
+  // ═══════════════ SELECTORES COLOR PICKER ═══════════════
   window.onCustomHeaderColor = function(val) {
-    document.getElementById('labelHeaderHex').textContent = val;
-    aplicarColoresEnVivo(val, currentPrimaryColor);
-    uncheckPresets();
+    stagedHeaderColor = val;
+    var lblH = document.getElementById('labelHeaderHex');
+    if (lblH) lblH.textContent = val;
+    uncheckPresetsIfNoMatch();
+    actualizarLivePreviewColores(stagedHeaderColor, stagedPrimaryColor);
   };
 
   window.onCustomPrimaryColor = function(val) {
-    document.getElementById('labelPrimaryHex').textContent = val;
-    aplicarColoresEnVivo(currentHeaderColor, val);
-    uncheckPresets();
+    stagedPrimaryColor = val;
+    var lblP = document.getElementById('labelPrimaryHex');
+    if (lblP) lblP.textContent = val;
+    uncheckPresetsIfNoMatch();
+    actualizarLivePreviewColores(stagedHeaderColor, stagedPrimaryColor);
   };
 
-  function uncheckPresets() {
+  function uncheckPresetsIfNoMatch() {
+    var matched = false;
     document.querySelectorAll('.color-preset-card').forEach(function(c) {
-      c.classList.remove('active');
+      var ch = c.getAttribute('data-header');
+      var cp = c.getAttribute('data-primary');
+      if (ch && cp && ch.toLowerCase() === stagedHeaderColor.toLowerCase() && cp.toLowerCase() === stagedPrimaryColor.toLowerCase()) {
+        c.classList.add('active');
+        matched = true;
+      } else {
+        c.classList.remove('active');
+      }
     });
   }
 
@@ -692,85 +1048,62 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
     });
   }
 
-  // Actualizar CSS en tiempo real en la página
-  function aplicarColoresEnVivo(hColor, pColor) {
-    currentHeaderColor = hColor;
-    currentPrimaryColor = pColor;
-
-    document.documentElement.style.setProperty('--topbar-custom-bg', hColor);
-    document.documentElement.style.setProperty('--primary-custom-color', pColor);
+  // ═══════════════ BOTÓN: DESCARTAR VISTA PREVIA ═══════════════
+  window.descartarPreviewColores = function() {
+    stagedHeaderColor = savedHeaderColor;
+    stagedPrimaryColor = savedPrimaryColor;
 
     var inpHeader = document.getElementById('inputHeaderColor');
     var inpPrimary = document.getElementById('inputPrimaryColor');
-    if (inpHeader) inpHeader.value = hColor;
-    if (inpPrimary) inpPrimary.value = pColor;
+    if (inpHeader) inpHeader.value = savedHeaderColor;
+    if (inpPrimary) inpPrimary.value = savedPrimaryColor;
 
     var lblH = document.getElementById('labelHeaderHex');
     var lblP = document.getElementById('labelPrimaryHex');
-    if (lblH) lblH.textContent = hColor;
-    if (lblP) lblP.textContent = pColor;
+    if (lblH) lblH.textContent = savedHeaderColor;
+    if (lblP) lblP.textContent = savedPrimaryColor;
 
-    localStorage.setItem('nomina-header-color', hColor);
-    localStorage.setItem('nomina-primary-color', pColor);
-  }
+    highlightMatchingPreset(savedHeaderColor, savedPrimaryColor);
 
-  // ═══════════════ REVERTIR CAMBIOS DE COLOR (SOLICITADO EXPLÍCITAMENTE) ═══════════════
-  window.revertirColoresOriginales = function() {
-    var defaultHeader = '#0d251e';
-    var defaultPrimary = '#0f766e';
+    // Restaurar DOM a los colores guardados
+    document.documentElement.style.setProperty('--topbar-custom-bg', savedHeaderColor);
+    document.documentElement.style.setProperty('--primary-custom-color', savedPrimaryColor);
 
-    aplicarColoresEnVivo(defaultHeader, defaultPrimary);
-    highlightMatchingPreset(defaultHeader, defaultPrimary);
+    var btnDescartar = document.getElementById('btnDescartarPreviewColores');
+    var btnConfirmar = document.getElementById('btnConfirmarColores');
+    if (btnDescartar) btnDescartar.style.display = 'none';
+    if (btnConfirmar) btnConfirmar.classList.remove('pulse-highlight');
 
-    // Guardar en servidor
-    var formData = new FormData();
-    var csrf = document.querySelector('meta[name="csrf-token"]');
-    if (csrf) formData.append('csrf_token', csrf.content);
-
-    fetch('index.php?r=perfil/revertirPreferencias', {
-      method: 'POST',
-      body: formData,
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      if (typeof showToast === 'function') {
-        showToast('↺ Colores originales restaurados con éxito');
-      } else {
-        alert('¡Header y botones revertidos al color original!');
-      }
-    })
-    .catch(function(err) {
-      console.warn('Revertido localmente', err);
-    });
+    showPerfilToast('Vista previa descartada. Se restauraron tus colores guardados.');
   };
 
-  // ═══════════════ SELECCIÓN DE MODO LAYOUT (SKELETON) ═══════════════
-  window.seleccionarLayoutMode = function(mode) {
-    currentNavLayout = mode;
+  // ═══════════════ BOTÓN: CONFIRMAR COLORES ═══════════════
+  // Confirma definitivamente los colores, persiste en localStorage y sincroniza con la base de datos
+  window.confirmarColores = function() {
+    savedHeaderColor = stagedHeaderColor;
+    savedPrimaryColor = stagedPrimaryColor;
 
-    var cardHeader = document.getElementById('cardLayoutHeader');
-    var cardSidebar = document.getElementById('cardLayoutSidebar');
+    // Aplicar al DOM
+    document.documentElement.style.setProperty('--topbar-custom-bg', savedHeaderColor);
+    document.documentElement.style.setProperty('--primary-custom-color', savedPrimaryColor);
 
-    if (mode === 'sidebar') {
-      if (cardSidebar) cardSidebar.classList.add('active');
-      if (cardHeader) cardHeader.classList.remove('active');
-      document.documentElement.classList.add('layout-sidebar-mode');
-    } else {
-      if (cardHeader) cardHeader.classList.add('active');
-      if (cardSidebar) cardSidebar.classList.remove('active');
-      document.documentElement.classList.remove('layout-sidebar-mode');
+    // Guardar definitivamente en localStorage
+    localStorage.setItem('nomina-header-color', savedHeaderColor);
+    localStorage.setItem('nomina-primary-color', savedPrimaryColor);
+
+    var btnDescartar = document.getElementById('btnDescartarPreviewColores');
+    var btnConfirmar = document.getElementById('btnConfirmarColores');
+    if (btnDescartar) btnDescartar.style.display = 'none';
+    if (btnConfirmar) {
+      btnConfirmar.classList.remove('pulse-highlight');
+      btnConfirmar.disabled = true;
     }
 
-    localStorage.setItem('nomina-nav-layout', mode);
-  };
-
-  // Guardar preferencias en base de datos
-  window.guardarPreferenciasServidor = function() {
+    // Guardar en base de datos
     var formData = new FormData();
-    formData.append('header_color', currentHeaderColor);
-    formData.append('primary_color', currentPrimaryColor);
-    formData.append('nav_layout', currentNavLayout);
+    formData.append('header_color', savedHeaderColor);
+    formData.append('primary_color', savedPrimaryColor);
+    formData.append('nav_layout', savedNavLayout);
 
     var csrf = document.querySelector('meta[name="csrf-token"]');
     if (csrf) formData.append('csrf_token', csrf.content);
@@ -782,20 +1115,141 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
+      if (btnConfirmar) btnConfirmar.disabled = false;
       if (data.success) {
-        if (typeof showToast === 'function') {
-          showToast('✓ ' + data.message);
-        } else {
-          alert(data.message);
-        }
+        showPerfilToast('✓ ¡Colores confirmados y guardados exitosamente!');
       } else {
-        alert(data.error || 'Error al guardar preferencias.');
+        showPerfilToast(data.error || 'Error al guardar colores.', true);
       }
     })
     .catch(function(err) {
+      if (btnConfirmar) btnConfirmar.disabled = false;
       console.error(err);
-      alert('Se aplicaron los cambios en tu navegador.');
+      showPerfilToast('✓ Colores guardados en tu navegador.');
     });
+  };
+
+  // Restaurar DOM si el usuario navega fuera sin confirmar
+  window.addEventListener('beforeunload', function() {
+    if (stagedHeaderColor.toLowerCase() !== savedHeaderColor.toLowerCase() || stagedPrimaryColor.toLowerCase() !== savedPrimaryColor.toLowerCase()) {
+      document.documentElement.style.setProperty('--topbar-custom-bg', savedHeaderColor);
+      document.documentElement.style.setProperty('--primary-custom-color', savedPrimaryColor);
+    }
+  });
+
+  // ═══════════════ REVERTIR CAMBIOS DE COLOR (BOTÓN HERO / PANEL) ═══════════════
+  window.revertirColoresOriginales = function() {
+    var defaultHeader = '#0d251e';
+    var defaultPrimary = '#0f766e';
+
+    stagedHeaderColor = defaultHeader;
+    stagedPrimaryColor = defaultPrimary;
+    savedHeaderColor = defaultHeader;
+    savedPrimaryColor = defaultPrimary;
+
+    var inpHeader = document.getElementById('inputHeaderColor');
+    var inpPrimary = document.getElementById('inputPrimaryColor');
+    if (inpHeader) inpHeader.value = defaultHeader;
+    if (inpPrimary) inpPrimary.value = defaultPrimary;
+
+    var lblH = document.getElementById('labelHeaderHex');
+    var lblP = document.getElementById('labelPrimaryHex');
+    if (lblH) lblH.textContent = defaultHeader;
+    if (lblP) lblP.textContent = defaultPrimary;
+
+    highlightMatchingPreset(defaultHeader, defaultPrimary);
+
+    document.documentElement.style.setProperty('--topbar-custom-bg', defaultHeader);
+    document.documentElement.style.setProperty('--primary-custom-color', defaultPrimary);
+
+    localStorage.setItem('nomina-header-color', defaultHeader);
+    localStorage.setItem('nomina-primary-color', defaultPrimary);
+
+    var formData = new FormData();
+    var csrf = document.querySelector('meta[name="csrf-token"]');
+    if (csrf) formData.append('csrf_token', csrf.content);
+
+    fetch('index.php?r=perfil/revertirPreferencias', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      showPerfilToast('↺ Colores originales restaurados con éxito');
+    })
+    .catch(function(err) {
+      console.warn('Revertido localmente', err);
+      showPerfilToast('↺ Colores originales restaurados');
+    });
+  };
+
+  // ═══════════════ SELECCIÓN DE MODO LAYOUT (SOLO SELECCIÓN VISUAL) ═══════════════
+  // Solo resalta la opción elegida; NO cambia la estructura del sistema hasta presionar el botón
+  window.seleccionarLayoutMode = function(mode) {
+    stagedNavLayout = mode;
+
+    var cardHeader = document.getElementById('cardLayoutHeader');
+    var cardSidebar = document.getElementById('cardLayoutSidebar');
+
+    if (mode === 'sidebar') {
+      if (cardSidebar) cardSidebar.classList.add('active');
+      if (cardHeader) cardHeader.classList.remove('active');
+    } else {
+      if (cardHeader) cardHeader.classList.add('active');
+      if (cardSidebar) cardSidebar.classList.remove('active');
+    }
+  };
+
+  // ═══════════════ BOTÓN: APLICAR ESTRUCTURA SELECCIONADA ═══════════════
+  // Al hacer clic, aplica el layout al sistema, a localStorage y lo guarda en base de datos
+  window.confirmarEstructura = function() {
+    savedNavLayout = stagedNavLayout;
+
+    if (savedNavLayout === 'sidebar') {
+      document.documentElement.classList.add('layout-sidebar-mode');
+    } else {
+      document.documentElement.classList.remove('layout-sidebar-mode');
+    }
+
+    localStorage.setItem('nomina-nav-layout', savedNavLayout);
+
+    var formData = new FormData();
+    formData.append('header_color', savedHeaderColor);
+    formData.append('primary_color', savedPrimaryColor);
+    formData.append('nav_layout', savedNavLayout);
+
+    var csrf = document.querySelector('meta[name="csrf-token"]');
+    if (csrf) formData.append('csrf_token', csrf.content);
+
+    var btn = document.getElementById('btnAplicarEstructura');
+    if (btn) btn.disabled = true;
+
+    fetch('index.php?r=perfil/guardarPreferencias', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (btn) btn.disabled = false;
+      if (data.success) {
+        showPerfilToast('✓ ¡Estructura de navegación aplicada con éxito!');
+      } else {
+        showPerfilToast(data.error || 'Error al guardar estructura.', true);
+      }
+    })
+    .catch(function(err) {
+      if (btn) btn.disabled = false;
+      console.error(err);
+      showPerfilToast('✓ Estructura aplicada en tu navegador.');
+    });
+  };
+
+  // Compatibilidad hacia atrás si alguna función externa llama guardarPreferenciasServidor
+  window.guardarPreferenciasServidor = function() {
+    confirmarColores();
+    confirmarEstructura();
   };
 
 })();

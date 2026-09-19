@@ -19,7 +19,7 @@ class PermisoController extends Controller {
     }
 
     public function solicitar(): void {
-        $this->requireLogin();
+        $this->requireRole(['Administrador', 'Operador']);
 
         $empleadoModel = new EmpleadoModel();
         $permisoModel = new PermisoModel();
@@ -53,7 +53,7 @@ class PermisoController extends Controller {
     }
 
     public function aprobar(): void {
-        $this->requireLogin();
+        $this->requireRole(['Administrador', 'Operador']);
 
         $id = (int)($_GET['id'] ?? 0);
         $accion = $_GET['accion'] ?? '';

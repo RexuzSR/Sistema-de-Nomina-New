@@ -1,0 +1,61 @@
+graph TD
+    subgraph MATRIZ["Matriz de Permisos por Rol"]
+        direction TB
+        subgraph MODULOS["Módulos del Sistema"]
+            M1["📊 Dashboard"]
+            M2["👥 Empleados"]
+            M3["📋 Permisos"]
+            M4["📅 Periodos"]
+            M5["💰 Nómina"]
+            M6["💱 Tasas"]
+            M7["🔐 Usuarios"]
+            M8["⚙️ Perfil"]
+        end
+
+        subgraph ADMIN["🔴 Administrador"]
+            A1["✅ Acceso Completo"]
+            A2["✅ CRUD Total"]
+            A3["✅ CRUD Total"]
+            A4["✅ CRUD Total"]
+            A5["✅ Generar / Cerrar"]
+            A6["✅ CRUD Total"]
+            A7["✅ Gestión Total"]
+            A8["✅ Configuración Propia"]
+        end
+
+        subgraph OPERADOR["🟡 Operador"]
+            O1["✅ Acceso Completo"]
+            O2["✅ CRUD Operativo"]
+            O3["✅ CRUD Operativo"]
+            O4["✅ CRUD Operativo"]
+            O5["✅ Generar Nómina"]
+            O6["✅ Registrar Tasas"]
+            O7["❌ Sin Acceso (Oculto)"]
+            O8["✅ Configuración Propia"]
+        end
+
+        subgraph APOYO["🟢 Personal de Apoyo"]
+            P1["✅ Acceso Completo"]
+            P2["👁️ Solo Lectura"]
+            P3["👁️ Solo Lectura"]
+            P4["👁️ Solo Lectura"]
+            P5["👁️ Ver y Exportar Excel"]
+            P6["👁️ Solo Lectura"]
+            P7["❌ Sin Acceso (Oculto)"]
+            P8["✅ Configuración Propia"]
+        end
+    end
+
+    M1 --- A1 & O1 & P1
+    M2 --- A2 & O2 & P2
+    M3 --- A3 & O3 & P3
+    M4 --- A4 & O4 & P4
+    M5 --- A5 & O5 & P5
+    M6 --- A6 & O6 & P6
+    M7 --- A7 & O7 & P7
+    M8 --- A8 & O8 & P8
+
+    style ADMIN fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b
+    style OPERADOR fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#854d0e
+    style APOYO fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#166534
+    style MODULOS fill:#f1f5f9,stroke:#64748b,stroke-width:2px,color:#334155

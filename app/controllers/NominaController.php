@@ -8,7 +8,7 @@ require_once __DIR__ . '/../models/TasaModel.php';
 
 class NominaController extends Controller {
     public function generar(): void {
-        $this->requireLogin();
+        $this->requireRole(['Administrador', 'Operador']);
 
         $id_periodo = (int)($_GET['id_periodo'] ?? $_POST['id_periodo'] ?? 0);
         $periodoModel = new PeriodoModel();

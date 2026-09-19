@@ -1,0 +1,120 @@
+graph LR
+    subgraph ACTORES["Actores"]
+        A["🔴 Administrador"]
+        O["🟡 Operador"]
+        P["🟢 Personal de Apoyo"]
+    end
+
+    subgraph MOD_DASH["📊 Dashboard"]
+        D1(("Ver Dashboard"))
+    end
+
+    subgraph MOD_EMP["👥 Empleados"]
+        E1(("Listar Empleados"))
+        E2(("Ver Detalle"))
+        E3(("Crear Empleado"))
+        E4(("Editar Empleado"))
+        E5(("Activar / Desactivar"))
+    end
+
+    subgraph MOD_PERM["📋 Permisos"]
+        P1(("Ver Permisos"))
+        P2(("Solicitar Permiso"))
+        P3(("Aprobar / Rechazar"))
+    end
+
+    subgraph MOD_PER["📅 Periodos"]
+        PE1(("Ver Periodos"))
+        PE2(("Crear Periodo"))
+    end
+
+    subgraph MOD_NOM["💰 Nómina"]
+        N1(("Ver Nóminas"))
+        N2(("Generar Nómina"))
+        N3(("Ver Recibo"))
+        N4(("Exportar Excel"))
+    end
+
+    subgraph MOD_TASA["💱 Tasa de Cambio"]
+        T1(("Ver Tasas"))
+        T2(("Registrar Tasa"))
+    end
+
+    subgraph MOD_USR["🔐 Usuarios"]
+        U1(("Listar Usuarios"))
+        U2(("Crear Usuario"))
+        U3(("Editar Usuario"))
+        U4(("Desactivar Usuario"))
+    end
+
+    subgraph MOD_PERFIL["⚙️ Perfil Propio"]
+        PF1(("Ver / Editar Perfil"))
+        PF2(("Cambiar Contraseña"))
+        PF3(("Personalizar UI"))
+    end
+
+    %% APOYO - Solo lectura
+    P --- D1
+    P --- E1
+    P --- E2
+    P --- P1
+    P --- PE1
+    P --- N1
+    P --- N3
+    P --- N4
+    P --- T1
+    P --- PF1
+    P --- PF2
+    P --- PF3
+
+    %% OPERADOR - Lectura + Escritura operativa
+    O --- D1
+    O --- E1
+    O --- E2
+    O --- E3
+    O --- E4
+    O --- E5
+    O --- P1
+    O --- P2
+    O --- P3
+    O --- PE1
+    O --- PE2
+    O --- N1
+    O --- N2
+    O --- N3
+    O --- N4
+    O --- T1
+    O --- T2
+    O --- PF1
+    O --- PF2
+    O --- PF3
+
+    %% ADMIN - Todo + Usuarios
+    A --- D1
+    A --- E1
+    A --- E2
+    A --- E3
+    A --- E4
+    A --- E5
+    A --- P1
+    A --- P2
+    A --- P3
+    A --- PE1
+    A --- PE2
+    A --- N1
+    A --- N2
+    A --- N3
+    A --- N4
+    A --- T1
+    A --- T2
+    A --- U1
+    A --- U2
+    A --- U3
+    A --- U4
+    A --- PF1
+    A --- PF2
+    A --- PF3
+
+    style A fill:#fee2e2,stroke:#dc2626,color:#991b1b
+    style O fill:#fef9c3,stroke:#ca8a04,color:#854d0e
+    style P fill:#dcfce7,stroke:#16a34a,color:#166534

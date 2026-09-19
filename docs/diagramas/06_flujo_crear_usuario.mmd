@@ -1,0 +1,44 @@
+sequenceDiagram
+    autonumber
+    actor Admin as Administrador
+    participant UI as Vista / Modal Crear Usuario
+    participant C as UsuarioAdminController
+    participant S as Security (CSRF / Input)
+    participant M as UsuarioModel
+    participant DB as Base de Datos MySQL
+
+    Admin->>UI: Click en "Nuevo Usuario"
+    UI-->>Admin: Abre modal con formulario dinámico
+    Admin->>UI: Selecciona Rol (Administrador / Operador / Apoyo)
+    
+    opt Si selecciona rol "Operador"
+        UI-->>Admin: Muestra selector de empleados activos (opcional)
+    end
+    
+    Admin->>UI: Llena usuario, email, password, confirma y envía
+    UI->>C: POST index.php?r=usuarios/crear (fetch / AJAX)
+    C->>S: validateCsrf() & sanitize()
+    C->>C: requireRole(['Administrador'])
+    
+    C->>M: isUsernameTaken(nombre_usuario)
+    alt Nombre de usuario ya registrado
+        M-->>C: true
+        C-->>UI: 400 Bad Request { success: false, message: "El nombre de usuario ya existe" }
+        UI-->>Admin: Muestra toast/alerta de error
+    else Nombre de usuario disponible
+        M-->>C: false
+        C->>M: isEmailTaken(correo)
+        alt Correo ya registrado
+            M-->>C: true
+            C-->>UI: 400 Bad Request { success: false, message: "El correo ya está en uso" }
+            UI-->>Admin: Muestra toast/alerta de error
+        else Correo disponible
+            M-->>C: false
+            C->>M: crearUsuario(datos, password_hash)
+            M->>DB: INSERT INTO tb_usuario (nombre_usuario, correo, password_hash, id_rol, id_empleado, ...)
+            DB-->>M: ID generado
+            M-->>C: true
+            C-->>UI: 200 OK { success: true, message: "Usuario creado exitosamente" }
+            UI-->>Admin: Cierra modal, muestra toast de éxito y recarga tabla
+        end
+    end

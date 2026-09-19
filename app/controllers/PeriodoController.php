@@ -18,7 +18,7 @@ class PeriodoController extends Controller {
     }
 
     public function crear(): void {
-        $this->requireLogin();
+        $this->requireRole(['Administrador', 'Operador']);
 
         $periodoModel = new PeriodoModel();
         $error = '';

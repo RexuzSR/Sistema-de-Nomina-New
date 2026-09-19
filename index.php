@@ -56,6 +56,12 @@ $router->add('perfil/eliminarFoto', 'PerfilController', 'eliminarFoto');
 $router->add('perfil/guardarPreferencias', 'PerfilController', 'guardarPreferencias');
 $router->add('perfil/revertirPreferencias', 'PerfilController', 'revertirPreferencias');
 
+// Administración de Usuarios (Solo Administrador)
+$router->add('usuarios', 'UsuarioAdminController', 'index');
+$router->add('usuarios/crear', 'UsuarioAdminController', 'crear');
+$router->add('usuarios/editar', 'UsuarioAdminController', 'editar');
+$router->add('usuarios/cambiarEstado', 'UsuarioAdminController', 'cambiarEstado');
+
 // Obtener ruta desde parámetro query 'r' (ej: index.php?r=empleados) o 'dashboard' por defecto
 $route = isset($_GET['r']) ? trim($_GET['r'], '/') : 'dashboard';
 

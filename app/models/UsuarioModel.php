@@ -113,5 +113,112 @@ class UsuarioModel extends Model {
         }
         return null;
     }
-}
 
+    // ════════════════════════════════════════════════════════════
+    // MÉTODOS DE ADMINISTRACIÓN DE USUARIOS (CRUD)
+    // ════════════════════════════════════════════════════════════
+
+    /**
+     * Obtiene todos los usuarios con su rol y empleado vinculado.
+     */
+    public function getAll(): array {
+        $stmt = $this->db->query("
+            SELECT u.id_usuario, u.nombre_usuario, u.correo, u.id_rol, u.id_empleado,
+                   u.estado, u.fecha_creacion, u.foto_perfil,
+                   r.nombre_rol,
+                   CONCAT(e.primer_nombre, ' ', e.primer_apellido) AS nombre_empleado,
+                   e.cedula AS cedula_empleado
+            FROM tb_usuario u
+            LEFT JOIN tb_rol r ON r.id_rol = u.id_rol
+            LEFT JOIN tb_empleado e ON e.id_empleado = u.id_empleado
+            ORDER BY u.fecha_creacion DESC
+        ");
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Obtiene todos los roles disponibles.
+     */
+    public function getRoles(): array {
+        $stmt = $this->db->query("SELECT * FROM tb_rol ORDER BY id_rol");
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Crea un nuevo usuario con hash bcrypt.
+     */
+    public function crearUsuario(string $username, string $correo, string $password, int $idRol, ?int $idEmpleado = null): bool {
+        try {
+            $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+            $stmt = $this->db->prepare("
+                INSERT INTO tb_usuario (nombre_usuario, correo, password_hash, id_rol, id_empleado, estado, fecha_creacion)
+                VALUES (?, ?, ?, ?, ?, 1, NOW())
+            ");
+            return $stmt->execute([$username, $correo, $hash, $idRol, $idEmpleado]);
+        } catch (Exception $e) {
+            error_log("Error crearUsuario: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualiza datos de un usuario existente (sin cambiar contraseña).
+     */
+    public function actualizarUsuario(int $idUsuario, string $username, string $correo, int $idRol, ?int $idEmpleado = null): bool {
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE tb_usuario
+                SET nombre_usuario = ?, correo = ?, id_rol = ?, id_empleado = ?
+                WHERE id_usuario = ?
+            ");
+            return $stmt->execute([$username, $correo, $idRol, $idEmpleado, $idUsuario]);
+        } catch (Exception $e) {
+            error_log("Error actualizarUsuario: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Cambia el estado de un usuario (activar/desactivar).
+     */
+    public function cambiarEstado(int $idUsuario, int $nuevoEstado): bool {
+        try {
+            $stmt = $this->db->prepare("UPDATE tb_usuario SET estado = ? WHERE id_usuario = ?");
+            return $stmt->execute([$nuevoEstado, $idUsuario]);
+        } catch (Exception $e) {
+            error_log("Error cambiarEstado usuario: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Obtiene empleados activos que aún no tienen un usuario vinculado.
+     */
+    public function getEmpleadosSinUsuario(?int $excludeUsuarioId = null): array {
+        $sql = "
+            SELECT e.id_empleado, e.cedula,
+                   CONCAT(e.primer_nombre, ' ', e.primer_apellido) AS nombre_completo
+            FROM tb_empleado e
+            WHERE e.estado = 1
+              AND e.id_empleado NOT IN (
+                  SELECT u.id_empleado FROM tb_usuario u WHERE u.id_empleado IS NOT NULL
+        ";
+        $params = [];
+        if ($excludeUsuarioId) {
+            $sql .= " AND u.id_usuario != ?";
+            $params[] = $excludeUsuarioId;
+        }
+        $sql .= ") ORDER BY e.primer_apellido, e.primer_nombre";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Cuenta total de usuarios activos.
+     */
+    public function contarUsuariosActivos(): int {
+        $stmt = $this->db->query("SELECT COUNT(*) FROM tb_usuario WHERE estado = 1");
+        return (int)$stmt->fetchColumn();
+    }
+}

@@ -49,7 +49,7 @@ class EmpleadoController extends Controller {
     }
 
     public function crear(): void {
-        $this->requireLogin();
+        $this->requireRole(['Administrador', 'Operador']);
 
         $empleadoModel = new EmpleadoModel();
         $error = '';
@@ -102,7 +102,7 @@ class EmpleadoController extends Controller {
     }
 
     public function editar(): void {
-        $this->requireLogin();
+        $this->requireRole(['Administrador', 'Operador']);
 
         $empleadoModel = new EmpleadoModel();
         $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
@@ -164,7 +164,7 @@ class EmpleadoController extends Controller {
     }
 
     public function cambiarEstado(): void {
-        $this->requireLogin();
+        $this->requireRole(['Administrador', 'Operador']);
 
         $id = (int)($_GET['id'] ?? 0);
         if ($id) {

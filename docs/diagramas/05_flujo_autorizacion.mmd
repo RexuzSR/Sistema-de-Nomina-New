@@ -1,0 +1,21 @@
+sequenceDiagram
+    autonumber
+    participant U as Usuario Navegador
+    participant R as Router (index.php)
+    participant C as Controller
+    participant M as Middleware (requireRole)
+    participant V as Vista / JSON Response
+
+    U->>R: Petición HTTP (ej: ?r=usuarios o ?r=empleados/crear)
+    R->>C: Invoca método del Controlador
+    C->>M: requireRole(['Administrador']) o requireRole(['Administrador', 'Operador'])
+    
+    alt Usuario Autenticado y Rol en Lista Permitida
+        M-->>C: Continúa ejecución normal
+        C->>V: Renderiza vista HTML o retorna JSON
+        V-->>U: 200 OK — Contenido solicitado
+    else Usuario NO Autenticado
+        M-->>U: 302 Redirect -> ?r=login
+    else Rol NO Autorizado (ej: Apoyo intentando crear)
+        M-->>U: 403 Forbidden -> "Acceso denegado: permisos insuficientes"
+    end

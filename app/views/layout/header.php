@@ -38,7 +38,9 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
 <?php elseif (strpos($currentRoute, 'empleados') === 0): ?>
 <link rel="stylesheet" href="assets/css/empleados.css?v=2.3">
 <?php elseif (strpos($currentRoute, 'perfil') === 0): ?>
-<link rel="stylesheet" href="assets/css/perfil.css?v=1.1">
+<link rel="stylesheet" href="assets/css/perfil.css?v=1.2">
+<?php elseif (strpos($currentRoute, 'usuarios') === 0): ?>
+<link rel="stylesheet" href="assets/css/usuarios.css?v=1.0">
 <?php endif; ?>
 <script nonce="<?= Security::getCspNonce() ?>">
 (function() {
@@ -144,10 +146,12 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
               <span class="icon-box"><i class="fa-solid fa-user-gear"></i></span>
               <span>Editar Perfil</span>
             </a>
-            <a href="index.php?r=periodos" class="dropdown-item">
-              <span class="icon-box"><i class="fa-solid fa-calendar-check"></i></span>
-              <span>Gestión de Periodos</span>
+            <?php if (($_SESSION['user_rol'] ?? '') === 'Administrador'): ?>
+            <a href="index.php?r=usuarios" class="dropdown-item <?= strpos($currentRoute, 'usuarios') === 0 ? 'active' : '' ?>">
+              <span class="icon-box"><i class="fa-solid fa-users-gear"></i></span>
+              <span>Gestión de Usuarios</span>
             </a>
+            <?php endif; ?>
             <a href="index.php?r=tasas" class="dropdown-item">
               <span class="icon-box"><i class="fa-solid fa-coins"></i></span>
               <span>Tasa de Cambio</span>
@@ -293,6 +297,14 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
           <span>Editar Perfil</span>
         </a>
       </li>
+      <?php if (($_SESSION['user_rol'] ?? '') === 'Administrador'): ?>
+      <li>
+        <a href="index.php?r=usuarios" class="sidebar-link <?= strpos($currentRoute, 'usuarios') === 0 ? 'active' : '' ?>" title="Gestión de Usuarios" data-title="Gestión de Usuarios">
+          <i class="fa-solid fa-users-gear"></i>
+          <span>Gestión de Usuarios</span>
+        </a>
+      </li>
+      <?php endif; ?>
     </ul>
   </div>
 

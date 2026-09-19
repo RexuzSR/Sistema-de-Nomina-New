@@ -20,7 +20,7 @@ class TasaController extends Controller {
     }
 
     public function crear(): void {
-        $this->requireLogin();
+        $this->requireRole(['Administrador', 'Operador']);
 
         $tasaModel = new TasaModel();
         $error = '';

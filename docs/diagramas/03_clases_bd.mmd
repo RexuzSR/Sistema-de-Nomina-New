@@ -1,0 +1,39 @@
+classDiagram
+    class tb_rol {
+        +int id_rol PK
+        +varchar(30) nombre_rol
+        +varchar(150) descripcion
+    }
+
+    class tb_usuario {
+        +int id_usuario PK
+        +int id_rol FK
+        +int id_empleado FK nullable
+        +varchar(50) nombre_usuario UNIQUE
+        +varchar(100) correo UNIQUE
+        +varchar(255) password_hash
+        +varchar(500) foto_perfil
+        +text preferencias
+        +tinyint estado
+        +datetime fecha_creacion
+    }
+
+    class tb_empleado {
+        +int id_empleado PK
+        +varchar(15) cedula
+        +varchar(50) primer_nombre
+        +varchar(50) segundo_nombre
+        +varchar(50) primer_apellido
+        +varchar(50) segundo_apellido
+        +int id_tipo_empleado FK
+        +int id_jornada FK
+        +decimal sueldo_divisa
+        +date fecha_ingreso
+        +tinyint estado
+    }
+
+    tb_rol "1" --> "*" tb_usuario : id_rol
+    tb_empleado "0..1" --> "0..1" tb_usuario : id_empleado
+
+    note for tb_rol "Roles del sistema:\n1 = Administrador\n2 = Personal de Apoyo\n3 = Operador"
+    note for tb_usuario "id_empleado es NULLABLE:\n- Admin: sin empleado\n- Operador: vinculado opcional\n- Apoyo: sin empleado"
