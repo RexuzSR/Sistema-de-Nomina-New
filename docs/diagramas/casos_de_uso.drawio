@@ -1,0 +1,125 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="casos-uso-estilo-uml" name="Diagrama de Casos de Uso">
+    <mxGraphModel dx="1302" dy="748" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box_title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;fontSize=14;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2;fontColor=#000000;" value="Diagrama de Casos de Uso" vertex="1">
+          <mxGeometry height="35" width="260" x="640" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="system_box" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fontStyle=1;fontSize=13;fontColor=#000000;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2;rounded=0;" value="Sistema de Nómina" vertex="1">
+          <mxGeometry height="690" width="620" x="250" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_usuarios" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontSize=12;strokeColor=#000000;strokeWidth=2;fillColor=#ffffff;" value="Gestión de&#xa;Usuarios" vertex="1">
+          <mxGeometry height="60" width="160" x="50" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_crear_usr" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;strokeColor=#000000;strokeWidth=1;fillColor=#ffffff;" value="Crear y asignar rol" vertex="1">
+          <mxGeometry height="45" width="160" x="380" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_mod_usr" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;strokeColor=#000000;strokeWidth=1;fillColor=#ffffff;" value="Modificar / Desactivar" vertex="1">
+          <mxGeometry height="45" width="160" x="380" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_empleados" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontSize=12;strokeColor=#000000;strokeWidth=2;fillColor=#ffffff;" value="Gestión de&#xa;Empleados" vertex="1">
+          <mxGeometry height="60" width="160" x="70" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_reg_emp" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;strokeColor=#000000;strokeWidth=1;fillColor=#ffffff;" value="Registrar Empleado" vertex="1">
+          <mxGeometry height="45" width="160" x="380" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_edit_emp" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;strokeColor=#000000;strokeWidth=1;fillColor=#ffffff;" value="Actualizar Datos Laborales" vertex="1">
+          <mxGeometry height="45" width="170" x="380" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_nomina" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontSize=12;strokeColor=#000000;strokeWidth=2;fillColor=#ffffff;" value="Procesamiento&#xa;de Nómina" vertex="1">
+          <mxGeometry height="60" width="160" x="60" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_calc_nom" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;strokeColor=#000000;strokeWidth=1;fillColor=#ffffff;" value="Calcular y Generar" vertex="1">
+          <mxGeometry height="45" width="160" x="385" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_periodos" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;strokeColor=#000000;strokeWidth=1;fillColor=#ffffff;" value="Apertura / Cierre Periodo" vertex="1">
+          <mxGeometry height="45" width="170" x="380" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_permisos" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontSize=12;strokeColor=#000000;strokeWidth=2;fillColor=#ffffff;" value="Control de Permisos&#xa;y Tasas BCV" vertex="1">
+          <mxGeometry height="60" width="160" x="60" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_aprob_perm" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;strokeColor=#000000;strokeWidth=1;fillColor=#ffffff;" value="Aprobar / Rechazar Permiso" vertex="1">
+          <mxGeometry height="45" width="170" x="380" y="415" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_reg_tasa" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;strokeColor=#000000;strokeWidth=1;fillColor=#ffffff;" value="Registrar Tasa del Día" vertex="1">
+          <mxGeometry height="45" width="160" x="380" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_reportes" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontStyle=1;fontSize=12;strokeColor=#000000;strokeWidth=2;fillColor=#ffffff;" value="Reportes y&#xa;Consultas" vertex="1">
+          <mxGeometry height="65" width="180" x="240" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_exp_excel" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;strokeColor=#000000;strokeWidth=1;fillColor=#ffffff;" value="Exportar Nómina a Excel" vertex="1">
+          <mxGeometry height="45" width="160" x="50" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_ver_fichas" parent="system_box" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;strokeColor=#000000;strokeWidth=1;fillColor=#ffffff;" value="Visualizar Recibos y Fichas" vertex="1">
+          <mxGeometry height="45" width="170" x="430" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_usr1" edge="1" parent="system_box" source="uc_crear_usr" style="endArrow=open;dashed=1;html=1;strokeColor=#000000;strokeWidth=1;endFill=0;" target="uc_usuarios">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_usr2" edge="1" parent="system_box" source="uc_mod_usr" style="endArrow=open;dashed=1;html=1;strokeColor=#000000;strokeWidth=1;endFill=0;" target="uc_usuarios">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_emp1" edge="1" parent="system_box" source="uc_reg_emp" style="endArrow=open;dashed=1;html=1;strokeColor=#000000;strokeWidth=1;endFill=0;" target="uc_empleados">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_emp2" edge="1" parent="system_box" source="uc_edit_emp" style="endArrow=open;dashed=1;html=1;strokeColor=#000000;strokeWidth=1;endFill=0;" target="uc_empleados">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_nom1" edge="1" parent="system_box" source="uc_calc_nom" style="endArrow=open;dashed=1;html=1;strokeColor=#000000;strokeWidth=1;endFill=0;" target="uc_nomina">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_nom2" edge="1" parent="system_box" source="uc_periodos" style="endArrow=open;dashed=1;html=1;strokeColor=#000000;strokeWidth=1;endFill=0;" target="uc_nomina">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_per1" edge="1" parent="system_box" source="uc_aprob_perm" style="endArrow=open;dashed=1;html=1;strokeColor=#000000;strokeWidth=1;endFill=0;" target="uc_permisos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_per2" edge="1" parent="system_box" source="uc_reg_tasa" style="endArrow=open;dashed=1;html=1;strokeColor=#000000;strokeWidth=1;endFill=0;" target="uc_permisos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_rep1" edge="1" parent="system_box" source="uc_exp_excel" style="endArrow=open;dashed=1;html=1;strokeColor=#000000;strokeWidth=1;endFill=0;" target="uc_reportes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_rep2" edge="1" parent="system_box" source="uc_ver_fichas" style="endArrow=open;dashed=1;html=1;strokeColor=#000000;strokeWidth=1;endFill=0;" target="uc_reportes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontColor=#000000;fontSize=12;strokeColor=#000000;strokeWidth=2;fillColor=#ffffff;" value="&lt;b&gt;&amp;lt;&amp;lt;interacción&amp;gt;&amp;gt;&lt;br&gt;Administrador&lt;/b&gt;" vertex="1">
+          <mxGeometry height="110" width="60" x="60" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="act_operador" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontColor=#000000;fontSize=12;strokeColor=#000000;strokeWidth=2;fillColor=#ffffff;" value="&lt;b&gt;&amp;lt;&amp;lt;interacción&amp;gt;&amp;gt;&lt;br&gt;Operador&lt;/b&gt;" vertex="1">
+          <mxGeometry height="110" width="60" x="60" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="act_apoyo" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontColor=#000000;fontSize=12;strokeColor=#000000;strokeWidth=2;fillColor=#ffffff;" value="&lt;b&gt;&amp;lt;&amp;lt;interacción&amp;gt;&amp;gt;&lt;br&gt;Personal de Apoyo&lt;/b&gt;" vertex="1">
+          <mxGeometry height="110" width="60" x="970" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_adm1" edge="1" parent="1" source="act_admin" style="endArrow=block;html=1;strokeColor=#000000;strokeWidth=1.5;endFill=1;" target="uc_usuarios">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_adm2" edge="1" parent="1" source="act_admin" style="endArrow=block;html=1;strokeColor=#000000;strokeWidth=1.5;endFill=1;" target="uc_empleados">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_ope1" edge="1" parent="1" source="act_operador" style="endArrow=block;html=1;strokeColor=#000000;strokeWidth=1.5;endFill=1;" target="uc_empleados">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_ope2" edge="1" parent="1" source="act_operador" style="endArrow=block;html=1;strokeColor=#000000;strokeWidth=1.5;endFill=1;" target="uc_nomina">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_ope3" edge="1" parent="1" source="act_operador" style="endArrow=block;html=1;strokeColor=#000000;strokeWidth=1.5;endFill=1;" target="uc_permisos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_apo1" edge="1" parent="1" source="act_apoyo" style="endArrow=block;html=1;strokeColor=#000000;strokeWidth=1.5;endFill=1;" target="uc_reportes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="830" y="590" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arr_apo2" edge="1" parent="1" source="act_apoyo" style="endArrow=block;html=1;strokeColor=#000000;strokeWidth=1.5;endFill=1;" target="uc_nomina">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

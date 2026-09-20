@@ -1,0 +1,98 @@
+<mxfile host="app.diagrams.net" modified="2026-09-19T23:26:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram id="flujo-crear-usuario" name="Flujo de Creación de Usuario">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="box_seq" value="DIAGRAMA DE SECUENCIA — CREACIÓN DE USUARIOS CON VALIDACIÓN Y ROLES" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#475569;strokeWidth=2;fontStyle=1;fontSize=14;fontColor=#0f172a;align=center;startSize=30;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="60" y="40" width="980" height="740" as="geometry" />
+        </mxCell>
+
+        <!-- PARTICIPANTES -->
+        <mxCell id="p_adm" value="Administrador" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#fee2e2;strokeColor=#dc2626;fontStyle=1;fontColor=#991b1b;" vertex="1" parent="box_seq">
+          <mxGeometry x="50" y="45" width="40" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#94a3b8;" edge="1" parent="box_seq" source="p_adm">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="70" y="700" as="targetPoint" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="p_ui" value="Modal UI&#xa;(index.php?r=usuarios)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#3b82f6;fontStyle=1;fontSize=11;" vertex="1" parent="box_seq">
+          <mxGeometry x="190" y="55" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l_ui" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#94a3b8;" edge="1" parent="box_seq" source="p_ui">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="265" y="700" as="targetPoint" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="p_ctrl" value="UsuarioAdminController&#xa;+ Security" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef9c3;strokeColor=#ca8a04;fontStyle=1;fontSize=11;" vertex="1" parent="box_seq">
+          <mxGeometry x="420" y="55" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l_ctrl" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#94a3b8;" edge="1" parent="box_seq" source="p_ctrl">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="700" as="targetPoint" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="p_model" value="UsuarioModel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;fontStyle=1;fontSize=11;" vertex="1" parent="box_seq">
+          <mxGeometry x="660" y="55" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l_model" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#94a3b8;" edge="1" parent="box_seq" source="p_model">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="725" y="700" as="targetPoint" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="p_db" value="MySQL Database&#xa;(tb_usuario)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#faf5ff;strokeColor=#9333ea;fontStyle=1;fontSize=11;" vertex="1" parent="box_seq">
+          <mxGeometry x="845" y="45" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="l_db" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#94a3b8;" edge="1" parent="box_seq" source="p_db">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="900" y="700" as="targetPoint" /></mxGeometry>
+        </mxCell>
+
+        <!-- PASOS -->
+        <mxCell id="m1" value="1. Clic en &quot;Nuevo Usuario&quot;" style="endArrow=block;html=1;strokeColor=#2563eb;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="70" y="140" as="sourcePoint" /><mxPoint x="265" y="140" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m2" value="2. Despliega modal y roles dinámicos" style="endArrow=block;dashed=1;html=1;strokeColor=#2563eb;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="265" y="170" as="sourcePoint" /><mxPoint x="70" y="170" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m3" value="3. Selecciona rol: si es &quot;Operador&quot; muestra vincular empleado" style="endArrow=block;html=1;strokeColor=#ca8a04;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="70" y="210" as="sourcePoint" /><mxPoint x="265" y="210" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m4" value="4. Envía formulario con token CSRF" style="endArrow=block;html=1;strokeColor=#2563eb;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="265" y="250" as="sourcePoint" /><mxPoint x="500" y="250" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m5" value="5. Valida CSRF, sesión y requireRole(['Administrador'])" style="endArrow=block;html=1;strokeColor=#ca8a04;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="290" as="sourcePoint" /><mxPoint x="500" y="320" as="targetPoint" /><Array as="points"><mxPoint x="530" y="290" /><mxPoint x="530" y="320" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m6" value="6. Verificar si usuario ya existe (isUsernameTaken)" style="endArrow=block;html=1;strokeColor=#16a34a;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="350" as="sourcePoint" /><mxPoint x="725" y="350" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m7" value="7. Consulta SELECT tb_usuario" style="endArrow=block;html=1;strokeColor=#9333ea;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="725" y="380" as="sourcePoint" /><mxPoint x="900" y="380" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m8" value="8. Retorna false (disponible)" style="endArrow=block;dashed=1;html=1;strokeColor=#16a34a;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="900" y="410" as="sourcePoint" /><mxPoint x="725" y="410" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m9" value="9. Genera hash bcrypt (PASSWORD_BCRYPT)" style="endArrow=block;html=1;strokeColor=#ca8a04;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="440" as="sourcePoint" /><mxPoint x="500" y="470" as="targetPoint" /><Array as="points"><mxPoint x="530" y="440" /><mxPoint x="530" y="470" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m10" value="10. crearUsuario(datos, hash, id_rol, id_empleado)" style="endArrow=block;html=1;strokeColor=#16a34a;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="500" as="sourcePoint" /><mxPoint x="725" y="500" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m11" value="11. INSERT INTO tb_usuario VALUES (...)" style="endArrow=block;html=1;strokeColor=#9333ea;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="725" y="530" as="sourcePoint" /><mxPoint x="900" y="530" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m12" value="12. Registro exitoso (ID insertado)" style="endArrow=block;dashed=1;html=1;strokeColor=#16a34a;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="900" y="560" as="sourcePoint" /><mxPoint x="725" y="560" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m13" value="13. true (confirmación)" style="endArrow=block;dashed=1;html=1;strokeColor=#16a34a;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="725" y="590" as="sourcePoint" /><mxPoint x="500" y="590" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m14" value="14. JSON { success: true, message: &quot;Usuario creado&quot; }" style="endArrow=block;dashed=1;html=1;strokeColor=#16a34a;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="630" as="sourcePoint" /><mxPoint x="265" y="630" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="m15" value="15. Cierra modal, actualiza tabla y lanza toast de éxito" style="endArrow=block;dashed=1;html=1;strokeColor=#16a34a;fontSize=11;" edge="1" parent="box_seq">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="265" y="660" as="sourcePoint" /><mxPoint x="70" y="660" as="targetPoint" /></mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

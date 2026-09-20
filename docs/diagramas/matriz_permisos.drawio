@@ -1,0 +1,83 @@
+<mxfile host="app.diagrams.net" modified="2026-09-19T23:24:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram id="matriz-permisos" name="Matriz de Permisos">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITULO -->
+        <mxCell id="hdr_matriz" value="MATRIZ DETALLADA DE PERMISOS POR ROL" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#475569;strokeWidth=2;fontStyle=1;fontSize=15;fontColor=#0f172a;align=center;startSize=35;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="80" y="40" width="940" height="680" as="geometry" />
+        </mxCell>
+
+        <!-- ENCABEZADOS DE TABLA -->
+        <mxCell id="th_mod" value="Módulo del Sistema" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#334155;strokeColor=#1e293b;fontStyle=1;fontColor=#ffffff;fontSize=13;" vertex="1" parent="hdr_matriz">
+          <mxGeometry x="40" y="60" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="th_adm" value="🔴 Administrador" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dc2626;strokeColor=#991b1b;fontStyle=1;fontColor=#ffffff;fontSize=13;" vertex="1" parent="hdr_matriz">
+          <mxGeometry x="270" y="60" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="th_ope" value="🟡 Operador" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ca8a04;strokeColor=#854d0e;fontStyle=1;fontColor=#ffffff;fontSize=13;" vertex="1" parent="hdr_matriz">
+          <mxGeometry x="480" y="60" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="th_apo" value="🟢 Personal de Apoyo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;strokeColor=#166534;fontStyle=1;fontColor=#ffffff;fontSize=13;" vertex="1" parent="hdr_matriz">
+          <mxGeometry x="690" y="60" width="210" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- FILA 1: DASHBOARD -->
+        <mxCell id="r1_m" value="📊 Dashboard &amp; Métricas" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#cbd5e1;fontSize=12;fontStyle=1;align=left;spacingLeft=10;" vertex="1" parent="hdr_matriz"><mxGeometry x="40" y="110" width="220" height="40" as="geometry" /></mxCell>
+        <mxCell id="r1_a" value="✅ Métricas Completas" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#fca5a5;fontSize=12;fontColor=#991b1b;" vertex="1" parent="hdr_matriz"><mxGeometry x="270" y="110" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r1_o" value="✅ Métricas Operativas" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fef9c3;strokeColor=#fde047;fontSize=12;fontColor=#854d0e;" vertex="1" parent="hdr_matriz"><mxGeometry x="480" y="110" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r1_p" value="👁️ Métricas Generales" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#86efac;fontSize=12;fontColor=#166534;" vertex="1" parent="hdr_matriz"><mxGeometry x="690" y="110" width="210" height="40" as="geometry" /></mxCell>
+
+        <!-- FILA 2: EMPLEADOS -->
+        <mxCell id="r2_m" value="👥 Gestión de Empleados" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#cbd5e1;fontSize=12;fontStyle=1;align=left;spacingLeft=10;" vertex="1" parent="hdr_matriz"><mxGeometry x="40" y="160" width="220" height="40" as="geometry" /></mxCell>
+        <mxCell id="r2_a" value="✅ CRUD Total + Sueldos" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#fca5a5;fontSize=12;fontColor=#991b1b;" vertex="1" parent="hdr_matriz"><mxGeometry x="270" y="160" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r2_o" value="✅ Crear / Editar / Activar" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fef9c3;strokeColor=#fde047;fontSize=12;fontColor=#854d0e;" vertex="1" parent="hdr_matriz"><mxGeometry x="480" y="160" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r2_p" value="👁️ Solo Consulta de Fichas" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#93c5fd;fontSize=12;fontColor=#1e40af;" vertex="1" parent="hdr_matriz"><mxGeometry x="690" y="160" width="210" height="40" as="geometry" /></mxCell>
+
+        <!-- FILA 3: NÓMINA -->
+        <mxCell id="r3_m" value="💰 Nómina y Pagos" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#cbd5e1;fontSize=12;fontStyle=1;align=left;spacingLeft=10;" vertex="1" parent="hdr_matriz"><mxGeometry x="40" y="210" width="220" height="40" as="geometry" /></mxCell>
+        <mxCell id="r3_a" value="✅ Generar / Cerrar / Exportar" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#fca5a5;fontSize=12;fontColor=#991b1b;" vertex="1" parent="hdr_matriz"><mxGeometry x="270" y="210" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r3_o" value="✅ Generar / Calcular / Exportar" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fef9c3;strokeColor=#fde047;fontSize=12;fontColor=#854d0e;" vertex="1" parent="hdr_matriz"><mxGeometry x="480" y="210" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r3_p" value="👁️ Ver Recibos y Exportar Excel" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#93c5fd;fontSize=12;fontColor=#1e40af;" vertex="1" parent="hdr_matriz"><mxGeometry x="690" y="210" width="210" height="40" as="geometry" /></mxCell>
+
+        <!-- FILA 4: PERMISOS -->
+        <mxCell id="r4_m" value="📋 Permisos Laborales" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#cbd5e1;fontSize=12;fontStyle=1;align=left;spacingLeft=10;" vertex="1" parent="hdr_matriz"><mxGeometry x="40" y="260" width="220" height="40" as="geometry" /></mxCell>
+        <mxCell id="r4_a" value="✅ Solicitar / Aprobar / Rechazar" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#fca5a5;fontSize=12;fontColor=#991b1b;" vertex="1" parent="hdr_matriz"><mxGeometry x="270" y="260" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r4_o" value="✅ Solicitar / Aprobar / Rechazar" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fef9c3;strokeColor=#fde047;fontSize=12;fontColor=#854d0e;" vertex="1" parent="hdr_matriz"><mxGeometry x="480" y="260" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r4_p" value="👁️ Consultar Estado Permisos" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#93c5fd;fontSize=12;fontColor=#1e40af;" vertex="1" parent="hdr_matriz"><mxGeometry x="690" y="260" width="210" height="40" as="geometry" /></mxCell>
+
+        <!-- FILA 5: PERIODOS -->
+        <mxCell id="r5_m" value="📅 Periodos de Nómina" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#cbd5e1;fontSize=12;fontStyle=1;align=left;spacingLeft=10;" vertex="1" parent="hdr_matriz"><mxGeometry x="40" y="310" width="220" height="40" as="geometry" /></mxCell>
+        <mxCell id="r5_a" value="✅ Apertura y Cierre" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#fca5a5;fontSize=12;fontColor=#991b1b;" vertex="1" parent="hdr_matriz"><mxGeometry x="270" y="310" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r5_o" value="✅ Apertura y Cierre" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fef9c3;strokeColor=#fde047;fontSize=12;fontColor=#854d0e;" vertex="1" parent="hdr_matriz"><mxGeometry x="480" y="310" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r5_p" value="👁️ Consultar Fechas Periodos" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#93c5fd;fontSize=12;fontColor=#1e40af;" vertex="1" parent="hdr_matriz"><mxGeometry x="690" y="310" width="210" height="40" as="geometry" /></mxCell>
+
+        <!-- FILA 6: TASAS BCV -->
+        <mxCell id="r6_m" value="💱 Tasas de Cambio (BCV)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#cbd5e1;fontSize=12;fontStyle=1;align=left;spacingLeft=10;" vertex="1" parent="hdr_matriz"><mxGeometry x="40" y="360" width="220" height="40" as="geometry" /></mxCell>
+        <mxCell id="r6_a" value="✅ Registrar y Actualizar" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#fca5a5;fontSize=12;fontColor=#991b1b;" vertex="1" parent="hdr_matriz"><mxGeometry x="270" y="360" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r6_o" value="✅ Registrar y Actualizar" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fef9c3;strokeColor=#fde047;fontSize=12;fontColor=#854d0e;" vertex="1" parent="hdr_matriz"><mxGeometry x="480" y="360" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r6_p" value="👁️ Consultar Tasa del Día" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#93c5fd;fontSize=12;fontColor=#1e40af;" vertex="1" parent="hdr_matriz"><mxGeometry x="690" y="360" width="210" height="40" as="geometry" /></mxCell>
+
+        <!-- FILA 7: USUARIOS (CRÍTICA) -->
+        <mxCell id="r7_m" value="🔐 Gestión de Usuarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#fda4af;fontSize=12;fontStyle=1;align=left;spacingLeft=10;fontColor=#9f1239;" vertex="1" parent="hdr_matriz"><mxGeometry x="40" y="410" width="220" height="45" as="geometry" /></mxCell>
+        <mxCell id="r7_a" value="✅ Acceso Total (CRUD + Roles)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#dc2626;fontSize=12;fontColor=#991b1b;fontStyle=1;" vertex="1" parent="hdr_matriz"><mxGeometry x="270" y="410" width="200" height="45" as="geometry" /></mxCell>
+        <mxCell id="r7_o" value="❌ Oculto / Sin Acceso" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#cbd5e1;fontSize=12;fontColor=#94a3b8;" vertex="1" parent="hdr_matriz"><mxGeometry x="480" y="410" width="200" height="45" as="geometry" /></mxCell>
+        <mxCell id="r7_p" value="❌ Oculto / Sin Acceso" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#cbd5e1;fontSize=12;fontColor=#94a3b8;" vertex="1" parent="hdr_matriz"><mxGeometry x="690" y="410" width="210" height="45" as="geometry" /></mxCell>
+
+        <!-- FILA 8: PERFIL PROPIO -->
+        <mxCell id="r8_m" value="⚙️ Perfil y Preferencias" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#cbd5e1;fontSize=12;fontStyle=1;align=left;spacingLeft=10;" vertex="1" parent="hdr_matriz"><mxGeometry x="40" y="465" width="220" height="40" as="geometry" /></mxCell>
+        <mxCell id="r8_a" value="✅ Foto, Clave y Colores" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#fca5a5;fontSize=12;fontColor=#991b1b;" vertex="1" parent="hdr_matriz"><mxGeometry x="270" y="465" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r8_o" value="✅ Foto, Clave y Colores" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fef9c3;strokeColor=#fde047;fontSize=12;fontColor=#854d0e;" vertex="1" parent="hdr_matriz"><mxGeometry x="480" y="465" width="200" height="40" as="geometry" /></mxCell>
+        <mxCell id="r8_p" value="✅ Foto, Clave y Colores" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#86efac;fontSize=12;fontColor=#166534;" vertex="1" parent="hdr_matriz"><mxGeometry x="690" y="465" width="210" height="40" as="geometry" /></mxCell>
+
+        <!-- LEYENDA -->
+        <mxCell id="leg" value="&lt;b&gt;Leyenda:&lt;/b&gt; &lt;span style=&quot;color:#16a34a;&quot;&gt;✅ Completo&lt;/span&gt; = Permite crear, modificar y procesar. | &lt;span style=&quot;color:#1e40af;&quot;&gt;👁️ Solo Lectura&lt;/span&gt; = Permite consultar y exportar datos. | &lt;span style=&quot;color:#dc2626;&quot;&gt;❌ Sin Acceso&lt;/span&gt; = Menú oculto y rutas bloqueadas (403)." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#94a3b8;fontSize=11;align=center;" vertex="1" parent="hdr_matriz">
+          <mxGeometry x="40" y="530" width="860" height="35" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
