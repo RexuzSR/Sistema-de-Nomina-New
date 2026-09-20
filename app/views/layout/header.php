@@ -30,9 +30,9 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
-<link rel="stylesheet" href="assets/css/style.css?v=3.2">
+<link rel="stylesheet" href="assets/css/style.css?v=3.3">
 <?php if (empty($currentRoute) || strpos($currentRoute, 'dashboard') === 0): ?>
-<link rel="stylesheet" href="assets/css/dashboard.css?v=2.6">
+<link rel="stylesheet" href="assets/css/dashboard.css?v=2.7">
 <?php elseif (strpos($currentRoute, 'nomina') === 0 || strpos($currentRoute, 'periodos') === 0): ?>
 <link rel="stylesheet" href="assets/css/nomina.css">
 <?php elseif (strpos($currentRoute, 'empleados') === 0): ?>

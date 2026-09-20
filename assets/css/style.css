@@ -3118,3 +3118,48 @@ html.layout-sidebar-mode .collapse-btn-text {
     display: inline-flex;
   }
 }
+
+/* ═══════════════ TOAST GLOBAL ADAPTATIVO (MODO CLARO / OSCURO) ═══════════════ */
+.dash-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 14px 22px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transform: translateY(120px);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  max-width: 380px;
+}
+
+.dash-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.dash-toast i {
+  color: #0d9488;
+  font-size: 15px;
+}
+
+/* Modo oscuro para el Toast */
+.dark-theme .dash-toast {
+  background: linear-gradient(135deg, #0a0f1c, #1e293b);
+  color: #f8fafc;
+  border: 1px solid rgba(94, 234, 212, 0.25);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.dark-theme .dash-toast i {
+  color: #5eead4;
+}

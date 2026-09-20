@@ -344,7 +344,7 @@ function toggleTheme() {
   localStorage.setItem('dash-theme', isDark ? 'dark' : 'light');
   updateThemeButtonState();
   if (typeof showToast === 'function') {
-    showToast(isDark ? '🌙 Modo noche activado' : '☀️ Modo día activado');
+    showToast(isDark ? 'Modo oscuro activado' : 'Modo claro activado');
   }
   if (window._chartCargos) {
     window._chartCargos.update();
