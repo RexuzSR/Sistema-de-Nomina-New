@@ -39,6 +39,13 @@ class PermisoController extends Controller {
             } else {
                 $dias = (strtotime($fecha_fin) - strtotime($fecha_inicio)) / 86400 + 1;
                 $permisoModel->create($id_empleado, $fecha_inicio, $fecha_fin, $dias, $motivo);
+                Audit::log('PERMISOS', 'SOLICITAR', "Registró solicitud de permiso ({$dias} días) para el empleado ID {$id_empleado}", 'tb_permiso', null, [
+                    'empleado_id' => $id_empleado,
+                    'fecha_inicio' => $fecha_inicio,
+                    'fecha_fin' => $fecha_fin,
+                    'dias' => $dias,
+                    'motivo' => $motivo
+                ]);
                 $this->redirect('index.php?r=permisos&msg=' . urlencode('Permiso registrado y en espera de aprobacion.'));
             }
         }
@@ -61,6 +68,7 @@ class PermisoController extends Controller {
         if ($id && in_array($accion, ['Aprobado', 'Rechazado'], true)) {
             $permisoModel = new PermisoModel();
             $permisoModel->updateEstado($id, $accion, (int)$_SESSION['user_id']);
+            Audit::log('PERMISOS', strtoupper($accion), "Cambió el estado del permiso ID {$id} a '{$accion}'", 'tb_permiso', $id);
         }
 
         $this->redirect('index.php?r=permisos&msg=' . urlencode('Permiso actualizado.'));

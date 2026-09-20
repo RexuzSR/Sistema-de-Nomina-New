@@ -5,18 +5,20 @@
 .mac-login-body {
   margin: 0;
   padding: 0;
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: #0f172a url('../images/recibo-de-nomina-ejemplo.webp') no-repeat center center fixed;
   background-size: cover;
   color: #1d1d1f;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
 }
 
 .mac-login-body::before {
   content: "";
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -33,7 +35,7 @@
 
 /* macOS Menu Bar */
 .mac-topbar {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -104,12 +106,13 @@
 
 /* Main Viewport & Card Window */
 .mac-login-viewport {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 68px 20px 32px;
+  box-sizing: border-box;
   position: relative;
   z-index: 10;
 }
@@ -493,3 +496,189 @@
 .mac-window.no-entry-anim {
   animation: none !important;
 }
+
+/* ═══════════════ SOPORTE PARA ZOOM ELEVADO (150%) Y PANTALLAS COMPACTAS ═══════════════ */
+@media (max-height: 780px), (max-width: 640px) {
+  .mac-login-viewport {
+    padding: 54px 16px 20px;
+    align-items: center;
+  }
+
+  .mac-window {
+    max-width: 390px;
+    border-radius: 20px;
+  }
+
+  .mac-window-body {
+    padding: 22px 22px 18px;
+  }
+
+  .mac-avatar-container {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 10px;
+  }
+
+  .mac-avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .mac-avatar svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .mac-title {
+    font-size: 19px;
+    margin-bottom: 3px;
+  }
+
+  .mac-subtitle {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .mac-alert {
+    padding: 8px 12px;
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  .mac-form {
+    gap: 12px;
+  }
+
+  .mac-input-group label {
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+
+  .mac-input-wrapper input {
+    height: 40px;
+    font-size: 13.5px;
+  }
+
+  .mac-btn-primary {
+    height: 42px;
+    font-size: 13.5px;
+    margin-top: 4px;
+  }
+}
+
+/* ═══════════════ TOAST NOTIFICATIONS (macOS SONOMA STYLE) ═══════════════ */
+.mac-toast-container {
+  position: fixed;
+  top: 56px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.mac-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.mac-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.mac-toast.hide {
+  transform: translateX(120%) scale(0.95);
+  opacity: 0;
+}
+
+.mac-toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mac-toast-info .mac-toast-icon {
+  background: rgba(13, 148, 136, 0.15);
+  color: #0d9488;
+}
+
+.mac-toast-warning .mac-toast-icon {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
+.mac-toast-error .mac-toast-icon {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.mac-toast-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.mac-toast-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.mac-toast-close:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #334155;
+}
+
+/* Modo oscuro para el Toast */
+.dark-theme .mac-toast {
+  background: rgba(30, 41, 59, 0.88);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.dark-theme .mac-toast-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .mac-toast-container {
+    top: 50px;
+    right: 12px;
+    left: 12px;
+    max-width: none;
+  }
+}
+

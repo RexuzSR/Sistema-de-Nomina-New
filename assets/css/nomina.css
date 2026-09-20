@@ -172,6 +172,7 @@ a.nav-link:hover, .nav-sublinks a:hover {
 .matrix-table th.header-group { font-size: 10.5px; letter-spacing: 0.3px; text-transform: uppercase; padding: 4px 2px; }
 .matrix-table th.asig-group { background: var(--primary); }
 .matrix-table th.calc-asig-group { background: #166534; }
+.matrix-table th.ded-group { background: #c2410c; }
 .matrix-table th.calc-ded-group { background: #991b1b; }
 .matrix-table th.header-neto { background: #065f46; color: #dff3e8; font-size: 12px; font-weight: 800; }
 
@@ -406,6 +407,10 @@ a.nav-link:hover, .nav-sublinks a:hover {
 
 .dark-theme .matrix-table th.calc-asig-group {
   background: #064e3b !important;
+}
+
+.dark-theme .matrix-table th.ded-group {
+  background: #9a3412 !important;
 }
 
 .dark-theme .matrix-table th.calc-ded-group {

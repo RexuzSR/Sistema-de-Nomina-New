@@ -197,6 +197,14 @@ $csrfToken = Security::csrfToken();
             </tr>
           <?php endforeach; ?>
         <?php endif; ?>
+        <tr id="usuarioNoResultsRow" style="display:none;">
+          <td colspan="7" class="tabla-empty">
+            <div class="empty-state">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <p>No se encontraron usuarios con los filtros seleccionados</p>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -539,5 +547,63 @@ function mostrarToast(msg, type) {
 // ─── KEYBOARD ───
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') cerrarModalUsuario();
+});
+
+// ─── FILTROS, BÚSQUEDA Y PAGINACIÓN ───
+function filterUsuarios() {
+  var q = (document.getElementById('searchUsuarios')?.value || '').toLowerCase().trim();
+  var rol = document.getElementById('filterRol')?.value || '';
+  var estado = document.getElementById('filterEstado')?.value || '';
+
+  var rows = document.querySelectorAll('#tablaUsuarios tbody tr.usuario-row');
+  var visible = 0;
+
+  rows.forEach(function(row) {
+    var searchTarget = (row.dataset.search || '').toLowerCase();
+    var rowRol = row.dataset.rol || '';
+    var rowEstado = row.dataset.estado || '';
+
+    var matchQ = !q || searchTarget.indexOf(q) !== -1;
+    var matchRol = !rol || rowRol === rol;
+    var matchEstado = !estado || rowEstado === estado;
+
+    if (matchQ && matchRol && matchEstado) {
+      row.dataset.filteredOut = 'false';
+      visible++;
+    } else {
+      row.dataset.filteredOut = 'true';
+    }
+  });
+
+  if (window.usuariosPaginator) {
+    window.usuariosPaginator.currentPage = 1;
+    window.usuariosPaginator.update();
+  } else {
+    var noResultsRow = document.getElementById('usuarioNoResultsRow');
+    if (noResultsRow) {
+      noResultsRow.style.display = (visible === 0 && rows.length > 0) ? '' : 'none';
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var searchInput = document.getElementById('searchUsuarios');
+  var filterRol = document.getElementById('filterRol');
+  var filterEstado = document.getElementById('filterEstado');
+
+  if (searchInput) searchInput.addEventListener('input', filterUsuarios);
+  if (filterRol) filterRol.addEventListener('change', filterUsuarios);
+  if (filterEstado) filterEstado.addEventListener('change', filterUsuarios);
+
+  if (typeof initTablePagination === 'function') {
+    window.usuariosPaginator = initTablePagination({
+      table: '#tablaUsuarios',
+      rowSelector: 'tbody tr.usuario-row',
+      noResultsSelector: '#usuarioNoResultsRow',
+      storageKey: 'nomina_paginator_usuarios',
+      defaultPageSize: 10,
+      appendTo: '.usuarios-table-wrapper'
+    });
+  }
 });
 </script>

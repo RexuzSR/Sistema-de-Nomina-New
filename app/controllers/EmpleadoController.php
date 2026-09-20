@@ -67,6 +67,9 @@ class EmpleadoController extends Controller {
             $sueldo = $_POST['sueldo_divisa'] ?? '';
             $fecha_ingreso = $_POST['fecha_ingreso'] ?? '';
             $email = trim($_POST['email'] ?? '');
+            $id_banco = (int)($_POST['id_banco'] ?? 0);
+            $numero_cuenta = trim($_POST['numero_cuenta'] ?? '');
+            $tipo_cuenta = trim($_POST['tipo_cuenta'] ?? 'Corriente');
 
             if ($cedula === '' || $p_nombre === '' || $p_apellido === '' || !$id_tipo || !$id_jornada || !$id_cargo
                 || $sueldo === '' || !is_numeric($sueldo) || $fecha_ingreso === '') {
@@ -86,7 +89,18 @@ class EmpleadoController extends Controller {
                     'id_jornada' => $id_jornada,
                     'id_cargo' => $id_cargo,
                     'sueldo_divisa' => $sueldo,
-                    'fecha_ingreso' => $fecha_ingreso
+                    'fecha_ingreso' => $fecha_ingreso,
+                    'id_banco' => $id_banco,
+                    'numero_cuenta' => $numero_cuenta,
+                    'tipo_cuenta' => $tipo_cuenta
+                ]);
+
+                Audit::log('EMPLEADOS', 'CREAR', "Registró al nuevo empleado {$p_nombre} {$p_apellido} (C.I. {$cedula})", 'tb_empleado', null, [
+                    'cedula' => $cedula,
+                    'nombre_completo' => "{$p_nombre} {$s_nombre} {$p_apellido} {$s_apellido}",
+                    'cargo_id' => $id_cargo,
+                    'sueldo_divisa' => $sueldo,
+                    'email' => $email
                 ]);
 
                 $this->redirect('index.php?r=empleados&msg=' . urlencode('Empleado creado correctamente.'));
@@ -97,6 +111,7 @@ class EmpleadoController extends Controller {
             'tipos' => $empleadoModel->getTipos(),
             'jornadas' => $empleadoModel->getJornadas(),
             'cargos' => $empleadoModel->getCargos(),
+            'bancos' => $empleadoModel->getBancos(),
             'error' => $error
         ], 'Nuevo empleado');
     }
@@ -126,6 +141,9 @@ class EmpleadoController extends Controller {
             $id_cargo = (int)($_POST['id_cargo'] ?? 0);
             $sueldo = $_POST['sueldo_divisa'] ?? '';
             $fecha_ingreso = $_POST['fecha_ingreso'] ?? '';
+            $id_banco = (int)($_POST['id_banco'] ?? 0);
+            $numero_cuenta = trim($_POST['numero_cuenta'] ?? '');
+            $tipo_cuenta = trim($_POST['tipo_cuenta'] ?? 'Corriente');
 
             if ($cedula === '' || $p_nombre === '' || $p_apellido === '' || !$id_tipo || !$id_jornada || !$id_cargo
                 || $sueldo === '' || !is_numeric($sueldo) || $fecha_ingreso === '') {
@@ -145,7 +163,17 @@ class EmpleadoController extends Controller {
                     'id_jornada' => $id_jornada,
                     'id_cargo' => $id_cargo,
                     'sueldo_divisa' => $sueldo,
-                    'fecha_ingreso' => $fecha_ingreso
+                    'fecha_ingreso' => $fecha_ingreso,
+                    'id_banco' => $id_banco,
+                    'numero_cuenta' => $numero_cuenta,
+                    'tipo_cuenta' => $tipo_cuenta
+                ]);
+
+                Audit::log('EMPLEADOS', 'MODIFICAR', "Actualizó los datos del empleado {$p_nombre} {$p_apellido} (C.I. {$cedula})", 'tb_empleado', $id, [
+                    'cedula' => $cedula,
+                    'nombre_completo' => "{$p_nombre} {$s_nombre} {$p_apellido} {$s_apellido}",
+                    'cargo_id' => $id_cargo,
+                    'sueldo_divisa' => $sueldo
                 ]);
 
                 $this->redirect('index.php?r=empleados&msg=' . urlencode('Empleado actualizado correctamente.'));
@@ -159,6 +187,8 @@ class EmpleadoController extends Controller {
             'jornadas' => $empleadoModel->getJornadas(),
             'cargos' => $empleadoModel->getCargos(),
             'cargoActual' => $empleadoModel->getCargoActual($id),
+            'bancos' => $empleadoModel->getBancos(),
+            'cuentaBancaria' => $empleadoModel->getCuentaBancaria($id),
             'error' => $error
         ], 'Editar empleado');
     }
@@ -169,7 +199,10 @@ class EmpleadoController extends Controller {
         $id = (int)($_GET['id'] ?? 0);
         if ($id) {
             $empleadoModel = new EmpleadoModel();
+            $emp = $empleadoModel->getById($id);
+            $nuevoEstado = !empty($emp['estado']) ? 'Inactivado' : 'Activado';
             $empleadoModel->toggleEstado($id);
+            Audit::log('EMPLEADOS', 'CAMBIAR_ESTADO', "Cambió el estado laboral del empleado ID {$id} (" . ($emp['primer_nombre'] ?? '') . " " . ($emp['primer_apellido'] ?? '') . ") a '{$nuevoEstado}'", 'tb_empleado', $id);
         }
         $this->redirect('index.php?r=empleados&msg=' . urlencode('Estado actualizado.'));
     }

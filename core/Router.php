@@ -12,6 +12,7 @@ class Router {
             // Default route if not matched
             $route = 'dashboard';
         }
+        $GLOBALS['activeRoute'] = $route;
 
         $target = $this->routes[$route];
         $controllerName = $target['controller'];

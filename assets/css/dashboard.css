@@ -587,7 +587,7 @@ main.container>*:not(.aurora-bg) {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 12px;
   margin-top: 28px;
   padding-top: 24px;

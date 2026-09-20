@@ -1,0 +1,594 @@
+/* ==========================================================================
+   MÓDULO: Historial de Actividades y Auditoría del Sistema
+   ========================================================================== */
+
+/* ─── KPI STATS GRID ─── */
+.audit-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.audit-kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.audit-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(15, 118, 110, 0.3);
+}
+
+.audit-kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.audit-kpi-icon.icon-today {
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+}
+
+.audit-kpi-icon.icon-week {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+}
+
+.audit-kpi-icon.icon-users {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.audit-kpi-icon.icon-total {
+  background: rgba(99, 102, 241, 0.12);
+  color: #4f46e5;
+}
+
+.audit-kpi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.audit-kpi-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.audit-kpi-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+/* ─── FILTROS Y BÚSQUEDA ─── */
+.audit-filter-card {
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+
+.audit-filter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.audit-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.audit-filter-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.audit-filter-field.search-field {
+  flex: 1 1 280px;
+  min-width: 240px;
+}
+
+.audit-filter-field.search-field input {
+  width: 100%;
+  padding: 9px 34px 9px 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13.5px;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.audit-filter-field.search-field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+.audit-filter-field.search-field .search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 10px;
+  color: var(--text-muted);
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.clear-search-btn:hover {
+  color: var(--danger);
+}
+
+.audit-filter-field.select-field {
+  flex: 0 1 190px;
+  min-width: 160px;
+}
+
+.audit-filter-field.select-field select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.audit-filter-field.select-field select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.audit-filter-dates-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.date-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.date-input-wrap input {
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12.5px;
+  font-family: inherit;
+}
+
+/* ─── TABLA DE AUDITORÍA ─── */
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+.audit-table th {
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 14px 18px;
+  border-bottom: 1.5px solid var(--border);
+}
+
+.audit-table td {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.audit-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.audit-table tbody tr:hover td {
+  background: rgba(15, 118, 110, 0.04);
+}
+
+/* Celdas enriquecidas */
+.audit-time-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.audit-date-main {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.audit-time-relative {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.audit-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.audit-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);
+}
+
+.audit-user-avatar.has-img img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.audit-user-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.audit-user-name {
+  font-size: 13.5px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.audit-user-role {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.audit-module-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.05);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+/* Badges de Acción */
+.audit-action-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+
+.audit-action-badge.badge-success {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.audit-action-badge.badge-info {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.audit-action-badge.badge-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.audit-action-badge.badge-purple {
+  background: #f3e8ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+.audit-action-badge.badge-emerald {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.audit-action-badge.badge-teal {
+  background: #ccfbf1;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+}
+
+.audit-action-badge.badge-other {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.audit-desc-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 480px;
+  white-space: normal;
+}
+
+.audit-desc-text {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.audit-table-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.audit-ip-pill {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--text-muted);
+}
+
+.audit-empty-state {
+  text-align: center;
+  padding: 50px 20px !important;
+  color: var(--text-muted);
+}
+
+.audit-empty-state i {
+  font-size: 40px;
+  opacity: 0.4;
+  margin-bottom: 12px;
+}
+
+.audit-empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* ─── PAGINACIÓN ─── */
+.audit-pagination-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 8px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.audit-pagination-info {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.audit-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-current-pill {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.3);
+}
+
+/* ─── MODAL FORENSE DE DETALLE ─── */
+.audit-modal-card {
+  max-width: 640px !important;
+}
+
+.audit-json-box {
+  background: #0f172a;
+  color: #38bdf8;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+}
+
+/* ─── MODO OSCURO GLOBAL ─── */
+.dark-theme .audit-kpi-card {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+.dark-theme .audit-kpi-val {
+  color: #f8fafc;
+}
+
+.dark-theme .audit-filter-card {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+.dark-theme .audit-filter-field.search-field input,
+.dark-theme .audit-filter-field.select-field select,
+.dark-theme .date-input-wrap input {
+  background: #0a0f1c;
+  border-color: #1f2937;
+  color: #f1f5f9;
+}
+
+.dark-theme .audit-table th {
+  background: #182234;
+  color: #94a3b8;
+  border-bottom-color: #1f2937;
+}
+
+.dark-theme .audit-table td {
+  border-bottom-color: #1f2937;
+}
+
+.dark-theme .audit-table tbody tr:hover td {
+  background: rgba(20, 184, 166, 0.1) !important;
+}
+
+.dark-theme .audit-module-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #1f2937;
+  color: #94a3b8;
+}
+
+.dark-theme .audit-ip-pill {
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+}
+
+.dark-theme .audit-action-badge.badge-success {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.dark-theme .audit-action-badge.badge-info {
+  background: rgba(56, 189, 248, 0.18);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.dark-theme .audit-action-badge.badge-danger {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.dark-theme .audit-action-badge.badge-purple {
+  background: rgba(168, 85, 247, 0.18);
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.35);
+}
+
+.dark-theme .audit-action-badge.badge-emerald {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.dark-theme .audit-action-badge.badge-teal {
+  background: rgba(20, 184, 166, 0.18);
+  color: #2dd4bf;
+  border-color: rgba(20, 184, 166, 0.35);
+}
+
+/* ─── RESPONSIVIDAD ─── */
+@media (max-width: 900px) {
+  .audit-filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .audit-filter-field.search-field,
+  .audit-filter-field.select-field {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .audit-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .audit-filter-dates-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .date-input-wrap {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .date-input-wrap input {
+    flex: 1;
+  }
+  .audit-pagination-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+  }
+}

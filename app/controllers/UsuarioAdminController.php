@@ -80,6 +80,12 @@ class UsuarioAdminController extends Controller {
         $result = $this->usuarioModel->crearUsuario($username, $correo, $password, $idRol, $idEmpleado);
 
         if ($result) {
+            Audit::log('USUARIOS', 'CREAR', "Creó al nuevo usuario '{$username}' ({$correo}) con rol ID {$idRol}", 'tb_usuario', is_numeric($result) ? (int)$result : null, [
+                'username' => $username,
+                'correo' => $correo,
+                'rol_id' => $idRol,
+                'empleado_id' => $idEmpleado
+            ]);
             echo json_encode(['success' => true, 'message' => 'Usuario creado exitosamente.']);
         } else {
             echo json_encode(['success' => false, 'error' => 'Error al crear el usuario. Intenta nuevamente.']);
@@ -149,6 +155,13 @@ class UsuarioAdminController extends Controller {
         }
 
         if ($result) {
+            Audit::log('USUARIOS', 'MODIFICAR', "Modificó los datos del usuario ID {$idUsuario} ('{$username}')" . (!empty($newPassword) ? ' (con nueva contraseña)' : ''), 'tb_usuario', $idUsuario, [
+                'username' => $username,
+                'correo' => $correo,
+                'rol_id' => $idRol,
+                'empleado_id' => $idEmpleado,
+                'cambio_password' => !empty($newPassword)
+            ]);
             echo json_encode(['success' => true, 'message' => 'Usuario actualizado exitosamente.']);
         } else {
             echo json_encode(['success' => false, 'error' => 'Error al actualizar el usuario.']);
@@ -184,6 +197,9 @@ class UsuarioAdminController extends Controller {
 
         if ($result) {
             $msg = $nuevoEstado === 1 ? 'Usuario activado exitosamente.' : 'Usuario desactivado exitosamente.';
+            Audit::log('USUARIOS', 'CAMBIAR_ESTADO', "Cambió el estado del usuario ID {$idUsuario} a " . ($nuevoEstado === 1 ? 'Activado' : 'Desactivado'), 'tb_usuario', $idUsuario, [
+                'nuevo_estado' => $nuevoEstado
+            ]);
             echo json_encode(['success' => true, 'message' => $msg]);
         } else {
             echo json_encode(['success' => false, 'error' => 'Error al cambiar el estado del usuario.']);

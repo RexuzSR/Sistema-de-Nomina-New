@@ -66,6 +66,16 @@ class AuthController extends Controller {
                         $user['nombre_usuario']
                     );
 
+                    Audit::log(
+                        'ACCESO',
+                        'LOGIN',
+                        "Inicio de sesión exitoso para el usuario '{$user['nombre_usuario']}'",
+                        'tb_usuario',
+                        (int)$user['id_usuario'],
+                        ['rol' => $user['nombre_rol'] ?? 'Administrador', 'ip' => $ip],
+                        (int)$user['id_usuario']
+                    );
+
                     if ($isAjax) {
                         header('Content-Type: application/json');
                         echo json_encode(['success' => true, 'redirect' => 'index.php?r=dashboard']);
@@ -156,6 +166,9 @@ class AuthController extends Controller {
         $username = $_SESSION['usuario'] ?? null;
 
         Security::logSecurityEvent('LOGOUT_MANUAL', 'Cierre de sesión voluntario', $userId, $username);
+        if ($userId) {
+            Audit::log('ACCESO', 'LOGOUT', "Cierre de sesión del usuario '{$username}'", 'tb_usuario', $userId, null, $userId);
+        }
         Security::destroySession();
 
         $this->redirect('index.php?r=auth/login&reason=logout');

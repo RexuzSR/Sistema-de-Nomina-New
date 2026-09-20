@@ -12,8 +12,8 @@
   </div>
 </div>
 
-<div class="card" style="padding:0; overflow:hidden;">
-  <table>
+<div class="card table-responsive" id="cardTablaPeriodos" style="padding:0; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+  <table id="tablaPeriodos">
     <thead>
       <tr>
         <th>Nombre del Ciclo / Descripción</th>
@@ -26,7 +26,7 @@
     </thead>
     <tbody>
       <?php if (!$periodos): ?>
-        <tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:30px;">Aún no hay periodos creados.</td></tr>
+        <tr class="no-data-row"><td colspan="6" style="text-align:center; color:var(--text-muted); padding:30px;">Aún no hay periodos creados.</td></tr>
       <?php endif; ?>
       <?php foreach ($periodos as $p): 
         $pJsonData = [
@@ -40,7 +40,7 @@
           'numero_quincena' => $p['numero_quincena'] ?? '—'
         ];
       ?>
-        <tr onclick="abrirVerPeriodoModal(this)" data-periodo="<?= htmlspecialchars(json_encode($pJsonData), ENT_QUOTES, 'UTF-8') ?>" title="Clic para ver detalles completos del periodo">
+        <tr class="periodo-row" onclick="abrirVerPeriodoModal(this)" data-periodo="<?= htmlspecialchars(json_encode($pJsonData), ENT_QUOTES, 'UTF-8') ?>" title="Clic para ver detalles completos del periodo">
           <td><strong style="color:var(--text); font-size:13.5px;"><?= htmlspecialchars($p['descripcion'] ?? 'Sin descripción') ?></strong></td>
           <td><span class="badge" style="background:rgba(2, 132, 199, 0.12); color:#0284c7; border:1px solid rgba(2, 132, 199, 0.25);"><?= htmlspecialchars($p['tipo_periodo']) ?></span></td>
           <td><span style="font-size:13px; color:var(--text-muted);"><?= htmlspecialchars($p['fecha_inicio']) ?> &rarr; <?= htmlspecialchars($p['fecha_fin']) ?></span></td>
@@ -57,4 +57,18 @@
 </div>
 
 <?php require __DIR__ . '/VerModal.php'; ?>
+
+<script nonce="<?= Security::getCspNonce() ?>">
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof initTablePagination === 'function') {
+    window.periodosPaginator = initTablePagination({
+      table: '#tablaPeriodos',
+      rowSelector: 'tbody tr.periodo-row',
+      storageKey: 'nomina_paginator_periodos',
+      defaultPageSize: 10,
+      appendTo: '#cardTablaPeriodos'
+    });
+  }
+});
+</script>
 

@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
 <link rel="stylesheet" href="assets/css/style.css?v=2.5">
 <link rel="stylesheet" href="assets/css/dashboard.css?v=2.5">
-<link rel="stylesheet" href="assets/css/auth.css?v=2.5">
+<link rel="stylesheet" href="assets/css/auth.css?v=2.7">
 <script>
 (function() {
   if (localStorage.getItem('dash-theme') === 'dark') {
@@ -296,43 +296,21 @@
         <?php
         $reason = $_GET['reason'] ?? '';
         $reasonMsg = '';
-        $reasonClass = 'mac-alert-info';
+        $reasonType = 'info';
         if ($reason === 'timeout') {
             $reasonMsg = 'Tu sesión ha expirado por inactividad. Por favor, ingresa tus credenciales nuevamente.';
-            $reasonClass = 'mac-alert-warning';
+            $reasonType = 'warning';
         } elseif ($reason === 'logout') {
             $reasonMsg = 'Has cerrado sesión correctamente.';
-            $reasonClass = 'mac-alert-info';
+            $reasonType = 'info';
         } elseif ($reason === 'security') {
             $reasonMsg = 'Tu sesión se cerró por motivos de seguridad.';
-            $reasonClass = 'mac-alert-warning';
+            $reasonType = 'warning';
         } elseif ($reason === 'lockout') {
             $reasonMsg = 'Acceso bloqueado temporalmente por demasiados intentos fallidos.';
-            $reasonClass = 'mac-alert-error';
+            $reasonType = 'error';
         }
         ?>
-
-        <div id="mac-alert-container">
-          <?php if (!empty($error)): ?>
-            <div class="mac-alert mac-alert-error">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              <span><?= htmlspecialchars($error) ?></span>
-            </div>
-          <?php elseif (!empty($reasonMsg)): ?>
-            <div class="mac-alert <?= $reasonClass ?>">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="12" x2="12" y2="16"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-              <span><?= htmlspecialchars($reasonMsg) ?></span>
-            </div>
-          <?php endif; ?>
-        </div>
 
         <form method="post" action="index.php?r=auth/login" class="mac-form" id="mac-login-form">
           <?= Security::csrfField() ?>
@@ -397,6 +375,73 @@
     }
     updateMacClock();
     setInterval(updateMacClock, 1000);
+
+    // Sistema de Notificaciones Toast flotantes estilo macOS
+    function showMacToast(msg, type, duration) {
+      if (!msg) return;
+      type = type || 'info';
+      duration = typeof duration === 'number' ? duration : 4500;
+
+      let container = document.getElementById('mac-toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'mac-toast-container';
+        container.className = 'mac-toast-container';
+        document.body.appendChild(container);
+      }
+
+      const toast = document.createElement('div');
+      toast.className = 'mac-toast mac-toast-' + type;
+
+      let iconSvg = '';
+      if (type === 'error') {
+        iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+      } else if (type === 'warning') {
+        iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+      } else {
+        iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+      }
+
+      toast.innerHTML = 
+        '<div class="mac-toast-icon">' + iconSvg + '</div>' +
+        '<div class="mac-toast-text">' + escapeHtml(msg) + '</div>' +
+        '<button type="button" class="mac-toast-close" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>';
+
+      container.appendChild(toast);
+      requestAnimationFrame(function() {
+        toast.classList.add('show');
+      });
+
+      function dismiss() {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(function() {
+          if (toast.parentNode) toast.remove();
+        }, 400);
+      }
+
+      var closeBtn = toast.querySelector('.mac-toast-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dismiss();
+        });
+      }
+      toast.addEventListener('click', dismiss);
+
+      if (duration > 0) {
+        setTimeout(dismiss, duration);
+      }
+    }
+
+    // Disparar mensaje inicial (si existe en sesión o redirección)
+    document.addEventListener('DOMContentLoaded', function() {
+      <?php if (!empty($error)): ?>
+        showMacToast(<?= json_encode($error) ?>, 'error');
+      <?php elseif (!empty($reasonMsg)): ?>
+        showMacToast(<?= json_encode($reasonMsg) ?>, <?= json_encode($reasonType) ?>);
+      <?php endif; ?>
+    });
 
     const loginForm = document.getElementById('mac-login-form');
     const submitBtn = document.getElementById('btn-submit-login');
@@ -489,25 +534,8 @@
           }
           passInput.select();
 
-          const alertContainer = document.getElementById('mac-alert-container');
-          alertContainer.innerHTML = `
-            <div class="mac-alert mac-alert-error">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              <span>${escapeHtml(data.error)}</span>
-            </div>
-          `;
-          
-          // Reiniciar vibración del cuadro de alerta
-          const alertEl = alertContainer.querySelector('.mac-alert');
-          if (alertEl) {
-            alertEl.style.animation = 'none';
-            void alertEl.offsetWidth;
-            alertEl.style.animation = '';
-          }
+          // Notificación Toast flotante automática
+          showMacToast(data.error || 'Credenciales incorrectas.', 'error');
         }
       })
       .catch(err => {
@@ -517,7 +545,7 @@
         passInput.readOnly = false;
         submitBtn.classList.remove('is-loading');
         submitBtn.innerHTML = submitBtnOriginalHtml;
-        alert('Ocurrió un error al procesar el inicio de sesión.');
+        showMacToast('Ocurrió un error al procesar el inicio de sesión.', 'error');
       });
     });
 

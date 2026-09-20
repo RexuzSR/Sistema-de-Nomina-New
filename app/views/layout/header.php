@@ -1,6 +1,6 @@
 <?php
 if (!isset($pageTitle)) { $pageTitle = 'Sistema de Nómina'; }
-$currentRoute = $_GET['r'] ?? 'dashboard';
+$currentRoute = $GLOBALS['activeRoute'] ?? $_GET['r'] ?? 'dashboard';
 
 // Obtener preferencias y avatar del usuario en sesión
 $uNombre = $_SESSION['user_nombre'] ?? $_SESSION['usuario'] ?? 'Usuario';
@@ -30,9 +30,10 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
-<link rel="stylesheet" href="assets/css/style.css?v=3.3">
+<link rel="stylesheet" href="assets/css/style.css?v=3.7">
+<link rel="stylesheet" href="assets/css/paginator.css?v=1.0">
 <?php if (empty($currentRoute) || strpos($currentRoute, 'dashboard') === 0): ?>
-<link rel="stylesheet" href="assets/css/dashboard.css?v=2.7">
+<link rel="stylesheet" href="assets/css/dashboard.css?v=2.8">
 <?php elseif (strpos($currentRoute, 'nomina') === 0 || strpos($currentRoute, 'periodos') === 0): ?>
 <link rel="stylesheet" href="assets/css/nomina.css">
 <?php elseif (strpos($currentRoute, 'empleados') === 0): ?>
@@ -40,7 +41,11 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
 <?php elseif (strpos($currentRoute, 'perfil') === 0): ?>
 <link rel="stylesheet" href="assets/css/perfil.css?v=1.2">
 <?php elseif (strpos($currentRoute, 'usuarios') === 0): ?>
-<link rel="stylesheet" href="assets/css/usuarios.css?v=1.0">
+<link rel="stylesheet" href="assets/css/usuarios.css?v=2.4">
+<?php elseif (strpos($currentRoute, 'auditoria') === 0 || strpos($currentRoute, 'historial') === 0): ?>
+<link rel="stylesheet" href="assets/css/auditoria.css?v=1.0">
+<?php elseif (strpos($currentRoute, 'configuracion') === 0): ?>
+<link rel="stylesheet" href="assets/css/configuracion.css?v=1.0">
 <?php endif; ?>
 <script nonce="<?= Security::getCspNonce() ?>">
 (function() {
@@ -98,13 +103,9 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
     <!-- Enlaces superiores (se ocultan automáticamente si el usuario activa el modo Sidebar) -->
     <div class="topbar-nav-links" id="topbarNavLinks">
       <a href="index.php?r=dashboard" class="nav-btn <?= strpos($currentRoute, 'dashboard') === 0 ? 'active' : '' ?>"><i class="fa-solid fa-house"></i> Inicio</a>
-      <span class="nav-divider" aria-hidden="true"></span>
       <a href="index.php?r=empleados" class="nav-btn <?= strpos($currentRoute, 'empleados') === 0 ? 'active' : '' ?>"><i class="fa-solid fa-users"></i> Empleados</a>
-      <span class="nav-divider" aria-hidden="true"></span>
       <a href="index.php?r=permisos" class="nav-btn <?= strpos($currentRoute, 'permisos') === 0 ? 'active' : '' ?>"><i class="fa-solid fa-file-signature"></i> Permisos</a>
-      <span class="nav-divider" aria-hidden="true"></span>
       <a href="index.php?r=periodos" class="nav-btn <?= (strpos($currentRoute, 'periodos') === 0 || strpos($currentRoute, 'nomina') === 0) ? 'active' : '' ?>"><i class="fa-solid fa-calendar-days"></i> Periodos</a>
-      <span class="nav-divider" aria-hidden="true"></span>
       <a href="index.php?r=tasas" class="nav-btn <?= strpos($currentRoute, 'tasas') === 0 ? 'active' : '' ?>"><i class="fa-solid fa-money-bill-transfer"></i> Tasa de cambio</a>
       <span class="nav-divider nav-divider-lg" aria-hidden="true"></span>
     </div>
@@ -151,10 +152,14 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
               <span class="icon-box"><i class="fa-solid fa-users-gear"></i></span>
               <span>Gestión de Usuarios</span>
             </a>
+            <a href="index.php?r=configuracion" class="dropdown-item <?= strpos($currentRoute, 'configuracion') === 0 ? 'active' : '' ?>">
+              <span class="icon-box"><i class="fa-solid fa-sliders"></i></span>
+              <span>Configuración General</span>
+            </a>
             <?php endif; ?>
-            <a href="index.php?r=tasas" class="dropdown-item">
-              <span class="icon-box"><i class="fa-solid fa-coins"></i></span>
-              <span>Tasa de Cambio</span>
+            <a href="index.php?r=auditoria" class="dropdown-item <?= (strpos($currentRoute, 'auditoria') === 0 || strpos($currentRoute, 'historial') === 0) ? 'active' : '' ?>">
+              <span class="icon-box"><i class="fa-solid fa-clock-rotate-left"></i></span>
+              <span>Historial</span>
             </a>
             <hr class="dropdown-divider">
             <form id="form-manual-logout" method="POST" action="index.php?r=auth/logout" style="margin: 0; padding: 0;">
@@ -225,16 +230,31 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
     if (mobileToggle && topbarNav) {
       mobileToggle.addEventListener('click', function(e) {
         e.stopPropagation();
-        var isOpen = topbarNav.classList.toggle('mobile-open');
-        mobileToggle.classList.toggle('is-active', isOpen);
-        mobileToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (document.documentElement.classList.contains('layout-sidebar-mode')) {
+          var isSideOpen = document.documentElement.classList.toggle('sidebar-mobile-open');
+          mobileToggle.classList.toggle('is-active', isSideOpen);
+          mobileToggle.setAttribute('aria-expanded', isSideOpen ? 'true' : 'false');
+        } else {
+          var isOpen = topbarNav.classList.toggle('mobile-open');
+          mobileToggle.classList.toggle('is-active', isOpen);
+          mobileToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
       });
 
       document.addEventListener('click', function(e) {
-        if (topbarNav.classList.contains('mobile-open') && !topbarNav.contains(e.target) && !mobileToggle.contains(e.target)) {
-          topbarNav.classList.remove('mobile-open');
-          mobileToggle.classList.remove('is-active');
-          mobileToggle.setAttribute('aria-expanded', 'false');
+        if (document.documentElement.classList.contains('layout-sidebar-mode')) {
+          var sidebar = document.getElementById('appSidebar');
+          if (document.documentElement.classList.contains('sidebar-mobile-open') && sidebar && !sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
+            document.documentElement.classList.remove('sidebar-mobile-open');
+            mobileToggle.classList.remove('is-active');
+            mobileToggle.setAttribute('aria-expanded', 'false');
+          }
+        } else {
+          if (topbarNav.classList.contains('mobile-open') && !topbarNav.contains(e.target) && !mobileToggle.contains(e.target)) {
+            topbarNav.classList.remove('mobile-open');
+            mobileToggle.classList.remove('is-active');
+            mobileToggle.setAttribute('aria-expanded', 'false');
+          }
         }
       });
     }
@@ -250,7 +270,7 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
       <span class="sidebar-brand-text">NÓMINA</span>
     </a>
     <button class="sidebar-desktop-toggle" id="sidebarDesktopToggle" type="button" title="Colapsar menú lateral" aria-label="Colapsar menú lateral">
-      <i class="fa-solid fa-bars-staggered"></i>
+      <i class="fa-solid fa-angles-left"></i>
     </button>
   </div>
   
@@ -304,16 +324,22 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
           <span>Gestión de Usuarios</span>
         </a>
       </li>
+      <li>
+        <a href="index.php?r=configuracion" class="sidebar-link <?= strpos($currentRoute, 'configuracion') === 0 ? 'active' : '' ?>" title="Configuraciones Generales" data-title="Configuración">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Configuración</span>
+        </a>
+      </li>
       <?php endif; ?>
+      <li>
+        <a href="index.php?r=auditoria" class="sidebar-link <?= (strpos($currentRoute, 'auditoria') === 0 || strpos($currentRoute, 'historial') === 0) ? 'active' : '' ?>" title="Historial del Sistema" data-title="Historial">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Historial</span>
+        </a>
+      </li>
     </ul>
   </div>
 
-  <div class="sidebar-footer">
-    <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Colapsar o expandir barra lateral" aria-label="Colapsar menú lateral">
-      <i class="fa-solid fa-chevron-left collapse-icon"></i>
-      <span class="collapse-btn-text">Colapsar menú</span>
-    </button>
-  </div>
 </aside>
 
 <script nonce="<?= Security::getCspNonce() ?>">
@@ -340,8 +366,13 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
 
   document.addEventListener('click', function(e) {
     if (window.innerWidth < 992 && document.documentElement.classList.contains('sidebar-mobile-open')) {
-      if (sidebar && !sidebar.contains(e.target) && desktopToggle && !desktopToggle.contains(e.target)) {
+      var mobileToggle = document.getElementById('topbarMobileToggle');
+      if (sidebar && !sidebar.contains(e.target) && desktopToggle && !desktopToggle.contains(e.target) && (!mobileToggle || !mobileToggle.contains(e.target))) {
         document.documentElement.classList.remove('sidebar-mobile-open');
+        if (mobileToggle) {
+          mobileToggle.classList.remove('is-active');
+          mobileToggle.setAttribute('aria-expanded', 'false');
+        }
       }
     }
   });

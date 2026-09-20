@@ -1,0 +1,242 @@
+/* ═══════════════════════════════════════════════════════════
+   MÓDULO DE CONFIGURACIONES GENERALES DE EMPRESA
+   ═══════════════════════════════════════════════════════════ */
+
+.config-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ─── SELECTOR DE CLASE DE RIESGO ─── */
+.regimen-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 860px) {
+  .regimen-selector-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.regimen-card {
+  position: relative;
+  border: 2px solid var(--border);
+  background: var(--card-bg, #ffffff);
+  border-radius: 16px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.regimen-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.08);
+}
+
+.regimen-card.active {
+  border-color: var(--primary);
+  background: rgba(15, 118, 110, 0.03);
+  box-shadow: 0 0 0 1px var(--primary), 0 10px 28px rgba(15, 118, 110, 0.12);
+}
+
+.dark-theme .regimen-card {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+.dark-theme .regimen-card.active {
+  background: rgba(20, 184, 166, 0.08);
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 1px #14b8a6, 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.regimen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.regimen-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+}
+
+.badge-minimo {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-medio {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-maximo {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.dark-theme .badge-minimo { background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
+.dark-theme .badge-medio  { background: rgba(37, 99, 235, 0.15); color: #60a5fa; border-color: rgba(37, 99, 235, 0.3); }
+.dark-theme .badge-maximo { background: rgba(220, 38, 38, 0.15); color: #f87171; border-color: rgba(220, 38, 38, 0.3); }
+
+.regimen-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+  margin: 0;
+}
+
+.regimen-desc {
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.regimen-rates-mini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ─── TABLA DE ALÍCUOTAS DE LEY ─── */
+.law-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card-bg, #ffffff);
+  margin-bottom: 20px;
+}
+
+.dark-theme .law-table-wrap {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+.law-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.law-table th {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: rgba(15, 23, 42, 0.02);
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.5px;
+}
+
+.dark-theme .law-table th {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: #1f2937;
+}
+
+.law-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+  vertical-align: middle;
+}
+
+.dark-theme .law-table td {
+  border-color: #1f2937;
+}
+
+.law-concept-title {
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.law-concept-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.pct-input-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg, #f8fafc);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  width: 120px;
+}
+
+.dark-theme .pct-input-wrap {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.pct-input-wrap input {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  text-align: right !important;
+  width: 100% !important;
+  color: var(--text) !important;
+  outline: none !important;
+}
+
+.pct-symbol {
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.info-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  color: #0369a1;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dark-theme .info-callout {
+  background: rgba(14, 165, 233, 0.12);
+  border-color: rgba(14, 165, 233, 0.35);
+  color: #38bdf8;
+}
+
+.info-callout i {
+  font-size: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}

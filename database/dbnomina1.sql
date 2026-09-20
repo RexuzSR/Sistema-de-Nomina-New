@@ -30,11 +30,14 @@ SET time_zone = "+00:00";
 CREATE TABLE `tb_auditoria` (
   `id_auditoria` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
+  `modulo` varchar(50) DEFAULT NULL,
   `accion` varchar(50) NOT NULL,
   `tabla_afectada` varchar(50) NOT NULL,
-  `id_registro_afectado` int(11) NOT NULL,
+  `id_registro_afectado` int(11) DEFAULT NULL,
+  `ip` varchar(45) DEFAULT NULL,
   `fecha_hora` datetime DEFAULT current_timestamp(),
-  `detalle` text DEFAULT NULL
+  `detalle` text DEFAULT NULL,
+  `detalles_json` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -984,6 +987,40 @@ ALTER TABLE `tb_permiso_empleado`
 ALTER TABLE `tb_usuario`
   ADD CONSTRAINT `tb_usuario_ibfk_1` FOREIGN KEY (`id_rol`) REFERENCES `tb_rol` (`id_rol`),
   ADD CONSTRAINT `tb_usuario_ibfk_2` FOREIGN KEY (`id_empleado`) REFERENCES `tb_empleado` (`id_empleado`);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `tb_configuracion_empresa`
+--
+
+CREATE TABLE IF NOT EXISTS `tb_configuracion_empresa` (
+  `id_config` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre_empresa` varchar(150) NOT NULL DEFAULT 'EMPRESA DEMO C.A.',
+  `rif` varchar(20) NOT NULL DEFAULT 'J-12345678-9',
+  `regimen_ivss` enum('Clase_I','Clase_II','Clase_III') NOT NULL DEFAULT 'Clase_II',
+  `tasa_sso_trabajador` decimal(5,4) NOT NULL DEFAULT 0.0400,
+  `tasa_sso_patronal` decimal(5,4) NOT NULL DEFAULT 0.1000,
+  `tasa_rpe_trabajador` decimal(5,4) NOT NULL DEFAULT 0.0050,
+  `tasa_rpe_patronal` decimal(5,4) NOT NULL DEFAULT 0.0210,
+  `tasa_faov_trabajador` decimal(5,4) NOT NULL DEFAULT 0.0100,
+  `tasa_faov_patronal` decimal(5,4) NOT NULL DEFAULT 0.0200,
+  `salario_minimo_legal` decimal(12,2) NOT NULL DEFAULT 130.00,
+  `tope_sso_salarios` int(11) NOT NULL DEFAULT 5,
+  `tope_rpe_salarios` int(11) NOT NULL DEFAULT 5,
+  `semanas_factor_anual` int(11) NOT NULL DEFAULT 52,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_config`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_configuracion_empresa`
+--
+
+INSERT INTO `tb_configuracion_empresa` (`id_config`, `nombre_empresa`, `rif`, `regimen_ivss`, `tasa_sso_trabajador`, `tasa_sso_patronal`, `tasa_rpe_trabajador`, `tasa_rpe_patronal`, `tasa_faov_trabajador`, `tasa_faov_patronal`, `salario_minimo_legal`, `tope_sso_salarios`, `tope_rpe_salarios`, `semanas_factor_anual`) VALUES
+(1, 'EMPRESA DEMO C.A.', 'J-12345678-9', 'Clase_II', 0.0400, 0.1000, 0.0050, 0.0210, 0.0100, 0.0200, 130.00, 5, 5, 52)
+ON DUPLICATE KEY UPDATE `id_config`=1;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

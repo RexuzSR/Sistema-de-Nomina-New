@@ -99,6 +99,37 @@ class EmpleadoModel extends Model {
         }
     }
 
+    public function getBancos(): array {
+        return $this->db->query("SELECT * FROM tb_banco ORDER BY nombre_banco")->fetchAll();
+    }
+
+    public function getCuentaBancaria(int $idEmpleado): ?array {
+        $stmt = $this->db->prepare("SELECT * FROM tb_cuenta_bancaria WHERE id_empleado = ? LIMIT 1");
+        $stmt->execute([$idEmpleado]);
+        $cuenta = $stmt->fetch();
+        return $cuenta ?: null;
+    }
+
+    public function setCuentaBancaria(int $idEmpleado, ?int $idBanco, ?string $numeroCuenta, ?string $tipoCuenta = 'Corriente'): void {
+        $numeroCuenta = trim($numeroCuenta ?? '');
+        $stmtActual = $this->db->prepare("SELECT id_cuenta FROM tb_cuenta_bancaria WHERE id_empleado = ? LIMIT 1");
+        $stmtActual->execute([$idEmpleado]);
+        $idCuenta = $stmtActual->fetchColumn();
+
+        if (!empty($idBanco) && $numeroCuenta !== '') {
+            if ($idCuenta) {
+                $stmt = $this->db->prepare("UPDATE tb_cuenta_bancaria SET id_banco = ?, numero_cuenta = ?, tipo_cuenta = ?, es_principal = 1 WHERE id_cuenta = ?");
+                $stmt->execute([$idBanco, $numeroCuenta, $tipoCuenta ?: 'Corriente', $idCuenta]);
+            } else {
+                $stmt = $this->db->prepare("INSERT INTO tb_cuenta_bancaria (id_empleado, id_banco, numero_cuenta, tipo_cuenta, es_principal) VALUES (?, ?, ?, ?, 1)");
+                $stmt->execute([$idEmpleado, $idBanco, $numeroCuenta, $tipoCuenta ?: 'Corriente']);
+            }
+        } elseif ($idCuenta && ($numeroCuenta === '' || empty($idBanco))) {
+            $stmt = $this->db->prepare("DELETE FROM tb_cuenta_bancaria WHERE id_cuenta = ?");
+            $stmt->execute([$idCuenta]);
+        }
+    }
+
     public function create(array $data): int {
         $stmt = $this->db->prepare("
             INSERT INTO tb_empleado
@@ -121,6 +152,11 @@ class EmpleadoModel extends Model {
         ]);
         $idEmpleado = (int)$this->db->lastInsertId();
         $this->setCargoActual($idEmpleado, (int)$data['id_cargo']);
+
+        if (!empty($data['id_banco']) && !empty($data['numero_cuenta'])) {
+            $this->setCuentaBancaria($idEmpleado, (int)$data['id_banco'], $data['numero_cuenta'], $data['tipo_cuenta'] ?? 'Corriente');
+        }
+
         return $idEmpleado;
     }
 
@@ -146,6 +182,10 @@ class EmpleadoModel extends Model {
             $id
         ]);
         $this->setCargoActual($id, (int)$data['id_cargo']);
+
+        if (array_key_exists('id_banco', $data)) {
+            $this->setCuentaBancaria($id, !empty($data['id_banco']) ? (int)$data['id_banco'] : null, $data['numero_cuenta'] ?? '', $data['tipo_cuenta'] ?? 'Corriente');
+        }
     }
 
     public function toggleEstado(int $id): bool {

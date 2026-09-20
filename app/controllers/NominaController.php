@@ -5,6 +5,7 @@ require_once __DIR__ . '/../models/NominaModel.php';
 require_once __DIR__ . '/../models/PeriodoModel.php';
 require_once __DIR__ . '/../models/EmpleadoModel.php';
 require_once __DIR__ . '/../models/TasaModel.php';
+require_once __DIR__ . '/../models/ConfiguracionModel.php';
 
 class NominaController extends Controller {
     public function generar(): void {
@@ -20,29 +21,24 @@ class NominaController extends Controller {
 
         $nominaModel = new NominaModel();
         $tasaModel = new TasaModel();
+        $configModel = new ConfiguracionModel();
+        $empConfig = $configModel->getConfiguracion();
 
         $nomina = $nominaModel->getByPeriodo($id_periodo);
         $ultimaTasa = $tasaModel->getUltima();
         $error = '';
 
-        $ultimaNomina = $nominaModel->getUltimaNominaGenerada();
-        $sugerencias = [
-            'salario_minimo_vigente' => '',
-            'semanas_descontar_ivss' => '2',
-            'factor_semanas_mes' => '4.333333',
-            'tasa_sso' => '4.0',
-            'tasa_rpe' => '0.5',
-            'tasa_lph' => '1.0'
-        ];
+        $semanas_anual = (float)($empConfig['semanas_factor_anual'] ?? 52);
+        $factor_mes = $semanas_anual > 0 ? number_format($semanas_anual / 12, 6, '.', '') : '4.333333';
 
-        if ($ultimaNomina) {
-            $sugerencias['salario_minimo_vigente'] = $ultimaNomina['salario_minimo_vigente'];
-            $sugerencias['semanas_descontar_ivss'] = $ultimaNomina['semanas_descontar_ivss'];
-            $sugerencias['factor_semanas_mes'] = $ultimaNomina['factor_semanas_mes'];
-            $sugerencias['tasa_sso'] = (float)$ultimaNomina['tasa_sso'] * 100;
-            $sugerencias['tasa_rpe'] = (float)$ultimaNomina['tasa_rpe'] * 100;
-            $sugerencias['tasa_lph'] = (float)$ultimaNomina['tasa_lph'] * 100;
-        }
+        $sugerencias = [
+            'salario_minimo_vigente' => (string)($empConfig['salario_minimo_legal'] ?? '130.00'),
+            'semanas_descontar_ivss' => '2',
+            'factor_semanas_mes' => $factor_mes,
+            'tasa_sso' => number_format((float)($empConfig['tasa_sso_trabajador'] ?? 0.04) * 100, 2, '.', ''),
+            'tasa_rpe' => number_format((float)($empConfig['tasa_rpe_trabajador'] ?? 0.005) * 100, 2, '.', ''),
+            'tasa_lph' => number_format((float)($empConfig['tasa_faov_trabajador'] ?? 0.01) * 100, 2, '.', '')
+        ];
 
         if (!$nomina && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
@@ -84,6 +80,13 @@ class NominaController extends Controller {
                     $tasa_rpe,
                     $tasa_lph
                 );
+
+                Audit::log('NOMINA', 'GENERAR_NOMINA', "Generó la nómina #{$id_nomina} para el periodo ID {$id_periodo}", 'tb_nomina', (int)$id_nomina, [
+                    'periodo_id' => $id_periodo,
+                    'salario_minimo' => (float)$salario_minimo,
+                    'semanas_ivss' => (float)$semanas
+                ]);
+
                 $this->redirect('index.php?r=nomina/detalle&id_nomina=' . $id_nomina . '&msg=' . urlencode('Nomina generada. Ahora ajusta los dias trabajados de cada empleado.'));
             }
         }
@@ -165,6 +168,8 @@ class NominaController extends Controller {
         }
 
         $msg = $_GET['msg'] ?? '';
+        $configModel = new ConfiguracionModel();
+        $empConfig = $configModel->getConfiguracion();
 
         $this->render('nomina/detalle', [
             'nomina' => $nomina,
@@ -173,6 +178,7 @@ class NominaController extends Controller {
             'detallesList' => $detallesList,
             'detalles' => $detalles,
             'nominaModel' => $nominaModel,
+            'empConfig' => $empConfig,
             'msg' => $msg
         ], 'Cargar Detalle de Nomina');
     }

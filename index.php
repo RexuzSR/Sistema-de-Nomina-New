@@ -10,6 +10,7 @@ Security::initSecureSession();
 Security::setSecurityHeaders();
 
 require_once __DIR__ . '/core/Database.php';
+require_once __DIR__ . '/core/Audit.php';
 require_once __DIR__ . '/core/Controller.php';
 require_once __DIR__ . '/core/Model.php';
 require_once __DIR__ . '/core/Router.php';
@@ -37,9 +38,11 @@ $router->add('permisos/aprobar', 'PermisoController', 'aprobar');
 
 $router->add('tasas', 'TasaController', 'index');
 $router->add('tasas/crear', 'TasaController', 'crear');
+$router->add('tasas/sincronizar', 'TasaController', 'sincronizar');
 
 $router->add('periodos', 'PeriodoController', 'index');
 $router->add('periodos/crear', 'PeriodoController', 'crear');
+$router->add('periodos/enviarCorreos', 'PeriodoController', 'enviarCorreos');
 
 $router->add('nomina/generar', 'NominaController', 'generar');
 $router->add('nomina/detalle', 'NominaController', 'detalle');
@@ -61,6 +64,16 @@ $router->add('usuarios', 'UsuarioAdminController', 'index');
 $router->add('usuarios/crear', 'UsuarioAdminController', 'crear');
 $router->add('usuarios/editar', 'UsuarioAdminController', 'editar');
 $router->add('usuarios/cambiarEstado', 'UsuarioAdminController', 'cambiarEstado');
+
+// Historial y Auditoría del Sistema
+$router->add('auditoria', 'AuditoriaController', 'index');
+$router->add('auditoria/detalle', 'AuditoriaController', 'detalle');
+$router->add('auditoria/exportar', 'AuditoriaController', 'exportar');
+$router->add('historial', 'AuditoriaController', 'index');
+
+// Configuraciones Generales de Nómina (Empresa, SSO, RPE, FAOV, Topes de Ley)
+$router->add('configuracion', 'ConfiguracionController', 'index');
+$router->add('configuracion/guardar', 'ConfiguracionController', 'guardar');
 
 // Obtener ruta desde parámetro query 'r' (ej: index.php?r=empleados) o 'dashboard' por defecto
 $route = isset($_GET['r']) ? trim($_GET['r'], '/') : 'dashboard';

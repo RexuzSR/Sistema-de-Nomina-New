@@ -12,8 +12,8 @@
   </div>
 </div>
 
-<div class="card" style="padding:0; overflow:hidden;">
-  <table>
+<div class="card table-responsive" id="cardTablaPermisos" style="padding:0; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+  <table id="tablaPermisos">
     <thead>
       <tr>
         <th>Empleado</th>
@@ -27,7 +27,7 @@
     </thead>
     <tbody>
       <?php if (!$permisos): ?>
-        <tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:30px;">No hay permisos registrados.</td></tr>
+        <tr class="no-data-row"><td colspan="7" style="text-align:center; color:var(--text-muted); padding:30px;">No hay permisos registrados.</td></tr>
       <?php endif; ?>
       <?php foreach ($permisos as $p): 
         $nombreComp = trim(preg_replace('/\s+/', ' ', implode(' ', array_filter([$p['primer_nombre'], $p['segundo_nombre'] ?? '', $p['primer_apellido'], $p['segundo_apellido'] ?? '']))));
@@ -49,7 +49,7 @@
           $badgeClass .= ' inactivo';
         }
       ?>
-        <tr onclick="abrirVerPermisoModal(this)" data-permiso="<?= htmlspecialchars(json_encode($pJsonData), ENT_QUOTES, 'UTF-8') ?>" title="Clic para ver detalles completos del permiso">
+        <tr class="permiso-row" onclick="abrirVerPermisoModal(this)" data-permiso="<?= htmlspecialchars(json_encode($pJsonData), ENT_QUOTES, 'UTF-8') ?>" title="Clic para ver detalles completos del permiso">
           <td>
             <div class="emp-avatar-wrapper">
               <div class="emp-avatar"><?= $inicial ?></div>
@@ -80,4 +80,18 @@
 </div>
 
 <?php require __DIR__ . '/VerModal.php'; ?>
+
+<script nonce="<?= Security::getCspNonce() ?>">
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof initTablePagination === 'function') {
+    window.permisosPaginator = initTablePagination({
+      table: '#tablaPermisos',
+      rowSelector: 'tbody tr.permiso-row',
+      storageKey: 'nomina_paginator_permisos',
+      defaultPageSize: 10,
+      appendTo: '#cardTablaPermisos'
+    });
+  }
+});
+</script>
 

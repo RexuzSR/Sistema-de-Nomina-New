@@ -325,6 +325,13 @@ body {
   flex-shrink: 0;
 }
 
+.topbar-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
 .topbar-nav .nav-btn {
   color: rgba(255, 255, 255, 0.88);
   text-decoration: none;
@@ -746,6 +753,15 @@ h2 {
   box-shadow: var(--shadow-lg);
 }
 
+/* Responsive Table Wrappers */
+.table-responsive,
+.card:has(> table),
+.card-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Base Data Table */
 table {
   width: 100%;
@@ -975,8 +991,9 @@ input[type="number"] {
 
 /* Responsive Rules */
 @media (max-width: 1280px) {
-  .header-cmdk-kbd {
-    display: none;
+  .header-cmdk-kbd,
+  .cmdk-filter-pill {
+    display: none !important;
   }
   .header-cmdk-trigger {
     min-width: 130px;
@@ -1000,6 +1017,13 @@ input[type="number"] {
     font-size: 12px;
     gap: 6px;
   }
+  .user-name {
+    max-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+  }
 }
 
 @media (max-width: 991px) {
@@ -1014,26 +1038,41 @@ input[type="number"] {
     justify-content: flex-start;
   }
 
-  /* El buscador en móvil se convierte en un botón de icono elegante */
+  /* El buscador en móvil / zoom se convierte en un botón de icono perfectamente centrado */
   .header-cmdk-trigger {
-    min-width: 38px;
-    max-width: 38px;
-    width: 38px;
-    height: 38px;
-    padding: 0;
-    justify-content: center;
-    border-radius: 10px;
-    flex: 0 0 38px;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    flex: 0 0 38px !important;
+    gap: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .header-cmdk-trigger .header-cmdk-text,
-  .header-cmdk-trigger .header-cmdk-kbd {
-    display: none;
+  .header-cmdk-trigger .header-cmdk-kbd,
+  .header-cmdk-trigger .header-cmdk-tags {
+    display: none !important;
   }
 
   .header-cmdk-trigger i {
-    font-size: 14px;
-    margin: 0;
+    font-size: 15px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    vertical-align: middle !important;
   }
 
   /* Mostrar controles de cabecera móvil (tema + hamburguesa) */
@@ -1049,7 +1088,8 @@ input[type="number"] {
   }
 
   /* Ocultar tema de dentro del nav en vista móvil si ya está en la barra superior */
-  .topbar-nav .header-theme-toggle {
+  .topbar-nav .header-theme-toggle,
+  .topbar-nav .header-theme-orb {
     display: none;
   }
 
@@ -1082,6 +1122,13 @@ input[type="number"] {
     pointer-events: auto;
     overflow-y: auto;
     padding: 16px 16px 20px;
+  }
+
+  .topbar-nav .topbar-nav-links {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 6px;
   }
 
   .topbar-nav .nav-btn {
@@ -1773,15 +1820,10 @@ table tbody tr:hover td {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 24px;
+  padding: 8px 18px;
   background: rgba(15, 23, 42, 0.02);
   border-top: 1px solid var(--border);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.detail-nav-tabs::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
 }
 
 .dark-theme .detail-nav-tabs {
@@ -1792,14 +1834,14 @@ table tbody tr:hover td {
 .detail-tab {
   background: transparent;
   border: 1px solid transparent;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 999px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.16s ease;
@@ -2047,7 +2089,8 @@ table tbody tr:hover td {
 }
 
 .detail-modal-card.detail-modal-lg {
-  max-width: 780px;
+  max-width: 860px;
+  width: min(860px, 94vw);
 }
 
 .detail-section-title {
@@ -2277,6 +2320,21 @@ table tbody tr:hover td {
   background: rgba(16, 185, 129, 0.15);
   color: #34d399;
   border-color: rgba(16, 185, 129, 0.35);
+}
+
+@media (max-width: 640px) {
+  .bcv-hero-status-card > div {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 14px !important;
+  }
+  .bcv-hero-status-card > div > div:last-child {
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+  .bcv-hero-status-card > div > div:last-child > div {
+    text-align: left !important;
+  }
 }
 
 /* ==========================================================================
@@ -3116,6 +3174,140 @@ html.layout-sidebar-mode .collapse-btn-text {
   }
   html.layout-sidebar-mode .sidebar-desktop-toggle {
     display: inline-flex;
+  }
+
+  /* ─── AJUSTE DEL HEADER EN MODO SIDEBAR PARA MÓVIL / ZOOM ELEVADO (150%) ─── */
+  html.layout-sidebar-mode .topbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding: 8px 12px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+  }
+
+  /* Botón hamburguesa a la izquierda para abrir el sidebar */
+  html.layout-sidebar-mode .topbar-mobile-actions {
+    display: inline-flex !important;
+    order: 1 !important;
+    margin-right: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Ocultar el botón duplicado de tema dentro de mobile-actions */
+  html.layout-sidebar-mode .topbar-mobile-actions #headerMobileThemeBtn {
+    display: none !important;
+  }
+
+  html.layout-sidebar-mode .topbar-mobile-actions .topbar-mobile-toggle {
+    display: inline-flex !important;
+  }
+
+  /* Barra de búsqueda centrada compacta */
+  html.layout-sidebar-mode .topbar-center-group {
+    order: 2 !important;
+    flex: 1 1 auto !important;
+    margin: 0 !important;
+    padding: 0 4px !important;
+    max-width: none !important;
+    justify-content: flex-start !important;
+  }
+
+  html.layout-sidebar-mode .header-cmdk-trigger {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: 38px !important;
+    padding: 0 10px !important;
+    gap: 8px !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+  }
+
+  html.layout-sidebar-mode .header-cmdk-trigger .header-cmdk-text {
+    display: block !important;
+  }
+
+  html.layout-sidebar-mode .header-cmdk-trigger i {
+    width: auto !important;
+    height: auto !important;
+    font-size: 14px !important;
+    display: inline-flex !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* El grupo de navegación NO debe ser un drawer desplegable en modo sidebar */
+  html.layout-sidebar-mode .topbar-nav {
+    order: 3 !important;
+    position: static !important;
+    max-height: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    overflow: visible !important;
+    width: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* El botón de tema original en topbar-nav se mantiene visible y elegante */
+  html.layout-sidebar-mode .topbar-nav #headerThemeBtn {
+    display: inline-flex !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* El user dropdown permanece como píldora compacta alineada */
+  html.layout-sidebar-mode .topbar-nav .user-dropdown-container {
+    width: auto !important;
+    margin: 0 !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+  }
+
+  html.layout-sidebar-mode .topbar-nav .userbox-toggle {
+    width: auto !important;
+    padding: 5px 10px !important;
+    font-size: 12.5px !important;
+  }
+
+  /* Menú flotante del dropdown de usuario en móvil para modo sidebar */
+  html.layout-sidebar-mode .topbar-nav .user-dropdown-menu {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 270px !important;
+    max-width: 90vw !important;
+    margin-top: 0 !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  }
+
+  /* En pantallas móviles muy estrechas (< 580px) o zoom 150%+, mostrar solo avatar circular */
+  @media (max-width: 580px) {
+    html.layout-sidebar-mode .topbar-nav .userbox-toggle .user-name,
+    html.layout-sidebar-mode .topbar-nav .userbox-toggle .arrow-icon {
+      display: none !important;
+    }
+    html.layout-sidebar-mode .topbar-nav .userbox-toggle {
+      padding: 0 !important;
+      width: 36px !important;
+      height: 36px !important;
+      border-radius: 50% !important;
+      justify-content: center !important;
+    }
+    html.layout-sidebar-mode .topbar-nav .user-avatar-pill {
+      width: 28px !important;
+      height: 28px !important;
+      font-size: 12px !important;
+    }
   }
 }
 

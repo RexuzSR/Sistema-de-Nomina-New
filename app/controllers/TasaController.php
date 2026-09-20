@@ -36,6 +36,11 @@ class TasaController extends Controller {
             } else {
                 try {
                     $tasaModel->create($fecha, (float)$valor, $fuente);
+                    Audit::log('TASAS', 'REGISTRO_MANUAL', "Registró manualmente la tasa de cambio de {$valor} Bs/USD para el día {$fecha}", 'tb_tasa_bcv', null, [
+                        'fecha' => $fecha,
+                        'valor' => (float)$valor,
+                        'fuente' => $fuente
+                    ]);
                     $this->redirect('index.php?r=tasas&msg=' . urlencode('Tasa registrada correctamente.'));
                 } catch (PDOException $e) {
                     $error = 'Error al registrar la tasa: ' . $e->getMessage();
@@ -58,6 +63,10 @@ class TasaController extends Controller {
         $tasaModel = new TasaModel();
         $resultado = $tasaModel->sincronizarTasaBcv();
 
+        if (!empty($resultado['exito'])) {
+            Audit::log('TASAS', 'SINCRONIZAR_BCV', "Sincronizó tasa oficial del BCV: " . ($resultado['tasa'] ?? 'N/A') . " Bs/USD", 'tb_tasa_bcv', null, $resultado);
+        }
+
         $isJson = isset($_GET['json']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 
         if ($isJson) {
@@ -67,10 +76,14 @@ class TasaController extends Controller {
         }
 
         $destino = !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.php?r=tasas';
+        if (strpos($destino, 'tasas/sincronizar') !== false) {
+            $destino = 'index.php?r=tasas';
+        }
         // Limpiar parámetros viejos de mensaje en el referrer
         $destino = preg_replace('/([?&])msg=[^&]+(&|$)/', '$1', $destino);
+        $destino = rtrim($destino, '&?');
         $sep = strpos($destino, '?') !== false ? '&' : '?';
         
-        $this->redirect(rtrim($destino, '&?') . $sep . 'msg=' . urlencode($resultado['mensaje']));
+        $this->redirect($destino . $sep . 'msg=' . urlencode($resultado['mensaje']));
     }
 }

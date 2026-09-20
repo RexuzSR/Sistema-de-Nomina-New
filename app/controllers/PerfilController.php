@@ -125,6 +125,16 @@ class PerfilController extends Controller {
                 $username
             );
 
+            Audit::log(
+                'PERFIL',
+                'MODIFICAR',
+                "Actualizó sus datos básicos de perfil (Usuario: {$username}, Correo: {$correo})",
+                'tb_usuario',
+                $idUsuario,
+                ['nombre_usuario' => $username, 'correo' => $correo],
+                $idUsuario
+            );
+
             $msg = '¡Perfil actualizado exitosamente!';
             if ($isAjax) {
                 header('Content-Type: application/json');
@@ -199,6 +209,16 @@ class PerfilController extends Controller {
                 "Usuario {$idUsuario} modificó exitosamente su contraseña",
                 $idUsuario,
                 $user['nombre_usuario']
+            );
+
+            Audit::log(
+                'PERFIL',
+                'PASSWORD_CHANGE',
+                "Actualizó su contraseña de acceso",
+                'tb_usuario',
+                $idUsuario,
+                null,
+                $idUsuario
             );
 
             $msg = '¡Contraseña actualizada correctamente!';

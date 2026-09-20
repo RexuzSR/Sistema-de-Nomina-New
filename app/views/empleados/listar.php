@@ -229,16 +229,21 @@ function filterEmployees() {
   rows.forEach(function(row) {
     var searchTarget = row.getAttribute('data-search') || row.textContent.toLowerCase();
     if (!query || searchTarget.indexOf(query) !== -1) {
-      row.style.display = '';
+      row.dataset.filteredOut = 'false';
       visibleCount++;
     } else {
-      row.style.display = 'none';
+      row.dataset.filteredOut = 'true';
     }
   });
 
-  var noResultsRow = document.getElementById('empNoResultsRow');
-  if (noResultsRow) {
-    noResultsRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+  if (window.empPaginator) {
+    window.empPaginator.currentPage = 1;
+    window.empPaginator.update();
+  } else {
+    var noResultsRow = document.getElementById('empNoResultsRow');
+    if (noResultsRow) {
+      noResultsRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+    }
   }
 }
 
@@ -250,4 +255,17 @@ function clearEmployeeSearch() {
     filterEmployees();
   }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof initTablePagination === 'function') {
+    window.empPaginator = initTablePagination({
+      table: '#empTable',
+      rowSelector: 'tbody tr.emp-row',
+      noResultsSelector: '#empNoResultsRow',
+      storageKey: 'nomina_paginator_empleados',
+      defaultPageSize: 10,
+      appendTo: '.emp-card-container'
+    });
+  }
+});
 </script>

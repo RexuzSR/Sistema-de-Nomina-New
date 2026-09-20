@@ -72,7 +72,7 @@
           <i class="fa-solid fa-layer-group"></i> Vista Completa
         </button>
         <button type="button" class="detail-tab" data-tab="personal" onclick="switchVerTab('personal', this)">
-          <i class="fa-solid fa-user-shield"></i> Personal & Contacto
+          <i class="fa-solid fa-id-card"></i> Personal & Contacto
         </button>
         <button type="button" class="detail-tab" data-tab="laboral" onclick="switchVerTab('laboral', this)">
           <i class="fa-solid fa-briefcase"></i> Laboral & Contrato

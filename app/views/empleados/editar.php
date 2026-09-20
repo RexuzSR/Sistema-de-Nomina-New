@@ -105,6 +105,42 @@
       <div><label>Sueldo Mensual ($ USD) *</label><input type="number" step="0.01" min="0" name="sueldo_divisa" value="<?= htmlspecialchars($empleado['sueldo_divisa']) ?>" required></div>
     </div>
 
+    <div style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+      <h3 style="margin:0; font-size:15px; color:var(--primary); display:flex; align-items:center; gap:8px;">
+        <i class="fa-solid fa-building-columns"></i> Información Bancaria
+      </h3>
+    </div>
+    <div class="form-grid" style="margin-bottom: 28px;">
+      <div>
+        <label>Entidad Bancaria</label>
+        <select name="id_banco">
+          <option value="">-- Sin banco asignado --</option>
+          <?php 
+            $bancoActual = $cuentaBancaria['id_banco'] ?? ($_POST['id_banco'] ?? '');
+            foreach ($bancos as $b): 
+          ?>
+            <option value="<?= $b['id_banco'] ?>" <?= $b['id_banco'] == $bancoActual ? 'selected' : '' ?>>
+              <?= htmlspecialchars($b['nombre_banco']) . (!empty($b['codigo_banco']) ? ' (' . htmlspecialchars($b['codigo_banco']) . ')' : '') ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div>
+        <label>Tipo de Cuenta</label>
+        <?php $tipoActual = $cuentaBancaria['tipo_cuenta'] ?? ($_POST['tipo_cuenta'] ?? 'Corriente'); ?>
+        <select name="tipo_cuenta">
+          <option value="Corriente" <?= $tipoActual === 'Corriente' ? 'selected' : '' ?>>Cuenta Corriente</option>
+          <option value="Ahorro" <?= $tipoActual === 'Ahorro' ? 'selected' : '' ?>>Cuenta de Ahorro</option>
+        </select>
+      </div>
+      <div class="full">
+        <label>Número de Cuenta (20 Dígitos)</label>
+        <input type="text" name="numero_cuenta" maxlength="20" placeholder="Ej: 01020123456789012345" 
+               value="<?= htmlspecialchars($cuentaBancaria['numero_cuenta'] ?? ($_POST['numero_cuenta'] ?? '')) ?>"
+               pattern="[0-9]{20}" title="Debe contener los 20 dígitos numéricos de la cuenta bancaria">
+      </div>
+    </div>
+
     <div style="display:flex; gap:12px; border-top:1px solid var(--border); padding-top:20px;">
       <button class="btn" type="submit"><i class="fa-solid fa-check"></i> Guardar Cambios</button>
       <a class="btn secondary" href="index.php?r=empleados"><i class="fa-solid fa-xmark"></i> Cancelar</a>

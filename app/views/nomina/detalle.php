@@ -8,10 +8,23 @@ foreach ($detallesList as $d) {
 }
 $descPeriodo = !empty($periodo['descripcion']) ? $periodo['descripcion'] : $periodo['tipo_periodo'];
 
-// Porcentajes de retención legal configurados para este periodo
-$ssoRaw = (float)($nomina['tasa_sso'] ?? 0.04);
-$rpeRaw = (float)($nomina['tasa_rpe'] ?? 0.005);
-$lphRaw = (float)($nomina['tasa_lph'] ?? 0.01);
+// Porcentajes de retención legal configurados a nivel de empresa
+$empConfig = $empConfig ?? [];
+$regimenClave = $empConfig['regimen_ivss'] ?? 'Clase_II';
+$regimenesMap = [
+    'Clase_I' => 'Riesgo Mínimo (Clase I)',
+    'Clase_II' => 'Riesgo Medio (Clase II)',
+    'Clase_III' => 'Riesgo Máximo (Clase III)'
+];
+$regimenNombre = $regimenesMap[$regimenClave] ?? $regimenClave;
+$salarioMinimoConfig = (float)($empConfig['salario_minimo_legal'] ?? ($nomina['salario_minimo_vigente'] ?? 130.00));
+$ssoRaw = (float)($empConfig['tasa_sso_trabajador'] ?? ($nomina['tasa_sso'] ?? 0.04));
+$rpeRaw = (float)($empConfig['tasa_rpe_trabajador'] ?? ($nomina['tasa_rpe'] ?? 0.005));
+$lphRaw = (float)($empConfig['tasa_faov_trabajador'] ?? ($nomina['tasa_lph'] ?? 0.01));
+
+$ssoPatronoRaw = (float)($empConfig['tasa_sso_patronal'] ?? 0.10);
+$rpePatronoRaw = (float)($empConfig['tasa_rpe_patronal'] ?? 0.021);
+$lphPatronoRaw = (float)($empConfig['tasa_faov_patronal'] ?? 0.02);
 
 $ssoVal = round($ssoRaw * 100, 2);
 $rpeVal = round($rpeRaw * 100, 2);
@@ -44,21 +57,21 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
   </div>
 
   <div class="hero-params-grid">
-    <div class="param-pill">
+    <div class="param-pill" title="Régimen de riesgo de la empresa">
+      <span class="lbl">Régimen Empresa</span>
+      <span class="val"><i class="fa-solid fa-shield-halved" style="color:var(--primary); margin-right:3px;"></i> <?= htmlspecialchars($regimenNombre) ?></span>
+    </div>
+    <div class="param-pill" title="Salario Mínimo Legal Vigente">
       <span class="lbl">Salario Mínimo</span>
-      <span class="val">Bs. <?= number_format((float)$nomina['salario_minimo_vigente'], 2, ',', '.') ?></span>
+      <span class="val">Bs. <?= number_format($salarioMinimoConfig, 2, ',', '.') ?></span>
     </div>
-    <div class="param-pill">
-      <span class="lbl">Semanas IVSS</span>
-      <span class="val"><?= $nomina['semanas_descontar_ivss'] ?></span>
-    </div>
-    <div class="param-pill param-pill-interactive" onclick="abrirModalTasasLey()" title="Clic para modificar porcentajes de retención legal de este periodo">
+    <a href="index.php?r=configuracion" class="param-pill param-pill-interactive" title="Configuración General de la Empresa (Afecta a todos los trabajadores)" style="text-decoration:none; color:inherit;">
       <div class="param-pill-header">
-        <span class="lbl"><i class="fa-solid fa-scale-balanced" style="margin-right:3px;"></i> Tasas Ley</span>
-        <span class="pill-badge-edit"><i class="fa-solid fa-pen-to-square"></i> Editar</span>
+        <span class="lbl"><i class="fa-solid fa-scale-balanced" style="margin-right:3px;"></i> Deducciones Ley (Empresa)</span>
+        <span class="pill-badge-edit"><i class="fa-solid fa-gear"></i> Ajustar</span>
       </div>
-      <span class="val">SSO <?= $ssoText ?>% | RPE <?= $rpeText ?>% | LPH <?= $lphText ?>%</span>
-    </div>
+      <span class="val">SSO <?= $ssoText ?>% | RPE <?= $rpeText ?>% | FAOV <?= $lphText ?>%</span>
+    </a>
   </div>
 
   <div class="hero-action-btn">
@@ -115,52 +128,40 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
         <tr>
           <th rowspan="2" class="sticky-col" title="Identificación del trabajador: Nombre completo, Cédula de Identidad y Cargo asignado">EMPLEADO</th>
           <th rowspan="2" title="Salario Diario: Calculado como (Sueldo en Divisas × Tasa de Cambio ÷ 30 días). Base fundamental para todos los cálculos.">S. DIARIO</th>
-          <th colspan="6" class="header-group asig-group" title="Carga manual de conceptos: Ingreso de días laborados, inasistencias, horas nocturnas, horas extra y días feriados.">CARGA DE ASIGNACIONES</th>
-          <th rowspan="2" title="Préstamos: Descuento directo por amortización de préstamos, anticipos de sueldo o adeudamientos.">Prést.</th>
-          <th rowspan="2" title="ISLR / Retenciones: Retención directa del Impuesto sobre la Renta u otros descuentos aplicables.">ISLR</th>
-          <th colspan="5" class="header-group calc-asig-group" title="Asignaciones devengadas: Resultados de Sueldo Base + Bono Nocturno + Horas Extra + Feriados + Otras Asignaciones.">ASIGNACIONES CALCULADAS</th>
-          <th colspan="5" class="header-group calc-ded-group" title="Deducciones de ley y retenciones: Resultados de SSO + RPE + LPH + Inasistencias + Préstamos + ISLR.">DEDUCCIONES CALCULADAS</th>
+          <th colspan="5" class="header-group asig-group" title="Carga manual de conceptos: Días laborados, horas nocturnas, horas extra, feriados y otras asignaciones.">CARGA DE ASIGNACIONES</th>
+          <th colspan="5" class="header-group calc-asig-group" title="Asignaciones devengadas: Resultados de Sueldo Base + Bono Nocturno + Horas Extra + Feriados + Total Bruto.">ASIGNACIONES CALCULADAS</th>
+          <th colspan="3" class="header-group ded-group" title="Carga manual de deducciones: Inasistencias, préstamos y retención directa de ISLR.">CARGA DE DEDUCCIONES</th>
+          <th colspan="5" class="header-group calc-ded-group" title="Deducciones de ley y retenciones: Resultados de SSO + RPE + FAOV + Inasistencias + Total Deducciones.">DEDUCCIONES CALCULADAS</th>
           <th rowspan="2" class="header-neto" title="Neto a Pagar: Salario líquido final a cobrar por el trabajador (Total Asignaciones Brutas - Total Deducciones).">NETO</th>
           <th rowspan="2" title="Recibo PDF: Generación e impresión del comprobante oficial de pago individual en PDF.">PDF</th>
           <th rowspan="2" title="Acciones de control: Guardar y recalcular la fila, o remover al trabajador del pago del periodo.">ACCIONES</th>
         </tr>
         <tr>
-          <!-- Carga Asignaciones -->
-          <th title="Días Trabajados: Días laborados en el periodo. Multiplica el Salario Diario para generar el Sueldo Base en asignaciones.">Días</th>
-          <th title="Días de Inasistencia: Faltas injustificadas. Genera un descuento de (Salario Diario × Días) en las deducciones del trabajador.">Inas.</th>
-          <th title="Horas Nocturnas: Laboradas en horario nocturno. Otorga un bono recargado al 30% sobre el salario/hora ordinario [(Salario Diario / 7.5) × 30% × Horas].">H.Noct</th>
-          <th title="Horas Extra: Horas extraordinarias laboradas. Se pagan al 150% del valor de la hora ordinaria [((Salario Diario × 1.5) / 7.5) × Horas].">H.Extra</th>
-          <th title="Días Feriados: Días festivos laborados que se pagan al 150% del salario diario habitual [Salario Diario × 1.5 × Días].">Feriad.</th>
-          <th title="Otras Asignaciones: Bonos o ingresos adicionales extraordinarios agregados directamente al Total Bruto.">O.Asig</th>
+          <!-- Carga Asignaciones (5) -->
+          <th title="Días Trabajados: Días laborados en el periodo.">Días</th>
+          <th title="Horas Nocturnas: Laboradas en horario nocturno [(Salario Diario / 7.5) × 30% × Horas].">H.Noct</th>
+          <th title="Horas Extra: Horas extraordinarias laboradas [((Salario Diario × 1.5) / 7.5) × Horas].">H.Extra</th>
+          <th title="Días Feriados: Días festivos laborados [Salario Diario × 1.5 × Días].">Feriad.</th>
+          <th title="Otras Asignaciones: Bonos extraordinarios agregados directamente al Total Bruto.">O.Asig</th>
 
-          <!-- Asignaciones Calculadas -->
-          <th title="Sueldo Base: Monto ganado por los días efectivamente trabajados (Salario Diario × Días Trabajados).">S.Base</th>
-          <th title="Bono Nocturno: Monto calculado por horas nocturnas [(Salario Diario / 7.5) × 30% × Horas Nocturnas].">B.Noct</th>
-          <th title="Horas Extra: Monto acumulado por horas extraordinarias [((Salario Diario × 1.5) / 7.5) × Horas Extra].">H.Extra</th>
-          <th title="Feriados: Monto acumulado por días feriados laborados [Salario Diario × 1.5 × Días Feriados].">Feriad.</th>
-          <th title="Total Asignaciones Brutas: Suma de todas las asignaciones ganadas antes de efectuar deducciones.">Tot.Bruto</th>
+          <!-- Asignaciones Calculadas (5) -->
+          <th title="Sueldo Base: Monto ganado por días laborados (Salario Diario × Días).">S.Base</th>
+          <th title="Bono Nocturno: Monto calculado por horas nocturnas.">B.Noct</th>
+          <th title="Horas Extra: Monto acumulado por horas extraordinarias.">H.Extra</th>
+          <th title="Feriados: Monto acumulado por días feriados laborados.">Feriad.</th>
+          <th title="Total Asignaciones Brutas: Suma de todas las asignaciones ganadas antes de deducciones.">Tot.Bruto</th>
 
-          <!-- Deducciones Calculadas -->
-          <th class="th-tax-col" data-tax="sso" onclick="abrirModalTasasLey('sso')" title="SSO (<?= $ssoText ?>%): Seguro Social Obligatorio. Clic para editar tasa y recalcular nómina.">
-            <div class="th-tax-header-content">
-              <span>SSO (<?= $ssoText ?>%)</span>
-              <i class="fa-solid fa-pen-to-square th-edit-icon" aria-hidden="true"></i>
-            </div>
-          </th>
-          <th class="th-tax-col" data-tax="rpe" onclick="abrirModalTasasLey('rpe')" title="RPE (<?= $rpeText ?>%): Régimen Prestacional de Empleo (Paro Forzoso). Clic para editar tasa y recalcular nómina.">
-            <div class="th-tax-header-content">
-              <span>RPE (<?= $rpeText ?>%)</span>
-              <i class="fa-solid fa-pen-to-square th-edit-icon" aria-hidden="true"></i>
-            </div>
-          </th>
-          <th class="th-tax-col" data-tax="lph" onclick="abrirModalTasasLey('lph')" title="LPH (<?= $lphText ?>%): Ley de Política Habitacional / FAOV. Clic para editar tasa y recalcular nómina.">
-            <div class="th-tax-header-content">
-              <span>LPH (<?= $lphText ?>%)</span>
-              <i class="fa-solid fa-pen-to-square th-edit-icon" aria-hidden="true"></i>
-            </div>
-          </th>
-          <th title="Descuento por Inasistencia: Descuento acumulado por días de falta injustificada (Salario Diario × Días Inasistencia).">Inasist.</th>
-          <th title="Total Deducciones: Suma total de todos los descuentos, retenciones de ley y préstamos aplicados.">Tot.Deduc.</th>
+          <!-- Carga Deducciones Adicionales (3) -->
+          <th title="Días de Inasistencia: Faltas injustificadas descontadas de las deducciones.">Inas.</th>
+          <th title="Préstamos: Amortización de préstamos o anticipos de sueldo.">Prést.</th>
+          <th title="ISLR: Retención directa del Impuesto sobre la Renta del trabajador.">ISLR</th>
+
+          <!-- Deducciones Calculadas (5) -->
+          <th title="SSO (<?= $ssoText ?>%): Seguro Social Obligatorio (Base con topes legales de 1 a 5 Salarios Mínimos)." class="th-tax-col" data-tax="sso" onclick="abrirModalTasasLey('sso')" style="cursor:pointer;">SSO (<?= $ssoText ?>%)</th>
+          <th title="RPE (<?= $rpeText ?>%): Régimen Prestacional de Empleo / Paro Forzoso." class="th-tax-col" data-tax="rpe" onclick="abrirModalTasasLey('rpe')" style="cursor:pointer;">RPE (<?= $rpeText ?>%)</th>
+          <th title="FAOV (<?= $lphText ?>%): Fondo de Ahorro Obligatorio para la Vivienda (1% de ley)." class="th-tax-col" data-tax="lph" onclick="abrirModalTasasLey('lph')" style="cursor:pointer;">FAOV (<?= $lphText ?>%)</th>
+          <th title="Descuento por Inasistencia: Salario Diario × Días Inasistencia.">Inasist.</th>
+          <th title="Total Deducciones: Suma total de retenciones de ley, préstamos, inasistencias e ISLR.">Tot.Deduc.</th>
         </tr>
       </thead>
       <tbody>
@@ -221,24 +222,26 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
 
             <td class="num-cell bold-text">Bs. <?= number_format((float)$d['sueldo_diario'], 2, ',', '.') ?></td>
 
-            <!-- Input fields con limpieza inteligente de ceros y auto-selección -->
+            <!-- Carga Asignaciones (5) -->
             <td class="input-cell"><input type="number" step="1" name="dias_trabajados" value="<?= (float)($d['dias_trabajados'] ?? 0) ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
-            <td class="input-cell"><input type="number" step="1" min="0" name="dias_inasistencia" value="<?= (float)($d['dias_inasistencia'] ?? 0) ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
             <td class="input-cell"><input type="number" step="0.1" min="0" name="bono_nocturno_qty" value="<?= (float)$bono_noct_qty ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
             <td class="input-cell"><input type="number" step="0.1" min="0" name="horas_extra_qty" value="<?= (float)$horas_extra_qty ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
             <td class="input-cell"><input type="number" step="0.5" min="0" name="feriados_qty" value="<?= (float)$feriados_qty ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
             <td class="input-cell"><input type="number" step="0.01" name="otras_asignaciones" value="0" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
-            <td class="input-cell"><input type="number" step="0.01" name="prestamo" value="<?= (float)$prestamo_monto ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
-            <td class="input-cell"><input type="number" step="0.01" name="islr" value="<?= (float)$islr_monto ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
 
-            <!-- Asignaciones Calculadas -->
+            <!-- Asignaciones Calculadas (5) -->
             <td class="num-cell cell-asig">Bs. <?= number_format((float)$d['sueldo_bss'], 2, ',', '.') ?></td>
             <td class="num-cell cell-asig">Bs. <?= number_format((float)$bono_noct_monto, 2, ',', '.') ?></td>
             <td class="num-cell cell-asig">Bs. <?= number_format((float)$horas_extra_monto, 2, ',', '.') ?></td>
             <td class="num-cell cell-asig">Bs. <?= number_format((float)$feriados_monto, 2, ',', '.') ?></td>
             <td class="num-cell cell-asig total-asig">Bs. <?= number_format((float)$d['total_asignaciones'], 2, ',', '.') ?></td>
 
-            <!-- Deducciones Calculadas -->
+            <!-- Carga Deducciones Adicionales (3) -->
+            <td class="input-cell"><input type="number" step="1" min="0" name="dias_inasistencia" value="<?= (float)($d['dias_inasistencia'] ?? 0) ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+            <td class="input-cell"><input type="number" step="0.01" name="prestamo" value="<?= (float)$prestamo_monto ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+            <td class="input-cell"><input type="number" step="0.01" name="islr" value="<?= (float)$islr_monto ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+
+            <!-- Deducciones Calculadas (5) -->
             <td class="num-cell cell-ded">Bs. <?= number_format((float)$sso_monto, 2, ',', '.') ?></td>
             <td class="num-cell cell-ded">Bs. <?= number_format((float)$rpe_monto, 2, ',', '.') ?></td>
             <td class="num-cell cell-ded">Bs. <?= number_format((float)$lph_monto, 2, ',', '.') ?></td>
@@ -327,128 +330,89 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
   </div>
 </div>
 
-<!-- MODAL PARA CONFIGURAR TASAS DE LEY (SSO, RPE, LPH) -->
+<!-- MODAL INFORMATIVO DE TASAS DE LEY A NIVEL DE EMPRESA -->
 <div id="modalTasasLey" class="modal-backdrop" style="display:none;">
-  <div class="modal-content modal-tasas-content">
+  <div class="modal-content modal-tasas-content" style="max-width:620px;">
     <div class="modal-header">
       <div style="display:flex; align-items:center; gap:12px;">
-        <div class="modal-icon-badge"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="modal-icon-badge"><i class="fa-solid fa-building-shield"></i></div>
         <div>
-          <h3 style="margin:0; font-size:17px;">Configurar Tasas de Deducción de Ley</h3>
-          <span style="font-size:12px; color:#64748b;">Ajuste los porcentajes legales de retención para este periodo</span>
+          <h3 style="margin:0; font-size:17px;">Tasas Legales de la Empresa</h3>
+          <span style="font-size:12px; color:#64748b;">Régimen legal unificado aplicable a todos los trabajadores</span>
         </div>
       </div>
       <span class="modal-close" onclick="cerrarModalTasasLey()">&times;</span>
     </div>
 
-    <form method="post" action="index.php?r=nomina/detalle" id="formTasasLey">
-      <?= Security::csrfField() ?>
-      <input type="hidden" name="id_nomina" value="<?= $nomina['id_nomina'] ?>">
-      <input type="hidden" name="action" value="actualizar_tasas_ley">
-
-      <div class="tasas-notice">
-        <i class="fa-solid fa-circle-info" style="font-size:16px; margin-top:2px;"></i>
+    <div style="padding: 20px 24px;">
+      <div class="tasas-notice" style="margin-bottom:18px;">
+        <i class="fa-solid fa-circle-info" style="font-size:18px; margin-top:2px;"></i>
         <div>
-          <strong>Cálculo Automático y Recalculación Inmediata:</strong> Al modificar estos porcentajes, el sistema recalculará en tiempo real todas las deducciones de ley y el salario neto de todos los empleados asignados a este pago de nómina.
+          <strong>Configuración Centralizada de la Empresa:</strong> Las deducciones de SSO, RPE y FAOV no se configuran por trabajador ni de forma aislada. Se establecen a nivel general de la empresa según su <strong>régimen de riesgo</strong> y afectan a todos los trabajadores automáticamente considerando los límites legales de cotización (1 a 5 Salarios Mínimos).
         </div>
       </div>
 
-      <div class="tasas-cards-grid">
-        <!-- SSO Card -->
-        <div class="tasa-edit-card" id="card-sso">
-          <div class="tasa-card-header">
-            <div class="tasa-card-title">
+      <div class="tasas-cards-grid" style="grid-template-columns: 1fr; gap:12px;">
+        <div class="tasa-edit-card" style="padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
               <i class="fa-solid fa-shield-heart" style="color:#0284c7; font-size:18px;"></i>
-              <div>
-                <strong>SSO (Seguro Social Obligatorio)</strong>
-                <span class="tasa-sub">IVSS &bull; Valor legal estándar: 4,00%</span>
-              </div>
+              <strong>Seguro Social Obligatorio (SSO)</strong>
             </div>
-            <div class="tasa-input-wrapper">
-              <input type="number" step="0.01" min="0" max="100" name="tasa_sso" id="input_tasa_sso" 
-                     value="<?= number_format($ssoVal, 2, '.', '') ?>" class="tasa-input" required>
-              <span class="tasa-suffix">%</span>
-            </div>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700; font-size:12px; padding:4px 10px; border-radius:12px;">
+              Trabajador: <?= $ssoText ?>% | Patrono: <?= number_format($ssoPatronoRaw * 100, 2, ',', '.') ?>%
+            </span>
           </div>
-          <div class="tasa-card-body">
-            <div class="tasa-info-pill">
-              <i class="fa-solid fa-calculator text-muted"></i>
-              <span><strong>Fórmula:</strong> (Salario Mínimo × Tasa %) × (Semanas IVSS ÷ 52 × 12 / 30)</span>
-            </div>
-            <p class="tasa-desc">
-              <strong>Efecto:</strong> Deduce el porcentaje fijado al trabajador para el IVSS, garantizando cobertura médica, reposos y pensión de vejez.
-            </p>
+          <div style="font-size:12px; color:#64748b;">
+            Base de cálculo: Acotada entre 1 SM (Bs. <?= number_format($salarioMinimoConfig, 2, ',', '.') ?>) y 5 SM (Bs. <?= number_format($salarioMinimoConfig * 5, 2, ',', '.') ?>). Ponderado por semanas cotizables.
           </div>
         </div>
 
-        <!-- RPE Card -->
-        <div class="tasa-edit-card" id="card-rpe">
-          <div class="tasa-card-header">
-            <div class="tasa-card-title">
+        <div class="tasa-edit-card" style="padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
               <i class="fa-solid fa-handshake-angle" style="color:#8b5cf6; font-size:18px;"></i>
-              <div>
-                <strong>RPE (Régimen Prestacional de Empleo)</strong>
-                <span class="tasa-sub">Paro Forzoso &bull; Valor legal estándar: 0,50%</span>
-              </div>
+              <strong>Régimen Prestacional de Empleo (RPE / Paro Forzoso)</strong>
             </div>
-            <div class="tasa-input-wrapper">
-              <input type="number" step="0.01" min="0" max="100" name="tasa_rpe" id="input_tasa_rpe" 
-                     value="<?= number_format($rpeVal, 2, '.', '') ?>" class="tasa-input" required>
-              <span class="tasa-suffix">%</span>
-            </div>
+            <span class="badge" style="background:#ede9fe; color:#6d28d9; font-weight:700; font-size:12px; padding:4px 10px; border-radius:12px;">
+              Trabajador: <?= $rpeText ?>% | Patrono: <?= number_format($rpePatronoRaw * 100, 2, ',', '.') ?>%
+            </span>
           </div>
-          <div class="tasa-card-body">
-            <div class="tasa-info-pill">
-              <i class="fa-solid fa-calculator text-muted"></i>
-              <span><strong>Fórmula:</strong> (Salario Mínimo × Tasa %) × (Semanas IVSS ÷ 52 × 12 / 30)</span>
-            </div>
-            <p class="tasa-desc">
-              <strong>Efecto:</strong> Retiene el porcentaje para el fondo de cesantía, otorgando compensación económica temporal ante terminación involuntaria del empleo.
-            </p>
+          <div style="font-size:12px; color:#64748b;">
+            Base de cálculo: Acotada entre 1 SM y 5 SM según el nivel de riesgo de la empresa.
           </div>
         </div>
 
-        <!-- LPH Card -->
-        <div class="tasa-edit-card" id="card-lph">
-          <div class="tasa-card-header">
-            <div class="tasa-card-title">
+        <div class="tasa-edit-card" style="padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
               <i class="fa-solid fa-house-chimney-user" style="color:#0d9488; font-size:18px;"></i>
-              <div>
-                <strong>LPH / FAOV (Ley de Política Habitacional)</strong>
-                <span class="tasa-sub">BANAVIH &bull; Valor legal estándar: 1,00%</span>
-              </div>
+              <strong>Fondo de Ahorro Obligatorio para la Vivienda (FAOV / BANAVIH)</strong>
             </div>
-            <div class="tasa-input-wrapper">
-              <input type="number" step="0.01" min="0" max="100" name="tasa_lph" id="input_tasa_lph" 
-                     value="<?= number_format($lphVal, 2, '.', '') ?>" class="tasa-input" required>
-              <span class="tasa-suffix">%</span>
-            </div>
+            <span class="badge" style="background:#ccfbf1; color:#0f766e; font-weight:700; font-size:12px; padding:4px 10px; border-radius:12px;">
+              Trabajador: <?= $lphText ?>% | Patrono: <?= number_format($lphPatronoRaw * 100, 2, ',', '.') ?>%
+            </span>
           </div>
-          <div class="tasa-card-body">
-            <div class="tasa-info-pill">
-              <i class="fa-solid fa-calculator text-muted"></i>
-              <span><strong>Fórmula:</strong> Total Asignaciones Brutas Devengadas × Tasa %</span>
-            </div>
-            <p class="tasa-desc">
-              <strong>Efecto:</strong> Descuenta el porcentaje sobre la totalidad de asignaciones brutas devengadas para acreditar su cuenta individual ante el BANAVIH (créditos de vivienda).
-            </p>
+          <div style="font-size:12px; color:#64748b;">
+            Base de cálculo: 1% sobre asignaciones brutas devengadas (mínimo 1 Salario Mínimo Legal).
           </div>
         </div>
       </div>
 
-      <div class="tasas-modal-actions">
-        <button type="button" class="btn-restore-defaults" onclick="restablecerTasasPorDefecto()">
-          <i class="fa-solid fa-rotate-left"></i> Restablecer Valores Estándar (4% / 0.5% / 1%)
-        </button>
+      <div style="margin-top:18px; padding:12px 14px; background:var(--bg-card, #f8fafc); border-radius:8px; border:1px solid var(--border-color, #e2e8f0); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <span style="font-size:13px; color:#475569;">
+          <i class="fa-solid fa-circle-check" style="color:#10b981; margin-right:4px;"></i>
+          Régimen activo: <strong><?= htmlspecialchars($regimenNombre) ?></strong>
+        </span>
+        <a href="index.php?r=configuracion" class="btn btn-hero-cta" style="padding:8px 18px; font-size:13px; text-decoration:none;">
+          <i class="fa-solid fa-sliders" style="margin-right:6px;"></i> Ir a Configuración General
+        </a>
       </div>
+    </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn secondary" onclick="cerrarModalTasasLey()">Cancelar</button>
-        <button type="submit" class="btn btn-hero-cta" style="padding:10px 22px;">
-          <i class="fa-solid fa-calculator" style="margin-right:6px;"></i> Guardar y Recalcular Nómina
-        </button>
-      </div>
-    </form>
+    <div class="modal-footer" style="padding:14px 24px;">
+      <button type="button" class="btn secondary" onclick="cerrarModalTasasLey()">Cerrar</button>
+    </div>
   </div>
 </div>
 
@@ -467,31 +431,31 @@ function marcarTodos(estado) {
   checkboxes.forEach(function(chk) { chk.checked = estado; });
 }
 
-// Tasas de Ley: Tooltips interactivos y Modal
+// Tasas de Ley: Tooltips interactivos y Modal Informativo
 const taxData = {
   sso: {
     title: 'Seguro Social Obligatorio (SSO)',
     badgeClass: 'sso',
     badgeText: 'SSO <?= $ssoText ?>%',
-    formula: '(Salario Mínimo × Tasa %) × (Semanas IVSS ÷ 52 × 12 / 30)',
-    funcion: 'Se calcula sobre el Salario Mínimo Legal vigente (tope legal de 5 salarios mínimos) ponderado según las semanas cotizables (lunes) del periodo de nómina.',
+    formula: '(Base Cotizable [1 a 5 SM] × Tasa %) × (Semanas IVSS ÷ 52 × 12 / 30)',
+    funcion: 'Configurado a nivel de empresa según régimen de riesgo. Se calcula sobre el sueldo acotado entre 1 SM (mínimo) y 5 SM (máximo legal Art. 107 RGLSS).',
     efecto: 'Deduce obligatoriamente el <strong><?= $ssoText ?>%</strong> del salario base del trabajador para el IVSS. Garantiza asistencia médica, cobertura de reposos y derecho a la pensión de vejez.'
   },
   rpe: {
-    title: 'Régimen Prestacional de Empleo (RPE)',
+    title: 'Régimen Prestacional de Empleo (RPE / Paro Forzoso)',
     badgeClass: 'rpe',
     badgeText: 'RPE <?= $rpeText ?>%',
-    formula: '(Salario Mínimo × Tasa %) × (Semanas IVSS ÷ 52 × 12 / 30)',
-    funcion: 'Calculado sobre el Salario Mínimo Legal vigente en proporción a las semanas cotizables del periodo de pago.',
-    efecto: 'Retiene el <strong><?= $rpeText ?>%</strong> del salario para el fondo solidario de paro forzoso. Otorga indemnización económica temporal y reinserción ante despido involuntario.'
+    formula: '(Base Cotizable [1 a 5 SM] × Tasa %) × (Semanas IVSS ÷ 52 × 12 / 30)',
+    funcion: 'Configurado a nivel de empresa según régimen de riesgo (Clase I: 0.5%, Clase II: 0.5%, Clase III: 0.5% trabajador). Tope máximo: 5 salarios mínimos.',
+    efecto: 'Retiene el <strong><?= $rpeText ?>%</strong> del salario para el fondo solidario de cesantía/paro forzoso de todos los empleados de la empresa.'
   },
   lph: {
-    title: 'Ley de Política Habitacional (LPH / FAOV)',
+    title: 'Fondo de Ahorro Obligatorio para la Vivienda (FAOV)',
     badgeClass: 'lph',
-    badgeText: 'LPH <?= $lphText ?>%',
-    formula: 'Total Asignaciones Brutas Devengadas × Tasa %',
-    funcion: 'A diferencia del SSO y RPE, este aporte se calcula sobre el <strong>Total de Asignaciones Brutas</strong> devengadas (sueldo base + bono nocturno + horas extra + feriados).',
-    efecto: 'Descuenta el <strong><?= $lphText ?>%</strong> de todos los ingresos brutos devengados y los transfiere a la cuenta de ahorro habitacional del trabajador en BANAVIH para créditos de vivienda.'
+    badgeText: 'FAOV <?= $lphText ?>%',
+    formula: 'Total Asignaciones Devengadas × Tasa 1%',
+    funcion: 'Aporte obligatorio fijado en 1% para el trabajador y 2% para el patrono sobre la totalidad de ingresos brutos devengados.',
+    efecto: 'Descuenta el <strong><?= $lphText ?>%</strong> de las asignaciones brutas devengadas para la cuenta de ahorro habitacional del trabajador en BANAVIH.'
   }
 };
 
@@ -524,8 +488,8 @@ document.querySelectorAll('.th-tax-col[data-tax]').forEach(function(el) {
         <div class="tax-tt-effect">${data.efecto}</div>
       </div>
       <div class="tax-tt-footer">
-        <i class="fa-solid fa-pen-to-square"></i>
-        <span>Haz clic en la columna para modificar la tasa</span>
+        <i class="fa-solid fa-building-gear"></i>
+        <span>Parámetro corporativo &bull; Clic para ver régimen</span>
       </div>
     `;
 
@@ -563,27 +527,16 @@ function abrirModalTasasLey(foco = '') {
     tooltipEl.style.display = 'none';
   }
   const modal = document.getElementById('modalTasasLey');
-  modal.style.display = 'flex';
-
-  if (foco) {
-    setTimeout(function() {
-      const input = document.getElementById('input_tasa_' + foco);
-      if (input) {
-        input.focus();
-        input.select();
-      }
-    }, 120);
+  if (modal) {
+    modal.style.display = 'flex';
   }
 }
 
 function cerrarModalTasasLey() {
-  document.getElementById('modalTasasLey').style.display = 'none';
-}
-
-function restablecerTasasPorDefecto() {
-  document.getElementById('input_tasa_sso').value = '4.00';
-  document.getElementById('input_tasa_rpe').value = '0.50';
-  document.getElementById('input_tasa_lph').value = '1.00';
+  const modal = document.getElementById('modalTasasLey');
+  if (modal) {
+    modal.style.display = 'none';
+  }
 }
 
 window.addEventListener('click', function(e) {

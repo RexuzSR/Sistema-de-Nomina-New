@@ -391,5 +391,6 @@ window.updateThemeButtonState = updateThemeButtonState;
 </div>
 
 <script nonce="<?= Security::getCspNonce() ?>" src="assets/js/security.js"></script>
+<script nonce="<?= Security::getCspNonce() ?>" src="assets/js/table-paginator.js"></script>
 </body>
 </html>

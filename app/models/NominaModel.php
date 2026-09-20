@@ -215,20 +215,40 @@ class NominaModel extends Model {
             2
         );
 
-        $factor_semanas_mes = (float)($nomina['factor_semanas_mes'] ?? 4.333333);
-        $prorrateo = ($nomina['semanas_descontar_ivss'] ?? 0) / $factor_semanas_mes;
+        require_once __DIR__ . '/ConfiguracionModel.php';
+        $configModel = new ConfiguracionModel();
+        $empConfig = $configModel->getConfiguracion();
 
-        $tasa_sso = (float)($nomina['tasa_sso'] ?? $tasas['S.S.O']['valor_default'] ?? 0.0400);
-        $tasa_rpe = (float)($nomina['tasa_rpe'] ?? $tasas['R.P.E']['valor_default'] ?? 0.0050);
-        $tasa_lph = (float)($nomina['tasa_lph'] ?? $tasas['L.P.H']['valor_default'] ?? 0.0100);
+        $semanas_anual = (float)($empConfig['semanas_factor_anual'] ?? 52);
+        $factor_semanas_mes = $semanas_anual > 0 ? ($semanas_anual / 12) : 4.333333;
+        $semanas_periodo = (float)($nomina['semanas_descontar_ivss'] ?? 2.0);
+        if ($semanas_periodo <= 0) $semanas_periodo = 2.0;
+        $prorrateo = $semanas_periodo / $factor_semanas_mes;
+
+        // Tasas globales de ley configuradas a nivel de empresa
+        $tasa_sso = (float)($empConfig['tasa_sso_trabajador'] ?? 0.0400);
+        $tasa_rpe = (float)($empConfig['tasa_rpe_trabajador'] ?? 0.0050);
+        $tasa_lph = (float)($empConfig['tasa_faov_trabajador'] ?? 0.0100);
+
+        // Salario mínimo legal y topes de cotización (Art. 107 RGLSS: 1 a 5 Salarios Mínimos)
+        $salarioMinimo = (float)($empConfig['salario_minimo_legal'] ?? 130.00);
+        $topeSsoSalarios = (int)($empConfig['tope_sso_salarios'] ?? 5);
+        $topeRpeSalarios = (int)($empConfig['tope_rpe_salarios'] ?? 5);
+
+        // Sueldo mensual base del trabajador
+        $sueldoMensual = (float)($empleado['sueldo_divisa'] ?? 0);
+
+        // Base de cotización mensual acotada estrictamente entre mínimo (1 SM) y máximo (ej. 5 SM)
+        $baseCotizableSso = max($salarioMinimo, min($sueldoMensual, $topeSsoSalarios * $salarioMinimo));
+        $baseCotizableRpe = max($salarioMinimo, min($sueldoMensual, $topeRpeSalarios * $salarioMinimo));
 
         $sso = 0.0;
         $rpe = 0.0;
         if ($dias_trabajados > 0) {
-            $sso = round($tasa_sso * ($nomina['salario_minimo_vigente'] ?? 0) * $prorrateo, 2);
-            $rpe = round($tasa_rpe * ($nomina['salario_minimo_vigente'] ?? 0) * $prorrateo, 2);
+            $sso = round($tasa_sso * $baseCotizableSso * $prorrateo, 2);
+            $rpe = round($tasa_rpe * $baseCotizableRpe * $prorrateo, 2);
         }
-        $lph = round($tasa_lph * $total_asignaciones, 2);
+        $lph = round($tasa_lph * max($salarioMinimo, $total_asignaciones), 2);
         $inasistencia_monto = round($sueldo_diario * $dias_inasistencia, 2);
 
         $total_deducciones = round($sso + $rpe + $lph + $prestamo + $inasistencia_monto + $islr, 2);
@@ -411,5 +431,24 @@ class NominaModel extends Model {
             'neto_bs' => (float)$res['neto_bs'],
             'trabajadores_procesados' => (int)$res['trabajadores_procesados']
         ];
+    }
+
+    public function recalcularNominaCompleta(int $idNomina): void {
+        $detalles = $this->getDetallesByNomina($idNomina);
+        foreach ($detalles as $d) {
+            $idDetalle = (int)$d['id_detalle'];
+            $idEmpleado = (int)$d['id_empleado'];
+            $inputs = [
+                'dias_trabajados' => $d['dias_trabajados'],
+                'dias_inasistencia' => $d['dias_inasistencia'],
+                'horas_extra_qty' => $this->getAsignacionCantidad($idDetalle, 3),
+                'bono_nocturno_qty' => $this->getAsignacionCantidad($idDetalle, 2),
+                'feriados_qty' => $this->getAsignacionCantidad($idDetalle, 4),
+                'otras_asignaciones' => $this->getAsignacionMonto($idDetalle, 5),
+                'prestamo' => $this->getDeduccionMonto($idDetalle, 4),
+                'islr' => $this->getDeduccionMonto($idDetalle, 6)
+            ];
+            $this->calcularYGuardarDetalle($idNomina, $idEmpleado, $inputs);
+        }
     }
 }

@@ -54,7 +54,7 @@
   </div>
 </div>
 
-<div class="card" style="padding:0; overflow:hidden; max-width:1000px;">
+<div class="card table-responsive" id="cardTablaTasas" style="padding:0; overflow-x:auto; -webkit-overflow-scrolling:touch; max-width:1000px;">
   <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
     <h3 style="margin:0; font-size:15px; font-weight:700; color:var(--text);">
       <i class="fa-solid fa-clock-rotate-left" style="color:var(--primary); margin-right:6px;"></i> Registros Históricos de Tasas
@@ -63,7 +63,7 @@
       Total: <?= count($tasas) ?> tasas archivadas
     </span>
   </div>
-  <table>
+  <table id="tablaTasas">
     <thead>
       <tr>
         <th>Fecha de Vigencia</th>
@@ -73,7 +73,7 @@
     </thead>
     <tbody>
       <?php if (!$tasas): ?>
-        <tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:36px;">Aún no hay tasas registradas. Puede sincronizar con el BCV con un clic o ingresar una manualmente.</td></tr>
+        <tr class="no-data-row"><td colspan="3" style="text-align:center; color:var(--text-muted); padding:36px;">Aún no hay tasas registradas. Puede sincronizar con el BCV con un clic o ingresar una manualmente.</td></tr>
       <?php endif; ?>
       <?php foreach ($tasas as $t): 
         $tJsonData = [
@@ -83,7 +83,7 @@
           'fuente' => $t['fuente']
         ];
       ?>
-        <tr onclick="abrirVerTasaModal(this)" data-tasa="<?= htmlspecialchars(json_encode($tJsonData), ENT_QUOTES, 'UTF-8') ?>" title="Clic para ver detalles completos de esta tasa">
+        <tr class="tasa-row" onclick="abrirVerTasaModal(this)" data-tasa="<?= htmlspecialchars(json_encode($tJsonData), ENT_QUOTES, 'UTF-8') ?>" title="Clic para ver detalles completos de esta tasa">
           <td><strong style="color:var(--text); font-size:13.5px;"><i class="fa-solid fa-calendar-day" style="margin-right:6px; color:var(--primary);"></i><?= htmlspecialchars($t['fecha']) ?></strong></td>
           <td><strong style="color:var(--text); font-size:15px;">Bs. <?= number_format((float)$t['valor_tasa'], 4, ',', '.') ?></strong></td>
           <td>
@@ -102,7 +102,7 @@
 <?php require __DIR__ . '/VerModal.php'; ?>
 
 
-<script>
+<script nonce="<?= Security::getCspNonce() ?>">
 function animateSync(btn) {
   const icon = document.getElementById('syncIcon');
   if (icon) {
@@ -134,4 +134,16 @@ function updateConnectionUI() {
 window.addEventListener('online', updateConnectionUI);
 window.addEventListener('offline', updateConnectionUI);
 updateConnectionUI();
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof initTablePagination === 'function') {
+    window.tasasPaginator = initTablePagination({
+      table: '#tablaTasas',
+      rowSelector: 'tbody tr.tasa-row',
+      storageKey: 'nomina_paginator_tasas',
+      defaultPageSize: 10,
+      appendTo: '#cardTablaTasas'
+    });
+  }
+});
 </script>
