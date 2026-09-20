@@ -253,6 +253,31 @@ class PerfilController extends Controller {
         // Opción 1: Selección de Avatar Preset
         if (!empty($_POST['avatar_preset'])) {
             $preset = trim($_POST['avatar_preset']);
+            if ($preset === 'multitel') {
+                if ($this->usuarioModel->isUsuarioProtegido($idUsuario)) {
+                    $fotoPath = 'assets/images/logo_multitel.png';
+                    $this->usuarioModel->actualizarFoto($idUsuario, $fotoPath);
+                    $_SESSION['user_avatar'] = $fotoPath;
+
+                    if ($isAjax) {
+                        header('Content-Type: application/json');
+                        echo json_encode(['success' => true, 'foto_perfil' => $fotoPath, 'message' => '¡Emblema Multitel seleccionado con éxito!']);
+                        exit;
+                    }
+                    $_SESSION['flash_success'] = '¡Emblema Multitel actualizado!';
+                    $this->redirect('index.php?r=perfil');
+                } else {
+                    $error = 'El logo descargado de Multitel en el sistema es exclusivo para los administradores principales. Si deseas utilizarlo, debes subirlo desde tu dispositivo.';
+                    if ($isAjax) {
+                        header('Content-Type: application/json', true, 403);
+                        echo json_encode(['success' => false, 'error' => $error]);
+                        exit;
+                    }
+                    $_SESSION['flash_error'] = $error;
+                    $this->redirect('index.php?r=perfil');
+                }
+            }
+
             // Validar que sea un preset permitido (ej: preset_1, preset_2, etc.)
             $validPresets = ['preset_1', 'preset_2', 'preset_3', 'preset_4', 'preset_5', 'preset_6'];
             if (in_array($preset, $validPresets, true)) {

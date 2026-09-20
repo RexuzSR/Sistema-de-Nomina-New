@@ -378,33 +378,70 @@ body {
 }
 
 .userbox-toggle {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 0 14px 0 6px;
-  height: 40px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  padding: 5px 14px 5px 6px;
+  min-height: 44px;
+  height: auto;
   box-sizing: border-box;
-  font-size: 13px;
-  font-weight: 600;
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  gap: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
   white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .userbox-toggle:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.32);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.38);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+  transform: translateY(-1px);
+}
+
+.user-info-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.15;
+}
+
+.user-info-text .user-name {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+}
+
+.user-info-text .user-role-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  display: inline-flex;
+  align-items: center;
+  gap: 4.5px;
+  margin-top: 1.5px;
+}
+
+.role-online-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  display: inline-block;
+  box-shadow: 0 0 6px #10b981;
 }
 
 .userbox-toggle .arrow-icon {
-  font-size: 10px;
-  opacity: 0.8;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+  margin-left: 4px;
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -413,8 +450,8 @@ body {
 }
 
 .user-dropdown-container.open .userbox-toggle {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.45);
 }
 
 /* Botón Hamburguesa Móvil */
@@ -472,24 +509,36 @@ body {
 
 /* User Avatar Pill */
 .user-avatar-pill {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%);
   color: #ffffff;
   font-weight: 800;
-  font-size: 11px;
+  font-size: 13px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(45,212,191,0.4);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   overflow: hidden;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
 }
 
-.user-avatar-pill.has-img,
+.user-avatar-pill.has-img {
+  padding: 0;
+  overflow: hidden;
+  background: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+}
+
 .u-card-avatar.has-img {
   padding: 0;
   overflow: hidden;
+  background: #ffffff;
+  border: 2px solid rgba(99, 102, 241, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .user-avatar-pill.has-img img,
@@ -3273,8 +3322,10 @@ html.layout-sidebar-mode .collapse-btn-text {
 
   html.layout-sidebar-mode .topbar-nav .userbox-toggle {
     width: auto !important;
-    padding: 5px 10px !important;
+    padding: 5px 14px 5px 6px !important;
     font-size: 12.5px !important;
+    min-height: 44px !important;
+    height: auto !important;
   }
 
   /* Menú flotante del dropdown de usuario en móvil para modo sidebar */
@@ -3292,21 +3343,21 @@ html.layout-sidebar-mode .collapse-btn-text {
 
   /* En pantallas móviles muy estrechas (< 580px) o zoom 150%+, mostrar solo avatar circular */
   @media (max-width: 580px) {
-    html.layout-sidebar-mode .topbar-nav .userbox-toggle .user-name,
+    html.layout-sidebar-mode .topbar-nav .userbox-toggle .user-info-text,
     html.layout-sidebar-mode .topbar-nav .userbox-toggle .arrow-icon {
       display: none !important;
     }
     html.layout-sidebar-mode .topbar-nav .userbox-toggle {
       padding: 0 !important;
-      width: 36px !important;
-      height: 36px !important;
+      width: 40px !important;
+      height: 40px !important;
       border-radius: 50% !important;
       justify-content: center !important;
     }
     html.layout-sidebar-mode .topbar-nav .user-avatar-pill {
-      width: 28px !important;
-      height: 28px !important;
-      font-size: 12px !important;
+      width: 32px !important;
+      height: 32px !important;
+      font-size: 13px !important;
     }
   }
 }

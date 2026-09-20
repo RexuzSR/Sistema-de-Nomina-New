@@ -6,6 +6,23 @@ $currentRoute = $GLOBALS['activeRoute'] ?? $_GET['r'] ?? 'dashboard';
 $uNombre = $_SESSION['user_nombre'] ?? $_SESSION['usuario'] ?? 'Usuario';
 $uInicial = strtoupper(substr($uNombre, 0, 1));
 $uAvatar = $_SESSION['user_avatar'] ?? '';
+$uRol = $_SESSION['user_rol'] ?? 'Usuario';
+
+// Sincronizar automáticamente el avatar con la base de datos para reflejar cambios inmediatos
+if (!empty($_SESSION['usuario'])) {
+    try {
+        $dbConn = Database::getInstance();
+        $stmtAv = $dbConn->prepare("SELECT foto_perfil FROM tb_usuario WHERE nombre_usuario = ? OR id_usuario = ? LIMIT 1");
+        $stmtAv->execute([$_SESSION['usuario'], $_SESSION['user_id'] ?? 0]);
+        $dbAvatar = $stmtAv->fetchColumn();
+        if ($dbAvatar !== false && $dbAvatar !== null && trim((string)$dbAvatar) !== '') {
+            $uAvatar = trim((string)$dbAvatar);
+            $_SESSION['user_avatar'] = $uAvatar;
+        }
+    } catch (\Throwable $e) {
+        // Fallback al valor en sesión si no hay conexión
+    }
+}
 
 $dbPrefs = [];
 if (!empty($_SESSION['user_preferencias'])) {
@@ -126,7 +143,10 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
           <?php else: ?>
             <span class="user-avatar-pill"><?= $uInicial ?></span>
           <?php endif; ?>
-          <span class="user-name"><?= htmlspecialchars($uNombre) ?></span>
+          <div class="user-info-text">
+            <span class="user-name"><?= htmlspecialchars($uNombre) ?></span>
+            <span class="user-role-label"><span class="role-online-dot"></span> <?= htmlspecialchars($uRol) ?></span>
+          </div>
           <i class="fa-solid fa-chevron-down arrow-icon"></i>
         </button>
         <div class="user-dropdown-menu" id="userDropdownMenu">

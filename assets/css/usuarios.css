@@ -253,6 +253,26 @@
   margin-left: 6px;
   vertical-align: middle;
 }
+.badge-protegido-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.2);
+  font-size: .68rem;
+  font-weight: 800;
+  border-radius: 6px;
+  letter-spacing: .2px;
+}
+.btn-eliminar {
+  color: #ef4444;
+}
+.btn-eliminar:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
 
 /* Role badges */
 .role-badge {
@@ -467,6 +487,207 @@
 
 .modal-body {
   padding: 24px 28px;
+}
+
+/* ═══════════════ SELECTOR DE AVATARES EN MODAL ═══════════════ */
+.modal-avatar-selection {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+}
+
+.avatar-hero-display {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed #cbd5e1;
+}
+
+.avatar-display-ring {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2.5px solid #6366f1;
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.22);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.avatar-display-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-preview-letter {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-display-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.avatar-display-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.avatar-tag-badge {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.avatar-active-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.avatar-display-desc {
+  font-size: 11.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.avatar-options-strip {
+  padding-top: 12px;
+}
+
+.avatar-strip-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.avatar-presets-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.avatar-picker-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2.5px solid #cbd5e1;
+  background: #ffffff;
+  padding: 2px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.avatar-picker-btn img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: block;
+}
+
+.avatar-picker-letter-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.avatar-picker-btn:hover {
+  transform: scale(1.12);
+  border-color: #6366f1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.avatar-picker-btn.selected {
+  border-color: #6366f1;
+  transform: scale(1.08);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.28);
+}
+
+.picker-check {
+  display: none;
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 17px;
+  height: 17px;
+  background: #10b981;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 9px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.avatar-picker-btn.selected .picker-check {
+  display: flex;
+}
+
+.avatar-picker-btn.avatar-picker-device {
+  background: #f0fdf4;
+  border: 1.5px dashed #16a34a;
+}
+.avatar-picker-btn.avatar-picker-device:hover {
+  background: #dcfce7;
+  border-color: #15803d;
+}
+.avatar-picker-device-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #16a34a;
+  font-size: 15px;
 }
 .modal-form-grid {
   display: grid;
@@ -721,6 +942,38 @@
 .dark-theme .badge-tu-cuenta {
   background: #312e81;
   color: #a5b4fc;
+}
+.dark-theme .modal-avatar-selection {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: #334155;
+}
+.dark-theme .avatar-hero-display {
+  border-bottom-color: #334155;
+}
+.dark-theme .avatar-display-ring {
+  background: #0f172a;
+  border-color: #818cf8;
+}
+.dark-theme .avatar-active-name {
+  color: #f1f5f9;
+}
+.dark-theme .avatar-display-desc {
+  color: #94a3b8;
+}
+.dark-theme .avatar-strip-title {
+  color: #94a3b8;
+}
+.dark-theme .avatar-picker-btn {
+  background: #1e293b;
+  border-color: #475569;
+}
+.dark-theme .avatar-picker-letter-icon {
+  background: #0f172a;
+  color: #94a3b8;
+}
+.dark-theme .avatar-picker-btn.selected {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.35);
 }
 
 /* ─── RESPONSIVE ─── */

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 17-09-2026 a las 23:42:45
+-- Tiempo de generación: 20-09-2026 a las 06:29:43
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -39,6 +39,20 @@ CREATE TABLE `tb_auditoria` (
   `detalle` text DEFAULT NULL,
   `detalles_json` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_auditoria`
+--
+
+INSERT INTO `tb_auditoria` (`id_auditoria`, `id_usuario`, `modulo`, `accion`, `tabla_afectada`, `id_registro_afectado`, `ip`, `fecha_hora`, `detalle`, `detalles_json`) VALUES
+(2, 1, 'SISTEMA', 'CONFIGURACIÓN', 'tb_auditoria', NULL, '127.0.0.1', '2026-09-19 23:12:28', 'Configuración e inicialización del Historial de Actividades del Sistema', '{\n    \"modulo\": \"Historial\",\n    \"estado\": \"activo\"\n}'),
+(3, 1, 'TASAS', 'SINCRONIZAR_BCV', 'tb_tasa_bcv', NULL, '127.0.0.1', '2026-09-19 23:42:29', 'Sincronizó tasa oficial del BCV: 848.5458 Bs/USD', '{\n    \"exito\": true,\n    \"origen\": \"online\",\n    \"accion\": \"actualizada\",\n    \"tasa\": 848.5458,\n    \"fecha\": \"2026-09-18\",\n    \"fuente\": \"BCV Oficial (DolarApi)\",\n    \"mensaje\": \"Tasa BCV sincronizada con éxito: 1 USD = 848,5458 Bs. (Vigencia: 2026-09-18)\"\n}'),
+(4, 1, 'TASAS', 'SINCRONIZAR_BCV', 'tb_tasa_bcv', NULL, '::1', '2026-09-19 23:49:40', 'Sincronizó tasa oficial del BCV: 848.5458 Bs/USD', '{\n    \"exito\": true,\n    \"origen\": \"online\",\n    \"accion\": \"actualizada\",\n    \"tasa\": 848.5458,\n    \"fecha\": \"2026-09-18\",\n    \"fuente\": \"BCV Oficial (DolarApi)\",\n    \"mensaje\": \"Tasa BCV sincronizada con éxito: 1 USD = 848,5458 Bs. (Vigencia: 2026-09-18)\"\n}'),
+(5, 1, 'CONFIGURACION', 'MODIFICAR', 'tb_configuracion_empresa', 1, '::1', '2026-09-20 00:00:17', 'Actualizó los parámetros globales de empresa: Régimen Clase_II, SSO Trab: 4%, RPE Trab: 0.5%, FAOV Trab: 5%, Salario Mínimo: Bs. 130, Tope: 5 SM', '{\n    \"csrf_token\": \"1eed4359b6d63051abca722fa6bff894d9c67057a021a6ca54c060efba23a908\",\n    \"nombre_empresa\": \"EMPRESA DEMO C.A.\",\n    \"rif\": \"J-12345678-9\",\n    \"regimen_ivss\": \"Clase_II\",\n    \"tasa_sso_trabajador\": \"4.00\",\n    \"tasa_sso_patronal\": \"10.00\",\n    \"tasa_rpe_trabajador\": \"0.50\",\n    \"tasa_rpe_patronal\": \"2.10\",\n    \"tasa_faov_trabajador\": \"5.00\",\n    \"tasa_faov_patronal\": \"9.00\",\n    \"salario_minimo_legal\": \"130.00\",\n    \"tope_sso_salarios\": \"5\",\n    \"tope_rpe_salarios\": \"5\",\n    \"semanas_factor_anual\": \"52\"\n}'),
+(6, 1, 'CONFIGURACION', 'MODIFICAR', 'tb_configuracion_empresa', 1, '::1', '2026-09-20 00:00:35', 'Actualizó los parámetros globales de empresa: Régimen Clase_II, SSO Trab: 4%, RPE Trab: 0.5%, FAOV Trab: 1%, Salario Mínimo: Bs. 130, Tope: 5 SM', '{\n    \"csrf_token\": \"1eed4359b6d63051abca722fa6bff894d9c67057a021a6ca54c060efba23a908\",\n    \"nombre_empresa\": \"EMPRESA DEMO C.A.\",\n    \"rif\": \"J-12345678-9\",\n    \"regimen_ivss\": \"Clase_II\",\n    \"tasa_sso_trabajador\": \"4.00\",\n    \"tasa_sso_patronal\": \"10.00\",\n    \"tasa_rpe_trabajador\": \"0.50\",\n    \"tasa_rpe_patronal\": \"2.10\",\n    \"tasa_faov_trabajador\": \"1.00\",\n    \"tasa_faov_patronal\": \"2.00\",\n    \"salario_minimo_legal\": \"130.00\",\n    \"tope_sso_salarios\": \"5\",\n    \"tope_rpe_salarios\": \"5\",\n    \"semanas_factor_anual\": \"52\"\n}'),
+(7, 1, 'TASAS', 'SINCRONIZAR_BCV', 'tb_tasa_bcv', NULL, '::1', '2026-09-20 00:10:21', 'Sincronizó tasa oficial del BCV: 848.5458 Bs/USD', '{\n    \"exito\": true,\n    \"origen\": \"online\",\n    \"accion\": \"actualizada\",\n    \"tasa\": 848.5458,\n    \"fecha\": \"2026-09-18\",\n    \"fuente\": \"BCV Oficial (DolarApi)\",\n    \"mensaje\": \"Tasa BCV sincronizada con éxito: 1 USD = 848,5458 Bs. (Vigencia: 2026-09-18)\"\n}'),
+(8, 1, 'TASAS', 'SINCRONIZAR_BCV', 'tb_tasa_bcv', NULL, '::1', '2026-09-20 00:14:46', 'Sincronizó tasa oficial del BCV: 848.5458 Bs/USD', '{\n    \"exito\": true,\n    \"origen\": \"online\",\n    \"accion\": \"actualizada\",\n    \"tasa\": 848.5458,\n    \"fecha\": \"2026-09-18\",\n    \"fuente\": \"BCV Oficial (DolarApi)\",\n    \"mensaje\": \"Tasa BCV sincronizada con éxito: 1 USD = 848,5458 Bs. (Vigencia: 2026-09-18)\"\n}'),
+(9, 1, 'ACCESO', 'LOGOUT', 'tb_usuario', 1, '::1', '2026-09-20 00:17:25', 'Cierre de sesión del usuario \'samu\'', NULL);
 
 -- --------------------------------------------------------
 
@@ -164,7 +178,42 @@ INSERT INTO `tb_auditoria_seguridad` (`id`, `id_usuario`, `username`, `evento`, 
 (100, NULL, 'payroll_admin_1789680897', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789680897\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 17:34:57'),
 (101, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 17:34:58'),
 (102, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-17 17:39:36'),
-(103, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 17:39:42');
+(103, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 17:39:42'),
+(104, 1, 'samu', 'SESSION_TIMEOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Sesión vencida por inactividad (970 s)', '2026-09-17 18:12:33'),
+(105, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-17 18:12:33'),
+(106, NULL, 'samu', 'LOGIN_FAILED', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Credenciales incorrectas para usuario \'samu\' desde IP ::1', '2026-09-17 19:58:32'),
+(107, NULL, 'samu', 'LOGIN_FAILED', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Credenciales incorrectas para usuario \'samu\' desde IP ::1', '2026-09-17 19:58:34'),
+(108, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 19:58:38'),
+(109, 999, 'test_admin', 'SESSION_TIMEOUT', '127.0.0.1', NULL, 'Sesión vencida por inactividad (950 s)', '2026-09-17 20:02:13'),
+(110, NULL, 'payroll_admin_1789689733', 'LOCKOUT_IP_USER', '127.0.0.1', NULL, 'Bloqueo de 10 min activado para usuario \'payroll_admin_1789689733\' desde IP 198.51.100.10 tras 5 intentos', '2026-09-17 20:02:13'),
+(111, NULL, 'test_multi_tab', 'SESSION_ROTATED', '127.0.0.1', NULL, 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-17 20:02:14'),
+(112, 1, 'samu', 'SESSION_TIMEOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Sesión vencida por inactividad (907 s)', '2026-09-17 20:16:15'),
+(113, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 20:17:22'),
+(114, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-17 20:46:01'),
+(115, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-17 20:46:19'),
+(116, 1, 'samu', 'SESSION_TIMEOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Sesión vencida por inactividad (164541 s)', '2026-09-19 18:37:42'),
+(117, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-19 18:37:49'),
+(118, 1, 'samu', 'SESSION_ROTATED', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-19 19:08:07'),
+(119, 1, 'samu', 'LOGOUT_BEACON', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Sesión cerrada automáticamente por baliza al abandonar la pestaña', '2026-09-19 19:10:00'),
+(120, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-19 19:10:06'),
+(121, 1, 'samu', 'SESSION_TIMEOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Sesión vencida por inactividad (1100 s)', '2026-09-19 19:29:10'),
+(122, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-19 19:29:10'),
+(123, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-19 21:04:53'),
+(124, 1, 'samu', 'SESSION_TIMEOUT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Sesión vencida por inactividad (954 s)', '2026-09-19 21:30:10'),
+(125, NULL, NULL, 'SUSPICIOUS_BEACON_ATTEMPT', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Petición beaconLogout rechazada por Origin o token CSRF no coincidente', '2026-09-19 21:30:10'),
+(126, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-19 21:45:02'),
+(127, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-19 21:46:17'),
+(128, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-19 21:47:24'),
+(129, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-19 21:49:15'),
+(130, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-19 21:59:50'),
+(131, 1, 'samu', 'LOGIN_SUCCESS', '192.168.100.25', 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Mobile Safari/537.36', 'Inicio de sesión exitoso desde IP 192.168.100.25', '2026-09-19 22:15:33'),
+(132, 1, 'samu', 'LOGIN_SUCCESS', '192.168.100.97', 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Mobile Safari/537.36', 'Inicio de sesión exitoso desde IP 192.168.100.97', '2026-09-19 22:36:15'),
+(133, 1, 'samu', 'LOGOUT_MANUAL', '192.168.100.97', 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Mobile Safari/537.36', 'Cierre de sesión voluntario', '2026-09-19 22:37:11'),
+(134, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-19 22:53:43'),
+(135, 1, 'samu', 'LOGIN_SUCCESS', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Inicio de sesión exitoso desde IP ::1', '2026-09-19 22:53:50'),
+(136, 1, 'samu', 'SESSION_ROTATED', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-19 23:24:29'),
+(137, 1, 'samu', 'SESSION_ROTATED', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Rotación periódica de session ID multi-pestaña ejecutada', '2026-09-19 23:54:46'),
+(138, 1, 'samu', 'LOGOUT_MANUAL', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0', 'Cierre de sesión voluntario', '2026-09-20 00:17:25');
 
 -- --------------------------------------------------------
 
@@ -260,6 +309,37 @@ INSERT INTO `tb_concepto_deduccion` (`id_concepto`, `nombre`, `tipo_calculo`, `v
 (4, 'Préstamo', 'Monto Fijo', 0.00, 'Descuento por préstamo concedido'),
 (5, 'Inasistencia', 'Monto Fijo', 0.00, 'Descuento por días no trabajados sin justificar'),
 (6, 'ISLR', 'Monto Fijo', 0.00, 'Impuesto sobre la Renta retenido');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `tb_configuracion_empresa`
+--
+
+CREATE TABLE `tb_configuracion_empresa` (
+  `id_config` int(11) NOT NULL,
+  `nombre_empresa` varchar(150) NOT NULL DEFAULT 'EMPRESA DEMO C.A.',
+  `rif` varchar(20) NOT NULL DEFAULT 'J-12345678-9',
+  `regimen_ivss` enum('Clase_I','Clase_II','Clase_III') NOT NULL DEFAULT 'Clase_II',
+  `tasa_sso_trabajador` decimal(5,4) NOT NULL DEFAULT 0.0400,
+  `tasa_sso_patronal` decimal(5,4) NOT NULL DEFAULT 0.1000,
+  `tasa_rpe_trabajador` decimal(5,4) NOT NULL DEFAULT 0.0050,
+  `tasa_rpe_patronal` decimal(5,4) NOT NULL DEFAULT 0.0210,
+  `tasa_faov_trabajador` decimal(5,4) NOT NULL DEFAULT 0.0100,
+  `tasa_faov_patronal` decimal(5,4) NOT NULL DEFAULT 0.0200,
+  `salario_minimo_legal` decimal(12,2) NOT NULL DEFAULT 130.00,
+  `tope_sso_salarios` int(11) NOT NULL DEFAULT 5,
+  `tope_rpe_salarios` int(11) NOT NULL DEFAULT 5,
+  `semanas_factor_anual` int(11) NOT NULL DEFAULT 52,
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tb_configuracion_empresa`
+--
+
+INSERT INTO `tb_configuracion_empresa` (`id_config`, `nombre_empresa`, `rif`, `regimen_ivss`, `tasa_sso_trabajador`, `tasa_sso_patronal`, `tasa_rpe_trabajador`, `tasa_rpe_patronal`, `tasa_faov_trabajador`, `tasa_faov_patronal`, `salario_minimo_legal`, `tope_sso_salarios`, `tope_rpe_salarios`, `semanas_factor_anual`, `updated_at`) VALUES
+(1, 'EMPRESA DEMO C.A.', 'J-12345678-9', 'Clase_II', 0.0400, 0.1000, 0.0050, 0.0210, 0.0100, 0.0200, 130.00, 5, 5, 52, '2026-09-20 00:00:35');
 
 -- --------------------------------------------------------
 
@@ -530,7 +610,8 @@ CREATE TABLE `tb_rol` (
 
 INSERT INTO `tb_rol` (`id_rol`, `nombre_rol`, `descripcion`) VALUES
 (1, 'Administrador', 'Acceso total al sistema'),
-(2, 'Personal de Apoyo', 'Consultas y reportes');
+(2, 'Personal de Apoyo', 'Consultas y reportes'),
+(3, 'Operador', 'Gestión operativa: empleados, nóminas, permisos. Sin acceso a gestión de usuarios.');
 
 -- --------------------------------------------------------
 
@@ -551,7 +632,8 @@ CREATE TABLE `tb_tasa_cambio` (
 
 INSERT INTO `tb_tasa_cambio` (`id_tasa`, `fecha`, `valor_tasa`, `fuente`) VALUES
 (1, '2026-08-13', 500.0000, 'BCV'),
-(2, '2026-09-16', 846.5131, 'BCV Oficial (DolarApi)');
+(2, '2026-09-16', 846.5131, 'BCV Oficial (DolarApi)'),
+(3, '2026-09-18', 848.5458, 'BCV Oficial (DolarApi)');
 
 -- --------------------------------------------------------
 
@@ -585,7 +667,9 @@ CREATE TABLE `tb_usuario` (
   `id_empleado` int(11) DEFAULT NULL,
   `nombre_usuario` varchar(50) NOT NULL,
   `correo` varchar(100) NOT NULL,
+  `foto_perfil` varchar(255) DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL,
+  `preferencias` text DEFAULT NULL,
   `estado` tinyint(1) DEFAULT 1,
   `fecha_creacion` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -594,8 +678,9 @@ CREATE TABLE `tb_usuario` (
 -- Volcado de datos para la tabla `tb_usuario`
 --
 
-INSERT INTO `tb_usuario` (`id_usuario`, `id_rol`, `id_empleado`, `nombre_usuario`, `correo`, `password_hash`, `estado`, `fecha_creacion`) VALUES
-(1, 1, NULL, 'samu', 'samueljosealexander@gmail.com', '$2y$12$amtgduIUNABRSkknwOyHbuAOcfT6XNXCVUnlO908I1Srqu1u5b6k6', 1, '2026-08-10 11:43:56');
+INSERT INTO `tb_usuario` (`id_usuario`, `id_rol`, `id_empleado`, `nombre_usuario`, `correo`, `foto_perfil`, `password_hash`, `preferencias`, `estado`, `fecha_creacion`) VALUES
+(1, 1, 1, 'samu', 'samueljosealexander@gmail.com', NULL, '$2y$12$amtgduIUNABRSkknwOyHbuAOcfT6XNXCVUnlO908I1Srqu1u5b6k6', '{\"header_color\":\"#0b1d3a\",\"primary_color\":\"#0284c7\",\"nav_layout\":\"sidebar\",\"updated_at\":\"2026-09-20 06:15:46\"}', 1, '2026-08-10 11:43:56'),
+(2, 1, NULL, 'mobile', 'samueljosealexanderr@gmail.com', NULL, '$2y$12$Awv8cJ6/8Y7x5R3qTkRv.uD4/7GgE9.49CJLWpdLzoXZWHk8DiO0u', NULL, 1, '2026-09-19 22:54:49');
 
 -- --------------------------------------------------------
 
@@ -665,6 +750,12 @@ ALTER TABLE `tb_concepto_asignacion`
 ALTER TABLE `tb_concepto_deduccion`
   ADD PRIMARY KEY (`id_concepto`),
   ADD UNIQUE KEY `nombre` (`nombre`);
+
+--
+-- Indices de la tabla `tb_configuracion_empresa`
+--
+ALTER TABLE `tb_configuracion_empresa`
+  ADD PRIMARY KEY (`id_config`);
 
 --
 -- Indices de la tabla `tb_cuenta_bancaria`
@@ -791,13 +882,13 @@ ALTER TABLE `tb_usuario`
 -- AUTO_INCREMENT de la tabla `tb_auditoria`
 --
 ALTER TABLE `tb_auditoria`
-  MODIFY `id_auditoria` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_auditoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_auditoria_seguridad`
 --
 ALTER TABLE `tb_auditoria_seguridad`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=139;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_banco`
@@ -822,6 +913,12 @@ ALTER TABLE `tb_concepto_asignacion`
 --
 ALTER TABLE `tb_concepto_deduccion`
   MODIFY `id_concepto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `tb_configuracion_empresa`
+--
+ALTER TABLE `tb_configuracion_empresa`
+  MODIFY `id_config` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_cuenta_bancaria`
@@ -851,7 +948,7 @@ ALTER TABLE `tb_jornada`
 -- AUTO_INCREMENT de la tabla `tb_login_intentos`
 --
 ALTER TABLE `tb_login_intentos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_nomina`
@@ -893,13 +990,13 @@ ALTER TABLE `tb_permiso_empleado`
 -- AUTO_INCREMENT de la tabla `tb_rol`
 --
 ALTER TABLE `tb_rol`
-  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_tasa_cambio`
 --
 ALTER TABLE `tb_tasa_cambio`
-  MODIFY `id_tasa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_tasa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `tb_tipo_empleado`
@@ -911,7 +1008,7 @@ ALTER TABLE `tb_tipo_empleado`
 -- AUTO_INCREMENT de la tabla `tb_usuario`
 --
 ALTER TABLE `tb_usuario`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas
@@ -987,40 +1084,6 @@ ALTER TABLE `tb_permiso_empleado`
 ALTER TABLE `tb_usuario`
   ADD CONSTRAINT `tb_usuario_ibfk_1` FOREIGN KEY (`id_rol`) REFERENCES `tb_rol` (`id_rol`),
   ADD CONSTRAINT `tb_usuario_ibfk_2` FOREIGN KEY (`id_empleado`) REFERENCES `tb_empleado` (`id_empleado`);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `tb_configuracion_empresa`
---
-
-CREATE TABLE IF NOT EXISTS `tb_configuracion_empresa` (
-  `id_config` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre_empresa` varchar(150) NOT NULL DEFAULT 'EMPRESA DEMO C.A.',
-  `rif` varchar(20) NOT NULL DEFAULT 'J-12345678-9',
-  `regimen_ivss` enum('Clase_I','Clase_II','Clase_III') NOT NULL DEFAULT 'Clase_II',
-  `tasa_sso_trabajador` decimal(5,4) NOT NULL DEFAULT 0.0400,
-  `tasa_sso_patronal` decimal(5,4) NOT NULL DEFAULT 0.1000,
-  `tasa_rpe_trabajador` decimal(5,4) NOT NULL DEFAULT 0.0050,
-  `tasa_rpe_patronal` decimal(5,4) NOT NULL DEFAULT 0.0210,
-  `tasa_faov_trabajador` decimal(5,4) NOT NULL DEFAULT 0.0100,
-  `tasa_faov_patronal` decimal(5,4) NOT NULL DEFAULT 0.0200,
-  `salario_minimo_legal` decimal(12,2) NOT NULL DEFAULT 130.00,
-  `tope_sso_salarios` int(11) NOT NULL DEFAULT 5,
-  `tope_rpe_salarios` int(11) NOT NULL DEFAULT 5,
-  `semanas_factor_anual` int(11) NOT NULL DEFAULT 52,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_config`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `tb_configuracion_empresa`
---
-
-INSERT INTO `tb_configuracion_empresa` (`id_config`, `nombre_empresa`, `rif`, `regimen_ivss`, `tasa_sso_trabajador`, `tasa_sso_patronal`, `tasa_rpe_trabajador`, `tasa_rpe_patronal`, `tasa_faov_trabajador`, `tasa_faov_patronal`, `salario_minimo_legal`, `tope_sso_salarios`, `tope_rpe_salarios`, `semanas_factor_anual`) VALUES
-(1, 'EMPRESA DEMO C.A.', 'J-12345678-9', 'Clase_II', 0.0400, 0.1000, 0.0050, 0.0210, 0.0100, 0.0200, 130.00, 5, 5, 52)
-ON DUPLICATE KEY UPDATE `id_config`=1;
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

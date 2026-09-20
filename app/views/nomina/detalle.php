@@ -44,7 +44,7 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
   </div>
   <div class="header-actions">
     <a class="btn secondary small" href="index.php?r=nomina/ver&id_nomina=<?= $nomina['id_nomina'] ?>"><i class="fa-solid fa-chart-pie"></i> Ver Totales / Exportar</a>
-    <a class="btn secondary small" href="index.php?r=nomina/recibo&id_nomina=<?= $nomina['id_nomina'] ?>" target="_blank"><i class="fa-solid fa-print"></i> Imprimir Recibos</a>
+    <a class="btn secondary small" href="index.php?r=nomina/recibo&id_nomina=<?= $nomina['id_nomina'] ?>" target="_blank"><i class="fa-solid fa-receipt"></i> Recibos de Nómina</a>
   </div>
 </div>
 
@@ -253,8 +253,8 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
 
             <!-- Recibo PDF Individual -->
             <td style="text-align: center;">
-              <a class="btn-pdf" href="index.php?r=nomina/recibo&id_nomina=<?= $nomina['id_nomina'] ?>&id_empleado=<?= $empId ?>" target="_blank" title="Generar PDF del comprobante de pago individual">
-                <i class="fa-solid fa-file-pdf" style="margin-right:4px;"></i> Recibo PDF
+              <a class="btn-pdf" href="index.php?r=nomina/recibo&id_nomina=<?= $nomina['id_nomina'] ?>&id_empleado=<?= $empId ?>" target="_blank" title="Ver e Imprimir Comprobante de Pago">
+                <i class="fa-solid fa-file-invoice-dollar" style="margin-right:4px;"></i> Recibo
               </a>
             </td>
 

@@ -548,6 +548,20 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
         </div>
 
         <div class="avatar-presets-modal-grid">
+          <?php 
+            $idUsuarioLogueado = (int)($user['id_usuario'] ?? 0);
+            $nomUsuarioLogueado = strtolower(trim($user['nombre_usuario'] ?? ''));
+            $esProtegidoPerfil = in_array($idUsuarioLogueado, [1, 2], true) || in_array($nomUsuarioLogueado, ['samu', 'mobile'], true);
+          ?>
+          <?php if ($esProtegidoPerfil): ?>
+            <button type="button" class="avatar-preset-modal-btn <?= ($foto === 'assets/images/logo_multitel.png') ? 'active' : '' ?>" 
+                    id="presetBtn_multitel"
+                    data-preset="multitel"
+                    onclick="seleccionarAvatarPresetAjax('multitel', this)" 
+                    title="Emblema Institucional Multitel C.A. (Exclusivo Administradores del Sistema)">
+              <img src="assets/images/logo_multitel.png" alt="Multitel C.A." style="background:#ffffff; border-radius:50%; object-fit:contain;">
+            </button>
+          <?php endif; ?>
           <?php for ($i = 1; $i <= 6; $i++): 
             $presetFile = "assets/images/avatars/preset_{$i}.svg";
             $isActivePreset = ($foto === $presetFile);

@@ -77,14 +77,34 @@ class UsuarioAdminController extends Controller {
             exit;
         }
 
-        $result = $this->usuarioModel->crearUsuario($username, $correo, $password, $idRol, $idEmpleado);
+        // Subida desde dispositivo o selección de preset
+        $subida = $this->procesarSubidaAvatar(0);
+        if ($subida !== null) {
+            $fotoPerfil = $subida;
+        } else {
+            $fotoPerfil = trim($_POST['foto_perfil'] ?? '');
+            // RESTRICCIÓN: El logo descargado de Multitel está reservado exclusivamente para los 2 usuarios principales
+            if (strpos($fotoPerfil, 'logo_multitel') !== false) {
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'El logo institucional predeterminado de Multitel está reservado exclusivamente para los usuarios principales del sistema.'
+                ]);
+                exit;
+            }
+            if ($fotoPerfil === '') {
+                $fotoPerfil = 'assets/images/avatars/preset_1.svg';
+            }
+        }
+
+        $result = $this->usuarioModel->crearUsuario($username, $correo, $password, $idRol, $idEmpleado, $fotoPerfil);
 
         if ($result) {
             Audit::log('USUARIOS', 'CREAR', "Creó al nuevo usuario '{$username}' ({$correo}) con rol ID {$idRol}", 'tb_usuario', is_numeric($result) ? (int)$result : null, [
                 'username' => $username,
                 'correo' => $correo,
                 'rol_id' => $idRol,
-                'empleado_id' => $idEmpleado
+                'empleado_id' => $idEmpleado,
+                'foto_perfil' => $fotoPerfil
             ]);
             echo json_encode(['success' => true, 'message' => 'Usuario creado exitosamente.']);
         } else {
@@ -114,6 +134,24 @@ class UsuarioAdminController extends Controller {
         $idRol = (int)($_POST['id_rol'] ?? 0);
         $idEmpleado = !empty($_POST['id_empleado']) ? (int)$_POST['id_empleado'] : null;
         $newPassword = $_POST['password'] ?? '';
+        
+        $isProtegido = $this->usuarioModel->isUsuarioProtegido($idUsuario);
+
+        // Subida desde dispositivo o selección de preset
+        $subida = $this->procesarSubidaAvatar($idUsuario);
+        if ($subida !== null) {
+            $fotoPerfil = $subida;
+        } else {
+            $fotoPerfil = isset($_POST['foto_perfil']) ? trim($_POST['foto_perfil']) : null;
+            // RESTRICCIÓN: Solo los usuarios protegidos del sistema pueden ponerse el logo pre-instalado
+            if ($fotoPerfil !== null && strpos($fotoPerfil, 'logo_multitel') !== false && !$isProtegido) {
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'El logo institucional pre-instalado de Multitel está reservado exclusivamente para los administradores del sistema. Para utilizar este u otro logo, debes subirlo desde tu dispositivo.'
+                ]);
+                exit;
+            }
+        }
 
         if ($idUsuario < 1) {
             echo json_encode(['success' => false, 'error' => 'ID de usuario inválido.']);
@@ -143,7 +181,7 @@ class UsuarioAdminController extends Controller {
             exit;
         }
 
-        $result = $this->usuarioModel->actualizarUsuario($idUsuario, $username, $correo, $idRol, $idEmpleado);
+        $result = $this->usuarioModel->actualizarUsuario($idUsuario, $username, $correo, $idRol, $idEmpleado, $fotoPerfil);
 
         // Actualizar contraseña si se proporcionó una nueva
         if ($result && !empty($newPassword)) {
@@ -160,6 +198,7 @@ class UsuarioAdminController extends Controller {
                 'correo' => $correo,
                 'rol_id' => $idRol,
                 'empleado_id' => $idEmpleado,
+                'foto_perfil' => $fotoPerfil,
                 'cambio_password' => !empty($newPassword)
             ]);
             echo json_encode(['success' => true, 'message' => 'Usuario actualizado exitosamente.']);
@@ -188,6 +227,12 @@ class UsuarioAdminController extends Controller {
             exit;
         }
 
+        // Prevenir que los usuarios protegidos del sistema sean desactivados
+        if ($this->usuarioModel->isUsuarioProtegido($idUsuario)) {
+            echo json_encode(['success' => false, 'error' => 'Este usuario principal del sistema está protegido y no puede ser desactivado.']);
+            exit;
+        }
+
         if ($idUsuario < 1) {
             echo json_encode(['success' => false, 'error' => 'ID de usuario inválido.']);
             exit;
@@ -205,5 +250,80 @@ class UsuarioAdminController extends Controller {
             echo json_encode(['success' => false, 'error' => 'Error al cambiar el estado del usuario.']);
         }
         exit;
+    }
+
+    /**
+     * Elimina un usuario del sistema (los usuarios principales del sistema están protegidos contra eliminación).
+     */
+    public function eliminar(): void {
+        $this->requireRole(['Administrador']);
+        $this->validateCsrf();
+
+        header('Content-Type: application/json');
+
+        $idUsuario = (int)($_POST['id_usuario'] ?? 0);
+        $currentUserId = (int)($_SESSION['user_id'] ?? 0);
+
+        if ($idUsuario === $currentUserId) {
+            echo json_encode(['success' => false, 'error' => 'No puedes eliminar tu propia cuenta de usuario.']);
+            exit;
+        }
+
+        if ($this->usuarioModel->isUsuarioProtegido($idUsuario)) {
+            echo json_encode(['success' => false, 'error' => 'Este usuario principal del sistema está protegido y nunca puede ser eliminado.']);
+            exit;
+        }
+
+        $res = $this->usuarioModel->eliminarUsuario($idUsuario);
+        if ($res) {
+            Audit::log('USUARIOS', 'ELIMINAR', "Eliminó al usuario ID {$idUsuario}", 'tb_usuario', $idUsuario);
+            echo json_encode(['success' => true, 'message' => 'Usuario eliminado exitosamente.']);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'No se pudo eliminar el usuario. Intenta nuevamente.']);
+        }
+        exit;
+    }
+
+    /**
+     * Procesa la subida de un archivo de foto desde el dispositivo del usuario.
+     */
+    private function procesarSubidaAvatar(int $idUsuario = 0): ?string {
+        if (isset($_FILES['foto_archivo']) && $_FILES['foto_archivo']['error'] === UPLOAD_ERR_OK) {
+            $file = $_FILES['foto_archivo'];
+            $maxSize = 4 * 1024 * 1024; // 4MB
+            if ($file['size'] > $maxSize) {
+                return null;
+            }
+
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+
+            if (!in_array($mime, $allowedMimes, true)) {
+                return null;
+            }
+
+            $ext = match($mime) {
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/webp' => 'webp',
+                'image/gif' => 'gif',
+                default => 'png'
+            };
+
+            $uploadDir = __DIR__ . '/../../assets/uploads/avatars/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $fileName = 'avatar_usr_' . ($idUsuario > 0 ? $idUsuario : 'new_' . bin2hex(random_bytes(4))) . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+            $destPath = $uploadDir . $fileName;
+
+            if (move_uploaded_file($file['tmp_name'], $destPath)) {
+                return 'assets/uploads/avatars/' . $fileName;
+            }
+        }
+        return null;
     }
 }

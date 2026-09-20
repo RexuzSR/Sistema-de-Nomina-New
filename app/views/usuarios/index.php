@@ -121,6 +121,7 @@ $csrfToken = Security::csrfToken();
             <?php
               $esActivo = $u['estado'] == 1;
               $esMiCuenta = ($u['id_usuario'] == ($_SESSION['user_id'] ?? 0));
+              $esProtegido = in_array((int)$u['id_usuario'], [1, 2], true) || in_array(strtolower($u['nombre_usuario']), ['samu', 'mobile'], true);
               $rolClass = match($u['nombre_rol']) {
                 'Administrador' => 'role-admin',
                 'Operador' => 'role-operador',
@@ -140,10 +141,15 @@ $csrfToken = Security::csrfToken();
                     <div class="usuario-avatar-mini usuario-avatar-letter"><?= $inicial ?></div>
                   <?php endif; ?>
                   <div>
-                    <strong><?= htmlspecialchars($u['nombre_usuario']) ?></strong>
-                    <?php if ($esMiCuenta): ?>
-                      <span class="badge-tu-cuenta">Tú</span>
-                    <?php endif; ?>
+                    <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+                      <strong><?= htmlspecialchars($u['nombre_usuario']) ?></strong>
+                      <?php if ($esProtegido): ?>
+                        <span class="badge-protegido-chip" title="Usuario principal del sistema (Protegido contra eliminación)"><i class="fa-solid fa-shield-halved"></i> Sistema</span>
+                      <?php endif; ?>
+                      <?php if ($esMiCuenta): ?>
+                        <span class="badge-tu-cuenta">Tú</span>
+                      <?php endif; ?>
+                    </div>
                   </div>
                 </div>
               </td>
@@ -185,12 +191,25 @@ $csrfToken = Security::csrfToken();
                     onclick="abrirModalEditar(<?= htmlspecialchars(json_encode($u)) ?>)">
                     <i class="fa-solid fa-pen-to-square"></i>
                   </button>
-                  <?php if (!$esMiCuenta): ?>
-                    <button type="button" class="btn-accion <?= $esActivo ? 'btn-desactivar' : 'btn-activar' ?>"
-                      title="<?= $esActivo ? 'Desactivar usuario' : 'Activar usuario' ?>"
-                      onclick="cambiarEstadoUsuario(<?= $u['id_usuario'] ?>, <?= $esActivo ? 0 : 1 ?>)">
-                      <i class="fa-solid <?= $esActivo ? 'fa-user-slash' : 'fa-user-check' ?>"></i>
-                    </button>
+
+                  <?php if ($esProtegido): ?>
+                    <!-- Usuario principal protegido del sistema: intocable -->
+                    <span class="btn-accion btn-accion-disabled" title="Usuario principal protegido del sistema (No se puede desactivar ni eliminar)" style="cursor:not-allowed; opacity:0.45; color:#64748b;">
+                      <i class="fa-solid fa-lock"></i>
+                    </span>
+                  <?php else: ?>
+                    <?php if (!$esMiCuenta): ?>
+                      <button type="button" class="btn-accion <?= $esActivo ? 'btn-desactivar' : 'btn-activar' ?>"
+                        title="<?= $esActivo ? 'Desactivar usuario' : 'Activar usuario' ?>"
+                        onclick="cambiarEstadoUsuario(<?= $u['id_usuario'] ?>, <?= $esActivo ? 0 : 1 ?>)">
+                        <i class="fa-solid <?= $esActivo ? 'fa-user-slash' : 'fa-user-check' ?>"></i>
+                      </button>
+                      <button type="button" class="btn-accion btn-eliminar"
+                        title="Eliminar usuario definitivamente"
+                        onclick="eliminarUsuario(<?= $u['id_usuario'] ?>, '<?= htmlspecialchars(addslashes($u['nombre_usuario'])) ?>')">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    <?php endif; ?>
                   <?php endif; ?>
                 </div>
               </td>
@@ -233,6 +252,78 @@ $csrfToken = Security::csrfToken();
       <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
 
       <div class="modal-body">
+        <!-- ══════════ SELECCIONADOR DE FOTO DE PERFIL (PRE-SELECCIONADA) ══════════ -->
+        <div class="modal-avatar-selection">
+          <div class="avatar-hero-display">
+            <div class="avatar-display-ring" id="modalAvatarPreviewWrap">
+              <img src="assets/images/avatars/preset_1.svg" alt="Avatar Seleccionado" id="modalSelectedAvatarImg" class="avatar-display-img">
+            </div>
+            <div class="avatar-display-info">
+              <div class="avatar-display-label">
+                <span class="avatar-tag-badge"><i class="fa-solid fa-sparkles"></i> Foto de Perfil</span>
+                <span class="avatar-active-name" id="avatarPreviewHint">Avatar Ejecutivo #1 (Pre-seleccionado)</span>
+              </div>
+              <p class="avatar-display-desc">Avatar corporativo pre-seleccionado para la cuenta de este usuario</p>
+            </div>
+          </div>
+
+          <div class="avatar-options-strip">
+            <span class="avatar-strip-title">Haz clic para cambiar el avatar:</span>
+            <div class="avatar-presets-track" id="avatarPresetsTrack">
+              <?php for ($i = 1; $i <= 6; $i++): ?>
+                <button type="button" 
+                        class="avatar-picker-btn <?= $i === 1 ? 'selected' : '' ?>" 
+                        data-avatar="assets/images/avatars/preset_<?= $i ?>.svg" 
+                        data-label="Avatar Ejecutivo #<?= $i ?>"
+                        onclick="seleccionarAvatarModal(this)"
+                        title="Avatar Ejecutivo <?= $i ?>">
+                  <img src="assets/images/avatars/preset_<?= $i ?>.svg" alt="Avatar <?= $i ?>">
+                  <span class="picker-check"><i class="fa-solid fa-check"></i></span>
+                </button>
+              <?php endfor; ?>
+
+              <!-- Opción Corporativa Multitel (Exclusiva para Administradores Principales Samu y Mobile) -->
+              <button type="button" 
+                      class="avatar-picker-btn" 
+                      id="btnPresetMultitelLogo"
+                      style="display:none;"
+                      data-avatar="assets/images/logo_multitel.png" 
+                      data-label="Emblema Multitel C.A."
+                      onclick="seleccionarAvatarModal(this)"
+                      title="Emblema Multitel C.A. (Exclusivo Administradores del Sistema)">
+                <img src="assets/images/logo_multitel.png" alt="Multitel" style="border-radius:50%; object-fit:contain; background:#ffffff;">
+                <span class="picker-check"><i class="fa-solid fa-check"></i></span>
+              </button>
+
+              <!-- Opción Inicial del Nombre -->
+              <button type="button" 
+                      class="avatar-picker-btn avatar-picker-initial" 
+                      data-avatar="" 
+                      data-label="Inicial del Nombre (Sin foto)"
+                      onclick="seleccionarAvatarModal(this)"
+                      title="Solo Letra Inicial">
+                <div class="avatar-picker-letter-icon"><i class="fa-solid fa-font"></i></div>
+                <span class="picker-check"><i class="fa-solid fa-check"></i></span>
+              </button>
+
+              <!-- Opción Subir desde dispositivo (si otro usuario quiere ponerse el logo o su foto, debe subirlo desde su equipo) -->
+              <button type="button" 
+                      class="avatar-picker-btn avatar-picker-device" 
+                      id="btnSubirDesdeDispositivo"
+                      onclick="document.getElementById('inputFotoArchivo').click()"
+                      title="Subir foto o logo desde tu dispositivo">
+                <div class="avatar-picker-device-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <span class="picker-check" id="checkUploadDevice" style="display:none;"><i class="fa-solid fa-check"></i></span>
+              </button>
+            </div>
+
+            <!-- Input oculto de archivo para subir desde el dispositivo -->
+            <input type="file" id="inputFotoArchivo" name="foto_archivo" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" onchange="handleFotoArchivoSeleccionada(this)">
+          </div>
+        </div>
+
+        <input type="hidden" name="foto_perfil" id="inputFotoPerfil" value="assets/images/avatars/preset_1.svg">
+
         <div class="modal-form-grid">
           <!-- Nombre de usuario -->
           <div class="form-group">
@@ -349,6 +440,60 @@ const ROLES_PERMISOS = {
 
 let modoEdicion = false;
 
+// ─── SELECCIÓN DE AVATAR PRE-SELECCIONADO ───
+function seleccionarAvatarModal(btn) {
+  document.querySelectorAll('.avatar-picker-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  // Limpiar input de archivo del dispositivo si se elige un preset o inicial
+  const inputArchivo = document.getElementById('inputFotoArchivo');
+  if (inputArchivo) inputArchivo.value = '';
+  const checkDev = document.getElementById('checkUploadDevice');
+  if (checkDev) checkDev.style.display = 'none';
+
+  const avatarUrl = btn.dataset.avatar || '';
+  const label = btn.dataset.label || 'Avatar Seleccionado';
+
+  document.getElementById('inputFotoPerfil').value = avatarUrl;
+  document.getElementById('avatarPreviewHint').textContent = label;
+
+  const wrap = document.getElementById('modalAvatarPreviewWrap');
+  if (avatarUrl) {
+    wrap.innerHTML = '<img src="' + avatarUrl + '" alt="Avatar" id="modalSelectedAvatarImg" class="avatar-display-img">';
+  } else {
+    const username = (document.getElementById('inputNombreUsuario').value || 'U').trim();
+    const inicial = username.charAt(0).toUpperCase() || 'U';
+    wrap.innerHTML = '<div class="avatar-preview-letter" id="modalSelectedAvatarLetter">' + inicial + '</div>';
+  }
+}
+
+// Subida de imagen desde dispositivo local (para que cualquier usuario que tenga el logo/foto en su equipo pueda subirla)
+function handleFotoArchivoSeleccionada(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+
+  // Deseleccionar presets
+  document.querySelectorAll('.avatar-picker-btn').forEach(b => b.classList.remove('selected'));
+
+  // Activar botón de dispositivo y mostrar check
+  const btnDev = document.getElementById('btnSubirDesdeDispositivo');
+  if (btnDev) btnDev.classList.add('selected');
+  const checkDev = document.getElementById('checkUploadDevice');
+  if (checkDev) checkDev.style.display = 'flex';
+
+  // Dejar inputFotoPerfil vacío para que se procese el archivo
+  document.getElementById('inputFotoPerfil').value = '';
+  document.getElementById('avatarPreviewHint').textContent = 'Archivo del dispositivo: ' + file.name;
+
+  // Previsualizar localmente
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const wrap = document.getElementById('modalAvatarPreviewWrap');
+    wrap.innerHTML = '<img src="' + e.target.result + '" alt="Avatar" id="modalSelectedAvatarImg" class="avatar-display-img">';
+  };
+  reader.readAsDataURL(file);
+}
+
 // ─── MODAL ───
 function abrirModalUsuario() {
   modoEdicion = false;
@@ -362,6 +507,24 @@ function abrirModalUsuario() {
   document.getElementById('formUsuario').reset();
   document.getElementById('inputIdUsuario').value = '';
   document.getElementById('rolPreview').style.display = 'none';
+
+  // Ocultar preset de Multitel en creación (reservado exclusivamente a Samu y Mobile)
+  const btnMultitel = document.getElementById('btnPresetMultitelLogo');
+  if (btnMultitel) btnMultitel.style.display = 'none';
+
+  // Resetear input de archivo y check
+  const inputArchivo = document.getElementById('inputFotoArchivo');
+  if (inputArchivo) inputArchivo.value = '';
+  const checkDev = document.getElementById('checkUploadDevice');
+  if (checkDev) checkDev.style.display = 'none';
+
+  // Pre-seleccionar foto de perfil por defecto (Preset #1)
+  const primerPreset = document.querySelector('.avatar-picker-btn[data-avatar="assets/images/avatars/preset_1.svg"]');
+  if (primerPreset) {
+    seleccionarAvatarModal(primerPreset);
+    document.getElementById('avatarPreviewHint').textContent = 'Avatar Ejecutivo #1 (Pre-seleccionado)';
+  }
+
   document.getElementById('modalUsuarioBackdrop').classList.add('show');
   setTimeout(() => document.getElementById('inputNombreUsuario').focus(), 200);
 }
@@ -381,11 +544,58 @@ function abrirModalEditar(usuario) {
   document.getElementById('inputNombreUsuario').value = usuario.nombre_usuario;
   document.getElementById('inputCorreo').value = usuario.correo;
   document.getElementById('selectRol').value = usuario.id_rol;
+
+  // Resetear archivo del dispositivo
+  const inputArchivo = document.getElementById('inputFotoArchivo');
+  if (inputArchivo) inputArchivo.value = '';
+  const checkDev = document.getElementById('checkUploadDevice');
+  if (checkDev) checkDev.style.display = 'none';
+
+  // Evaluar si es usuario protegido del sistema (id 1, 2 o nombres samu, mobile)
+  const idUsr = parseInt(usuario.id_usuario, 10);
+  const nombreUsr = (usuario.nombre_usuario || '').toLowerCase();
+  const esProtegido = (idUsr === 1 || idUsr === 2 || ['samu', 'mobile'].includes(nombreUsr));
+
+  // El botón preset de Multitel descargado en el sistema SOLO se muestra a los usuarios principales
+  const btnMultitel = document.getElementById('btnPresetMultitelLogo');
+  if (btnMultitel) {
+    btnMultitel.style.display = esProtegido ? 'inline-flex' : 'none';
+  }
+
+  // Configurar foto de perfil actual del usuario
+  const userFoto = usuario.foto_perfil || '';
+  let matchingBtn = null;
+  document.querySelectorAll('.avatar-picker-btn').forEach(b => {
+    if (b.dataset.avatar === userFoto) {
+      if (b.id === 'btnPresetMultitelLogo' && !esProtegido) {
+        // No permitir seleccionar el preset a usuarios no protegidos
+      } else {
+        matchingBtn = b;
+      }
+    }
+  });
+
+  if (matchingBtn) {
+    seleccionarAvatarModal(matchingBtn);
+    if (!userFoto) {
+      const inicial = (usuario.nombre_usuario || 'U').charAt(0).toUpperCase();
+      document.getElementById('modalAvatarPreviewWrap').innerHTML = '<div class="avatar-preview-letter" id="modalSelectedAvatarLetter">' + inicial + '</div>';
+    }
+  } else if (userFoto) {
+    // Foto personalizada o subida desde su dispositivo
+    document.querySelectorAll('.avatar-picker-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('inputFotoPerfil').value = userFoto;
+    document.getElementById('avatarPreviewHint').textContent = 'Fotografía actual del usuario';
+    document.getElementById('modalAvatarPreviewWrap').innerHTML = '<img src="' + userFoto + '" alt="Avatar" id="modalSelectedAvatarImg" class="avatar-display-img">';
+  } else {
+    // Si no tiene foto, pre-seleccionar Preset #1
+    const defaultBtn = document.querySelector('.avatar-picker-btn[data-avatar="assets/images/avatars/preset_1.svg"]');
+    if (defaultBtn) seleccionarAvatarModal(defaultBtn);
+  }
   
   // Para empleado vinculado: si el usuario ya tiene uno, agregarlo como opción temporal
   const selEmp = document.getElementById('selectEmpleado');
   if (usuario.id_empleado && usuario.nombre_empleado) {
-    // Verificar si la opción ya existe
     let existe = false;
     for (let opt of selEmp.options) {
       if (opt.value == usuario.id_empleado) { existe = true; break; }
@@ -480,6 +690,35 @@ async function cambiarEstadoUsuario(idUsuario, nuevoEstado) {
   }
 }
 
+// ─── ELIMINAR USUARIO DEFINITIVAMENTE ───
+async function eliminarUsuario(idUsuario, nombre) {
+  if (!confirm('¿Estás seguro de que deseas eliminar permanentemente al usuario "' + nombre + '"? Esta acción no se puede deshacer.')) {
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('id_usuario', idUsuario);
+  formData.append('csrf_token', '<?= $csrfToken ?>');
+
+  try {
+    const resp = await fetch('index.php?r=usuarios/eliminar', {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: formData
+    });
+    const data = await resp.json();
+
+    if (data.success) {
+      mostrarToast(data.message, 'success');
+      setTimeout(() => location.reload(), 800);
+    } else {
+      mostrarToast(data.error || 'Error al eliminar usuario', 'error');
+    }
+  } catch (err) {
+    mostrarToast('Error de conexión al eliminar el usuario.', 'error');
+  }
+}
+
 // ─── BÚSQUEDA Y FILTROS ───
 function filtrarTabla() {
   const search = document.getElementById('searchUsuarios').value.toLowerCase();
@@ -517,6 +756,17 @@ function actualizarRolPreview() {
     preview.style.display = 'none';
   }
 }
+
+// ─── ACTUALIZAR INICIAL EN TIEMPO REAL SI SE ELIGE MODO INICIAL ───
+document.getElementById('inputNombreUsuario').addEventListener('input', function() {
+  const currentAvatar = document.getElementById('inputFotoPerfil').value;
+  if (!currentAvatar) {
+    const letterEl = document.getElementById('modalSelectedAvatarLetter');
+    if (letterEl) {
+      letterEl.textContent = (this.value.trim().charAt(0).toUpperCase()) || 'U';
+    }
+  }
+});
 
 // ─── PASSWORD TOGGLE ───
 function togglePasswordVis() {

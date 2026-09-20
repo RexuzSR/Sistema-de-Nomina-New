@@ -48,6 +48,7 @@ $router->add('nomina/generar', 'NominaController', 'generar');
 $router->add('nomina/detalle', 'NominaController', 'detalle');
 $router->add('nomina/ver', 'NominaController', 'ver');
 $router->add('nomina/recibo', 'NominaController', 'recibo');
+$router->add('nomina/reportePdf', 'NominaController', 'reportePdf');
 $router->add('nomina/exportExcel', 'NominaController', 'exportExcel');
 
 // Perfil de Usuario y Preferencias de Diseño
@@ -64,6 +65,7 @@ $router->add('usuarios', 'UsuarioAdminController', 'index');
 $router->add('usuarios/crear', 'UsuarioAdminController', 'crear');
 $router->add('usuarios/editar', 'UsuarioAdminController', 'editar');
 $router->add('usuarios/cambiarEstado', 'UsuarioAdminController', 'cambiarEstado');
+$router->add('usuarios/eliminar', 'UsuarioAdminController', 'eliminar');
 
 // Historial y Auditoría del Sistema
 $router->add('auditoria', 'AuditoriaController', 'index');

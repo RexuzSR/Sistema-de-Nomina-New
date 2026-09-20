@@ -88,7 +88,11 @@ class PeriodoController extends Controller {
                     ]);
                     $this->redirect('index.php?r=periodos&msg=' . urlencode('Periodo creado correctamente.'));
                 } catch (PDOException $e) {
-                    $error = 'Ya existe un periodo con ese año, mes y numero de quincena.';
+                    if ($e->getCode() == 23000 || strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                        $error = 'Ya existe un periodo con ese año, mes y número de quincena.';
+                    } else {
+                        $error = 'Error al registrar el periodo: ' . $e->getMessage();
+                    }
                 }
             }
         }

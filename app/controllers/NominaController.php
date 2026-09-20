@@ -6,6 +6,7 @@ require_once __DIR__ . '/../models/PeriodoModel.php';
 require_once __DIR__ . '/../models/EmpleadoModel.php';
 require_once __DIR__ . '/../models/TasaModel.php';
 require_once __DIR__ . '/../models/ConfiguracionModel.php';
+require_once __DIR__ . '/../services/ReciboPdfService.php';
 
 class NominaController extends Controller {
     public function generar(): void {
@@ -219,16 +220,21 @@ class NominaController extends Controller {
 
         $id_nomina = (int)($_GET['id_nomina'] ?? 0);
         $id_empleado = (int)($_GET['id_empleado'] ?? 0);
+        $format = strtolower(trim($_GET['format'] ?? ''));
 
         $nominaModel = new NominaModel();
         $periodoModel = new PeriodoModel();
         $empleadoModel = new EmpleadoModel();
+        $configModel = new ConfiguracionModel();
+        $tasaModel = new TasaModel();
 
         $nomina = $nominaModel->getById($id_nomina);
         $periodo = $nomina ? $periodoModel->getById($nomina['id_periodo']) : null;
+        $empConfig = $configModel->getConfiguracion();
+        $ultimaTasa = $tasaModel->getUltima();
 
         if (!$nomina) {
-            die('Nomina no encontrada.');
+            die('Nómina no encontrada.');
         }
 
         if ($id_empleado > 0) {
@@ -237,13 +243,24 @@ class NominaController extends Controller {
             $detalle = $nominaModel->getDetalleEmpleado($id_nomina, $id_empleado);
 
             if (!$empleado || !$detalle) {
-                die('Datos no encontrados. Verifica que ya se haya guardado el detalle de este empleado en la nomina.');
+                die('Datos no encontrados. Verifica que ya se haya guardado el detalle de este empleado en la nómina.');
             }
 
             $asignaciones = $nominaModel->getAsignacionesDetalle($detalle['id_detalle']);
             $deducciones = $nominaModel->getDeduccionesDetalle($detalle['id_detalle']);
 
-            $this->render('nomina/recibo', [
+            if ($format === 'pdf') {
+                $pdf = ReciboPdfService::generarReciboIndividual(
+                    $nomina, $periodo, $empleado, $cargo, $detalle, 
+                    $asignaciones, $deducciones, $empConfig, $ultimaTasa
+                );
+                $cedula = preg_replace('/[^0-9A-Za-z]/', '', $empleado['cedula'] ?? 'trabajador');
+                $filename = 'Recibo_Pago_' . $cedula . '_' . ($periodo['fecha_inicio'] ?? '') . '.pdf';
+                $pdf->Output('I', $filename);
+                exit;
+            }
+
+            extract([
                 'id_nomina' => $id_nomina,
                 'nomina' => $nomina,
                 'periodo' => $periodo,
@@ -251,8 +268,12 @@ class NominaController extends Controller {
                 'cargo' => $cargo,
                 'detalle' => $detalle,
                 'asignaciones' => $asignaciones,
-                'deducciones' => $deducciones
-            ], 'Recibo de pago');
+                'deducciones' => $deducciones,
+                'empConfig' => $empConfig,
+                'ultimaTasa' => $ultimaTasa
+            ]);
+            require __DIR__ . '/../views/nomina/recibo.php';
+            exit;
         } else {
             $detallesList = $nominaModel->getDetallesByNomina($id_nomina);
             $recibos = [];
@@ -273,13 +294,53 @@ class NominaController extends Controller {
                 ];
             }
 
-            $this->render('nomina/recibo_masivo', [
+            if ($format === 'pdf') {
+                $modo = $_GET['modo'] ?? 'carta6';
+                if ($modo === 'compacto') $modo = 'carta6';
+                $pdf = ReciboPdfService::generarRecibosMasivos(
+                    $nomina, $periodo, $recibos, $empConfig, $ultimaTasa, $modo
+                );
+                $filename = 'Recibos_Nomina_Periodo_' . ($periodo['fecha_inicio'] ?? '') . '_al_' . ($periodo['fecha_fin'] ?? '') . '.pdf';
+                $pdf->Output('I', $filename);
+                exit;
+            }
+
+            extract([
                 'id_nomina' => $id_nomina,
                 'nomina' => $nomina,
                 'periodo' => $periodo,
-                'recibos' => $recibos
-            ], 'Imprimir Todos los Recibos');
+                'recibos' => $recibos,
+                'empConfig' => $empConfig,
+                'ultimaTasa' => $ultimaTasa
+            ]);
+            require __DIR__ . '/../views/nomina/recibo_masivo.php';
+            exit;
         }
+    }
+
+    public function reportePdf(): void {
+        $this->requireLogin();
+
+        $id_nomina = (int)($_GET['id_nomina'] ?? 0);
+        $nominaModel = new NominaModel();
+        $periodoModel = new PeriodoModel();
+        $configModel = new ConfiguracionModel();
+        $tasaModel = new TasaModel();
+
+        $nomina = $nominaModel->getById($id_nomina);
+        if (!$nomina) { die('Nómina no encontrada.'); }
+
+        $periodo = $periodoModel->getById($nomina['id_periodo']);
+        $detallesList = $nominaModel->getDetallesByNomina($id_nomina);
+        $empConfig = $configModel->getConfiguracion();
+        $ultimaTasa = $tasaModel->getUltima();
+
+        $pdf = ReciboPdfService::generarResumenNominaPdf(
+            $nomina, $periodo, $detallesList, $empConfig, $ultimaTasa
+        );
+        $filename = 'Reporte_Resumen_Nomina_' . ($periodo['fecha_inicio'] ?? '') . '_al_' . ($periodo['fecha_fin'] ?? '') . '.pdf';
+        $pdf->Output('I', $filename);
+        exit;
     }
 
     public function exportExcel(): void {

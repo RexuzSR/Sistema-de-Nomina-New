@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 80" width="420" height="80">
+  <defs>
+    <linearGradient id="gradIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+    <linearGradient id="gradFiber" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  </defs>
+
+  <!-- ISOTIPO FIBRA ÓPTICA & RED -->
+  <g transform="translate(10, 8)">
+    <!-- Base hexagonal / redondeada tecnológica -->
+    <rect x="0" y="0" width="64" height="64" rx="14" fill="url(#gradIcon)" />
+    
+    <!-- Ondas concéntricas de señal / fibra -->
+    <path d="M 17 46 A 21 21 0 0 1 47 46" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.9" />
+    <path d="M 23 46 A 15 15 0 0 1 41 46" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" />
+    <circle cx="32" cy="46" r="4" fill="#ffffff" />
+    
+    <!-- Nodo de red en la cumbre -->
+    <circle cx="32" cy="19" r="3.5" fill="#38bdf8" />
+    <line x1="32" y1="22.5" x2="32" y2="42" stroke="#ffffff" stroke-width="2" stroke-dasharray="2 2" />
+    <circle cx="21" cy="28" r="2.5" fill="#ffffff" opacity="0.8" />
+    <circle cx="43" cy="28" r="2.5" fill="#ffffff" opacity="0.8" />
+    <line x1="23.5" y1="28" x2="32" y2="35" stroke="#ffffff" stroke-width="1.5" opacity="0.6" />
+    <line x1="40.5" y1="28" x2="32" y2="35" stroke="#ffffff" stroke-width="1.5" opacity="0.6" />
+  </g>
+
+  <!-- TIPOGRAFÍA CORPORATIVA MULTITEL -->
+  <text x="88" y="38" font-family="'Plus Jakarta Sans', 'Inter', sans-serif" font-size="28" font-weight="900" fill="#0f172a" letter-spacing="-0.5">MULTI<tspan fill="#0284c7">TEL</tspan></text>
+  <rect x="238" y="24" width="6" height="6" rx="3" fill="#10b981" />
+
+  <!-- SUBTÍTULOS Y DETALLES INSTITUCIONALES -->
+  <text x="89" y="53" font-family="'Inter', sans-serif" font-size="10.5" font-weight="700" fill="#0284c7" letter-spacing="1.2">INTERNET POR FIBRA ÓPTICA &amp; TELECOMUNICACIONES</text>
+  <text x="89" y="68" font-family="'Inter', sans-serif" font-size="9" font-weight="600" fill="#64748b">CUMANÁ &bull; ESTADO SUCRE &bull; R.I.F. J-40982716-0</text>
+</svg>

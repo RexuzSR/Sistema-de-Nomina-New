@@ -145,16 +145,16 @@ class UsuarioModel extends Model {
     }
 
     /**
-     * Crea un nuevo usuario con hash bcrypt.
+     * Crea un nuevo usuario con hash bcrypt y foto de perfil opcional/preseleccionada.
      */
-    public function crearUsuario(string $username, string $correo, string $password, int $idRol, ?int $idEmpleado = null): bool {
+    public function crearUsuario(string $username, string $correo, string $password, int $idRol, ?int $idEmpleado = null, ?string $fotoPerfil = null): bool {
         try {
             $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
             $stmt = $this->db->prepare("
-                INSERT INTO tb_usuario (nombre_usuario, correo, password_hash, id_rol, id_empleado, estado, fecha_creacion)
-                VALUES (?, ?, ?, ?, ?, 1, NOW())
+                INSERT INTO tb_usuario (nombre_usuario, correo, password_hash, id_rol, id_empleado, foto_perfil, estado, fecha_creacion)
+                VALUES (?, ?, ?, ?, ?, ?, 1, NOW())
             ");
-            return $stmt->execute([$username, $correo, $hash, $idRol, $idEmpleado]);
+            return $stmt->execute([$username, $correo, $hash, $idRol, $idEmpleado, $fotoPerfil]);
         } catch (Exception $e) {
             error_log("Error crearUsuario: " . $e->getMessage());
             return false;
@@ -162,18 +162,58 @@ class UsuarioModel extends Model {
     }
 
     /**
-     * Actualiza datos de un usuario existente (sin cambiar contraseña).
+     * Actualiza datos de un usuario existente (con foto de perfil opcional, sin cambiar contraseña).
      */
-    public function actualizarUsuario(int $idUsuario, string $username, string $correo, int $idRol, ?int $idEmpleado = null): bool {
+    public function actualizarUsuario(int $idUsuario, string $username, string $correo, int $idRol, ?int $idEmpleado = null, ?string $fotoPerfil = null): bool {
         try {
-            $stmt = $this->db->prepare("
-                UPDATE tb_usuario
-                SET nombre_usuario = ?, correo = ?, id_rol = ?, id_empleado = ?
-                WHERE id_usuario = ?
-            ");
-            return $stmt->execute([$username, $correo, $idRol, $idEmpleado, $idUsuario]);
+            if ($fotoPerfil !== null) {
+                $stmt = $this->db->prepare("
+                    UPDATE tb_usuario
+                    SET nombre_usuario = ?, correo = ?, id_rol = ?, id_empleado = ?, foto_perfil = ?
+                    WHERE id_usuario = ?
+                ");
+                return $stmt->execute([$username, $correo, $idRol, $idEmpleado, $fotoPerfil, $idUsuario]);
+            } else {
+                $stmt = $this->db->prepare("
+                    UPDATE tb_usuario
+                    SET nombre_usuario = ?, correo = ?, id_rol = ?, id_empleado = ?
+                    WHERE id_usuario = ?
+                ");
+                return $stmt->execute([$username, $correo, $idRol, $idEmpleado, $idUsuario]);
+            }
         } catch (Exception $e) {
             error_log("Error actualizarUsuario: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Determina si un usuario es un usuario principal protegido del sistema (ID 1 'samu' o ID 2 'mobile').
+     * Estos usuarios nunca pueden ser eliminados ni desactivados.
+     */
+    public function isUsuarioProtegido(int $idUsuario): bool {
+        if ($idUsuario === 1 || $idUsuario === 2) {
+            return true;
+        }
+        $stmt = $this->db->prepare("SELECT nombre_usuario FROM tb_usuario WHERE id_usuario = ?");
+        $stmt->execute([$idUsuario]);
+        $name = strtolower(trim((string)$stmt->fetchColumn()));
+        return in_array($name, ['samu', 'mobile'], true);
+    }
+
+    /**
+     * Elimina un usuario con protección estricta para los usuarios principales.
+     */
+    public function eliminarUsuario(int $idUsuario): bool {
+        if ($this->isUsuarioProtegido($idUsuario)) {
+            error_log("Intento de eliminar usuario protegido ID {$idUsuario} bloqueado.");
+            return false;
+        }
+        try {
+            $stmt = $this->db->prepare("DELETE FROM tb_usuario WHERE id_usuario = ?");
+            return $stmt->execute([$idUsuario]);
+        } catch (Exception $e) {
+            error_log("Error eliminarUsuario: " . $e->getMessage());
             return false;
         }
     }
@@ -182,6 +222,10 @@ class UsuarioModel extends Model {
      * Cambia el estado de un usuario (activar/desactivar).
      */
     public function cambiarEstado(int $idUsuario, int $nuevoEstado): bool {
+        if ($nuevoEstado === 0 && $this->isUsuarioProtegido($idUsuario)) {
+            error_log("Intento de desactivar usuario protegido ID {$idUsuario} bloqueado.");
+            return false;
+        }
         try {
             $stmt = $this->db->prepare("UPDATE tb_usuario SET estado = ? WHERE id_usuario = ?");
             return $stmt->execute([$nuevoEstado, $idUsuario]);
