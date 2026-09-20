@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Iniciar Sesión — Sistema de Nómina</title>
+<link rel="icon" type="image/png" href="assets/images/logo_multitel.png?v=1">
+<link rel="shortcut icon" type="image/png" href="assets/images/logo_multitel.png?v=1">
+<link rel="apple-touch-icon" href="assets/images/logo_multitel.png?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -43,8 +46,8 @@
       <header class="topbar">
         <div class="topbar-left-group">
           <div class="brand">
-            <i class="fa-solid fa-calculator brand-icon"></i>
-            <span class="brand-text">NÓMINA</span>
+            <img src="assets/images/logo_multitel.png" alt="Multitel" class="brand-logo-img">
+            <span class="brand-text">MULTI<span class="brand-text-accent">TEL</span></span>
           </div>
           <span class="topbar-divider" aria-hidden="true"></span>
           <div class="header-cmdk-trigger" style="pointer-events: none;">

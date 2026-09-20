@@ -42,12 +42,15 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="<?= Security::csrfToken() ?>">
 <meta name="csp-nonce" content="<?= Security::getCspNonce() ?>">
-<title><?= htmlspecialchars($pageTitle) ?> - Nómina</title>
+<title><?= htmlspecialchars($pageTitle) ?> - Multitel</title>
+<link rel="icon" type="image/png" href="assets/images/logo_multitel.png?v=1">
+<link rel="shortcut icon" type="image/png" href="assets/images/logo_multitel.png?v=1">
+<link rel="apple-touch-icon" href="assets/images/logo_multitel.png?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
-<link rel="stylesheet" href="assets/css/style.css?v=3.7">
+<link rel="stylesheet" href="assets/css/style.css?v=3.9">
 <link rel="stylesheet" href="assets/css/paginator.css?v=1.0">
 <?php if (empty($currentRoute) || strpos($currentRoute, 'dashboard') === 0): ?>
 <link rel="stylesheet" href="assets/css/dashboard.css?v=2.8">
@@ -96,9 +99,9 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
 <body>
 <header class="topbar" id="appTopbar">
   <div class="topbar-left-group">
-    <a href="index.php?r=dashboard" class="brand">
-      <i class="fa-solid fa-calculator brand-icon"></i>
-      <span class="brand-text">NÓMINA</span>
+    <a href="index.php?r=dashboard" class="brand" title="Multitel - Ir al Inicio">
+      <img src="assets/images/logo_multitel.png" alt="Multitel" class="brand-logo-img">
+      <span class="brand-text">MULTI<span class="brand-text-accent">TEL</span></span>
     </a>
     <span class="topbar-divider" aria-hidden="true"></span>
   </div>
@@ -285,9 +288,9 @@ $dbNavLayout = $dbPrefs['nav_layout'] ?? 'header';
 <!-- ═══════════════ SIDEBAR LATERAL EJECUTIVO (MODO SIDEBAR) ═══════════════ -->
 <aside class="app-sidebar" id="appSidebar" aria-label="Navegación lateral del sistema">
   <div class="sidebar-header">
-    <a href="index.php?r=dashboard" class="sidebar-brand" title="Ir al Inicio">
-      <i class="fa-solid fa-calculator sidebar-brand-icon"></i>
-      <span class="sidebar-brand-text">NÓMINA</span>
+    <a href="index.php?r=dashboard" class="sidebar-brand" title="Multitel - Ir al Inicio">
+      <img src="assets/images/logo_multitel.png" alt="Multitel" class="sidebar-brand-logo-img">
+      <span class="sidebar-brand-text">MULTI<span class="brand-text-accent">TEL</span></span>
     </a>
     <button class="sidebar-desktop-toggle" id="sidebarDesktopToggle" type="button" title="Colapsar menú lateral" aria-label="Colapsar menú lateral">
       <i class="fa-solid fa-angles-left"></i>

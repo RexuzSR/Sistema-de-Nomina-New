@@ -126,8 +126,15 @@ class NominaController extends Controller {
             if ($action === 'agregar_trabajadores') {
                 $seleccionados = $_POST['id_empleados'] ?? [];
                 if (!empty($seleccionados)) {
-                    $nominaModel->agregarTrabajadoresANomina($id_nomina, $seleccionados);
-                    $msg = 'Trabajadores agregados a la nómina exitosamente.';
+                    $diasPeriodo = 15;
+                    if ($periodo) {
+                        $inicio = strtotime($periodo['fecha_inicio']);
+                        $fin = strtotime($periodo['fecha_fin']);
+                        $calcDias = round(($fin - $inicio) / 86400) + 1;
+                        if ($calcDias > 0) $diasPeriodo = (int)$calcDias;
+                    }
+                    $nominaModel->agregarTrabajadoresANomina($id_nomina, $seleccionados, $diasPeriodo);
+                    $msg = 'Trabajadores agregados a la nómina exitosamente con sus días y deducciones calculadas.';
                 } else {
                     $msg = 'No se seleccionó ningún trabajador.';
                 }

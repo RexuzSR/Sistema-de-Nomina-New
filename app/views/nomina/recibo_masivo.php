@@ -13,6 +13,8 @@ $totalRecibos = count($recibos);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tickets de Nómina (Formato Comercial POS) - <?= htmlspecialchars($nombreEmpresa) ?></title>
+  <link rel="icon" type="image/png" href="assets/images/logo_multitel.png?v=1">
+  <link rel="shortcut icon" type="image/png" href="assets/images/logo_multitel.png?v=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">

@@ -92,11 +92,40 @@ body {
 }
 
 .topbar .brand-text {
-  font-weight: 800;
-  font-size: 16px;
-  letter-spacing: 1.2px;
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: 0.8px;
   color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  line-height: 1;
+}
+
+.brand-logo-img,
+.sidebar-brand-logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  padding: 0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.22);
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+  image-rendering: -webkit-optimize-contrast;
+  transition: transform 0.25s ease;
+}
+
+.topbar .brand:hover .brand-logo-img,
+.sidebar-brand:hover .sidebar-brand-logo-img {
+  transform: scale(1.06);
+}
+
+.brand-text-accent {
+  color: #ff7417;
+  font-weight: 900;
+  text-shadow: 0 2px 8px rgba(255, 116, 23, 0.45);
 }
 
 /* Grupo Izquierdo: Brand */
@@ -2914,25 +2943,23 @@ html.layout-sidebar-mode .sidebar-header {
 html.layout-sidebar-mode .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 12px;
   color: #ffffff;
   text-decoration: none;
-  font-weight: 800;
-  font-size: 16px;
-  letter-spacing: 1.2px;
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: 0.8px;
   white-space: nowrap;
-}
-
-html.layout-sidebar-mode .sidebar-brand-icon {
-  font-size: 18px;
-  color: #2dd4bf;
-  flex-shrink: 0;
-  width: 22px;
-  text-align: center;
-  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), font-size 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 }
 
 html.layout-sidebar-mode .sidebar-brand-text {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   opacity: 1;
   transform: translateX(0);
   white-space: nowrap;
