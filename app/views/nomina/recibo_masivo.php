@@ -541,7 +541,7 @@ $totalRecibos = count($recibos);
       <a id="btnDownloadPdf" class="btn-pdf-link" href="index.php?r=nomina/recibo_masivo&id_nomina=<?= $id_nomina ?>&format=pdf&modo=carta6" target="_blank" title="Descargar documento PDF listo para imprimir o archivar">
         <i class="fa-solid fa-file-pdf" style="color:#ef4444;"></i> Descargar PDF
       </a>
-      <button class="btn-print-cta" onclick="window.print()" title="Enviar directamente a la impresora">
+      <button class="btn-print-cta" onclick="imprimirMasivoConAuditoria(<?= (int)$id_nomina ?>)" title="Enviar directamente a la impresora">
         <i class="fa-solid fa-print"></i> Imprimir Tickets
       </button>
       <a class="btn-back-link" href="index.php?r=nomina/detalle&id_nomina=<?= $id_nomina ?>">
@@ -737,6 +737,17 @@ $totalRecibos = count($recibos);
         btnPdf.href = 'index.php?r=nomina/recibo_masivo&id_nomina=<?= $id_nomina ?>&format=pdf&modo=pos80';
       }
     }
+  }
+
+  function imprimirMasivoConAuditoria(idNomina) {
+    try {
+      fetch('index.php?r=nomina/logImpresionRecibo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id_nomina=' + encodeURIComponent(idNomina) + '&id_empleado=0&tipo=masivo'
+      }).catch(function(){});
+    } catch(e){}
+    window.print();
   }
   </script>
 

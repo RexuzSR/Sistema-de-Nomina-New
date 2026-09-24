@@ -33,20 +33,30 @@ class PermisoController extends Controller {
             $motivo = trim($_POST['motivo'] ?? '');
 
             if (!$id_empleado || !$fecha_inicio || !$fecha_fin || $motivo === '') {
-                $error = 'Completa todos los campos.';
+                $error = 'Completa todos los campos obligatorios (*).';
+            } elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_inicio) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_fin) || strtotime($fecha_inicio) === false || strtotime($fecha_fin) === false) {
+                $error = 'Las fechas ingresadas no son válidas.';
             } elseif ($fecha_fin < $fecha_inicio) {
                 $error = 'La fecha de fin no puede ser anterior a la fecha de inicio.';
+            } elseif (mb_strlen($motivo) < 3) {
+                $error = 'El motivo del permiso debe contener al menos 3 caracteres.';
+            } elseif (mb_strlen($motivo) > 500) {
+                $error = 'El motivo del permiso no puede exceder los 500 caracteres.';
             } else {
-                $dias = (strtotime($fecha_fin) - strtotime($fecha_inicio)) / 86400 + 1;
-                $permisoModel->create($id_empleado, $fecha_inicio, $fecha_fin, $dias, $motivo);
-                Audit::log('PERMISOS', 'SOLICITAR', "Registró solicitud de permiso ({$dias} días) para el empleado ID {$id_empleado}", 'tb_permiso', null, [
-                    'empleado_id' => $id_empleado,
-                    'fecha_inicio' => $fecha_inicio,
-                    'fecha_fin' => $fecha_fin,
-                    'dias' => $dias,
-                    'motivo' => $motivo
-                ]);
-                $this->redirect('index.php?r=permisos&msg=' . urlencode('Permiso registrado y en espera de aprobacion.'));
+                $dias = (int)round((strtotime($fecha_fin) - strtotime($fecha_inicio)) / 86400) + 1;
+                if ($dias > 365) {
+                    $error = 'La duración del permiso no puede exceder los 365 días.';
+                } else {
+                    $permisoModel->create($id_empleado, $fecha_inicio, $fecha_fin, $dias, $motivo);
+                    Audit::log('PERMISOS', 'SOLICITAR', "Registró solicitud de permiso ({$dias} días) para el empleado ID {$id_empleado}", 'tb_permiso', null, [
+                        'empleado_id' => $id_empleado,
+                        'fecha_inicio' => $fecha_inicio,
+                        'fecha_fin' => $fecha_fin,
+                        'dias' => $dias,
+                        'motivo' => $motivo
+                    ]);
+                    $this->redirect('index.php?r=permisos&msg=' . urlencode('Permiso registrado y en espera de aprobacion.'));
+                }
             }
         }
 

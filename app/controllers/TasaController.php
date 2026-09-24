@@ -32,7 +32,19 @@ class TasaController extends Controller {
             $fuente = trim($_POST['fuente'] ?? 'BCV');
 
             if (!$fecha || $valor === '' || !is_numeric($valor)) {
-                $error = 'Completa fecha y valor de la tasa correctamente.';
+                $error = 'Completa la fecha y el valor de la tasa con valores válidos.';
+            } elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha) || strtotime($fecha) === false) {
+                $error = 'La fecha ingresada no es válida.';
+            } elseif ($fecha > date('Y-m-d')) {
+                $error = 'La fecha de la tasa no puede ser una fecha futura (máximo hoy ' . date('d/m/Y') . ').';
+            } elseif ($fecha < '2000-01-01') {
+                $error = 'La fecha de la tasa no puede ser anterior al año 2000.';
+            } elseif ((float)$valor <= 0) {
+                $error = 'El valor de la tasa debe ser un monto numérico mayor a cero.';
+            } elseif ((float)$valor > 1000000) {
+                $error = 'El valor de la tasa supera el límite permitido.';
+            } elseif (mb_strlen($fuente) > 50) {
+                $error = 'El campo fuente no puede exceder los 50 caracteres.';
             } else {
                 try {
                     $tasaModel->create($fecha, (float)$valor, $fuente);

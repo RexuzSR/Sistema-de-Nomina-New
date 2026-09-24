@@ -1,22 +1,21 @@
 /**
  * Sistema de Nómina — Gestor de Seguridad del Cliente
- * Control de inactividad, renovación proactiva (Ping), advertencia modal interactiva
- * y detección de abandono seguro con sendBeacon.
+ * Control de inactividad, renovación proactiva (Heartbeat Ping) y advertencia modal interactiva.
  */
 (function() {
   'use strict';
 
-  // Configuración de tiempos (en segundos)
-  // En producción: 15 min inactividad (900 s), advertencia a los 14 min (840 s)
-  var INACTIVITY_LIMIT = 900;
-  var WARNING_BEFORE = 60;
-  var WARNING_TIME = INACTIVITY_LIMIT - WARNING_BEFORE; // 840 s
+  // Configuración de tiempos de sesión
+  // Inactividad máxima: 30 minutos (1800 s), advertencia a los 28 minutos (faltando 120 s)
+  var INACTIVITY_LIMIT = 1800;
+  var WARNING_BEFORE = 120;
+  var WARNING_TIME = INACTIVITY_LIMIT - WARNING_BEFORE; // 1680 s
 
   var lastActivity = Date.now();
+  var lastServerPing = Date.now();
   var warningModalVisible = false;
   var countdownInterval = null;
   var secondsLeft = WARNING_BEFORE;
-  var isInternalNavigation = false;
 
   // Claves para coordinación multi-pestaña en localStorage
   var TAB_ID = 'tab_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
@@ -55,54 +54,73 @@
     try {
       var tabs = JSON.parse(localStorage.getItem('nomina_active_tabs') || '{}');
       delete tabs[TAB_ID];
-      // Limpiar pestañas zombis con más de 1 hora
       var now = Date.now();
-      var count = 0;
       for (var id in tabs) {
-        if (now - tabs[id] < 3600000) {
-          count++;
-        } else {
+        if (now - tabs[id] >= 3600000) {
           delete tabs[id];
         }
       }
       localStorage.setItem('nomina_active_tabs', JSON.stringify(tabs));
-      return count;
-    } catch (e) {
-      return 0;
-    }
+    } catch (e) {}
   }
 
   registerTab();
-  // Latido periódico de pestaña activa
   setInterval(registerTab, 15000);
+  window.addEventListener('beforeunload', unregisterTab);
 
   /**
-   * Detección de actividad del usuario
+   * Detección de actividad del usuario con Heartbeat proactivo
    */
   var activityDebounce = 0;
   function onUserActivity() {
     var now = Date.now();
-    if (now - activityDebounce < 5000) return; // Evitar saturación cada 5s
-    activityDebounce = now;
     lastActivity = now;
 
-    // Sincronizar timestamp con otras pestañas
+    // Heartbeat proactivo: si el usuario está interactuando y han pasado más de 3 minutos
+    // desde el último ping, refrescar la sesión en el servidor silenciosamente
+    if (now - lastServerPing > 180000) { // 3 minutos
+      lastServerPing = now;
+      pingSession();
+    }
+
+    if (now - activityDebounce < 5000) return; // Evitar saturar localStorage
+    activityDebounce = now;
+
     try {
       localStorage.setItem('nomina_last_user_activity', String(now));
     } catch (e) {}
 
-    // Si el modal de advertencia estaba visible y el usuario interactuó, renovar
+    // Si el modal de advertencia estaba visible y el usuario volvió a interactuar, renovar
     if (warningModalVisible) {
       pingSession();
     }
   }
 
   // Eventos de usuario para monitoreo de actividad
-  ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'].forEach(function(evt) {
+  ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll', 'click'].forEach(function(evt) {
     window.addEventListener(evt, onUserActivity, { passive: true });
   });
 
-  // Escuchar actividad desde otras pestañas
+  // Al regresar a la pestaña (foco o visibilidad activa), renovar de inmediato si la sesión está vigente
+  function onTabWakeUp() {
+    var elapsedSeconds = Math.floor((Date.now() - lastActivity) / 1000);
+    if (elapsedSeconds < INACTIVITY_LIMIT) {
+      lastActivity = Date.now();
+      lastServerPing = Date.now();
+      pingSession();
+      if (warningModalVisible) {
+        hideWarningModal();
+      }
+    }
+  }
+  window.addEventListener('focus', onTabWakeUp);
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      onTabWakeUp();
+    }
+  });
+
+  // Escuchar actividad desde otras pestañas del mismo navegador
   window.addEventListener('storage', function(e) {
     if (e.key === 'nomina_last_user_activity' && e.newValue) {
       var foreignActivity = parseInt(e.newValue, 10);
@@ -122,10 +140,8 @@
     var elapsedSeconds = Math.floor((Date.now() - lastActivity) / 1000);
 
     if (elapsedSeconds >= INACTIVITY_LIMIT) {
-      // Tiempo vencido
       handleSessionTimeout();
     } else if (elapsedSeconds >= WARNING_TIME && !warningModalVisible) {
-      // A falta de 60 segundos: mostrar advertencia
       showWarningModal();
     }
   }, 1000);
@@ -161,7 +177,9 @@
   function updateCountdownDisplay(sec) {
     var timerEl = document.getElementById('timeout-countdown-seconds');
     if (timerEl) {
-      timerEl.textContent = sec < 10 ? '0' + sec : sec;
+      var m = Math.floor(sec / 60);
+      var s = sec % 60;
+      timerEl.textContent = (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
     }
     var progressEl = document.getElementById('timeout-progress-bar');
     if (progressEl) {
@@ -183,6 +201,7 @@
         handleSessionTimeout();
       } else {
         lastActivity = Date.now();
+        lastServerPing = Date.now();
         try {
           localStorage.setItem('nomina_last_user_activity', String(lastActivity));
         } catch (e) {}
@@ -190,7 +209,7 @@
       }
     })
     .catch(function() {
-      // Error de red temporal
+      // Tolerar errores transitorios de red sin interrumpir al usuario
     });
   }
 
@@ -198,48 +217,6 @@
     hideWarningModal();
     window.location.href = 'index.php?r=auth/login&reason=timeout';
   }
-
-  /**
-   * Detección de navegación interna vs abandono de pestaña
-   */
-  document.addEventListener('click', function(e) {
-    var link = e.target.closest('a');
-    if (link && link.href) {
-      // Si el enlace apunta al mismo host y no abre en target="_blank"
-      var target = link.getAttribute('target');
-      if (!target || target === '_self') {
-        if (link.origin === window.location.origin) {
-          isInternalNavigation = true;
-        }
-      }
-    }
-  }, true);
-
-  document.addEventListener('submit', function() {
-    isInternalNavigation = true;
-  }, true);
-
-  // Detectar atajos de recarga de página (F5, Ctrl+R, Cmd+R) para tratarlos como navegación interna
-  window.addEventListener('keydown', function(e) {
-    if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R'))) {
-      isInternalNavigation = true;
-    }
-  }, true);
-
-  // Al cerrar la ventana o cambiar de página
-  window.addEventListener('pagehide', function() {
-    var remainingTabs = unregisterTab();
-
-    // Si NO fue navegación interna y ya no quedan pestañas abiertas del sistema de nómina
-    if (!isInternalNavigation && remainingTabs <= 0) {
-      var token = getCsrfToken();
-      if (token && navigator.sendBeacon) {
-        var formData = new FormData();
-        formData.append('csrf_token', token);
-        navigator.sendBeacon('index.php?r=auth/beaconLogout', formData);
-      }
-    }
-  });
 
   /**
    * Conectar botones del modal una vez que el DOM esté listo

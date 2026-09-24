@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDashboardCharts();
     initCommandPalette();
     initRangeToggles();
+    initChartLegendTooltips();
 
     const savedCur = localStorage.getItem('dash-currency');
     if (savedCur) {
@@ -97,13 +98,14 @@ function initDashboardCharts() {
                             fill: true,
                             tension: 0.4,
                             borderWidth: 3,
-                            pointBackgroundColor: '#fff',
+                            pointBackgroundColor: '#ffffff',
                             pointBorderColor: '#0284c7',
                             pointBorderWidth: 2.5,
-                            pointRadius: 4,
-                            pointHoverRadius: 8,
+                            pointRadius: 5,
+                            pointHoverRadius: 9,
+                            pointHitRadius: 18,
                             pointHoverBackgroundColor: '#0284c7',
-                            pointHoverBorderColor: '#fff',
+                            pointHoverBorderColor: '#ffffff',
                             pointHoverBorderWidth: 3,
                             order: 1
                         },
@@ -115,10 +117,16 @@ function initDashboardCharts() {
                             fill: false,
                             borderDash: [6, 6],
                             tension: 0.4,
-                            borderWidth: 2,
+                            borderWidth: 2.2,
                             pointBackgroundColor: '#0f766e',
-                            pointRadius: 3,
-                            pointHoverRadius: 6,
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointHitRadius: 18,
+                            pointHoverBackgroundColor: '#0f766e',
+                            pointHoverBorderColor: '#ffffff',
+                            pointHoverBorderWidth: 3,
                             order: 2
                         },
                         {
@@ -128,10 +136,16 @@ function initDashboardCharts() {
                             backgroundColor: 'transparent',
                             fill: false,
                             tension: 0.4,
-                            borderWidth: 2,
+                            borderWidth: 2.2,
                             pointBackgroundColor: '#e11d48',
-                            pointRadius: 3,
-                            pointHoverRadius: 6,
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointHitRadius: 18,
+                            pointHoverBackgroundColor: '#e11d48',
+                            pointHoverBorderColor: '#ffffff',
+                            pointHoverBorderWidth: 3,
                             order: 3
                         }
                     ]
@@ -141,10 +155,53 @@ function initDashboardCharts() {
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { display: false }, // usamos leyenda custom
+                        legend: { display: false }, // Usamos leyenda custom interactiva en el header
                         tooltip: {
+                            enabled: true,
+                            usePointStyle: true,
+                            boxPadding: 6,
+                            padding: 13,
+                            cornerRadius: 12,
+                            backgroundColor: 'rgba(15, 23, 42, 0.96)',
+                            titleColor: '#f8fafc',
+                            titleFont: { size: 12.5, weight: '700' },
+                            bodyColor: '#e2e8f0',
+                            bodyFont: { size: 11.5 },
+                            bodySpacing: 6,
+                            borderColor: 'rgba(255, 255, 255, 0.12)',
+                            borderWidth: 1,
                             callbacks: {
-                                label: (c) => `${c.dataset.label}: ${formatUSD(c.parsed.y)}`
+                                title: (items) => {
+                                    const label = items[0]?.label || '';
+                                    return `📅 Periodo: ${label}`;
+                                },
+                                label: (c) => {
+                                    const valUsd = c.parsed.y;
+                                    const tasa = Number(d.tasaBcv || 0);
+                                    const usdStr = formatUSD(valUsd);
+                                    if (tasa > 0) {
+                                        const bsVal = valUsd * tasa;
+                                        const bsStr = 'Bs. ' + Number(bsVal).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                        return ` ${c.dataset.label}: ${usdStr} (${bsStr})`;
+                                    }
+                                    return ` ${c.dataset.label}: ${usdStr}`;
+                                },
+                                afterBody: (items) => {
+                                    const dataIdx = items[0]?.dataIndex;
+                                    const chartInst = items[0]?.chart;
+                                    const offset = chartInst?._rangeStartIdx || 0;
+                                    const actualIdx = (dataIdx !== undefined) ? (offset + dataIdx) : null;
+                                    const lines = [];
+
+                                    if (actualIdx !== null && d.empleados && d.empleados[actualIdx] !== undefined) {
+                                        const emps = d.empleados[actualIdx];
+                                        lines.push(`👥 Personal procesado: ${emps} trabajador${emps === 1 ? '' : 'es'}`);
+                                    }
+                                    return lines;
+                                },
+                                footer: (items) => {
+                                    return '───────────────────────────\n💡 Neto = Asignaciones − Deducciones';
+                                }
                             }
                         }
                     },
@@ -361,6 +418,7 @@ function initRangeToggles() {
                 const n = range === 'all' ? total : Math.min(parseInt(range), total);
                 const startIdx = Math.max(0, total - n);
 
+                chart._rangeStartIdx = startIdx;
                 chart.data.labels = fullLabels.slice(startIdx);
                 chart.data.datasets[0].data = (window.dashboardChartData.neto || []).slice(startIdx);
                 chart.data.datasets[1].data = (window.dashboardChartData.asignaciones || []).slice(startIdx);
@@ -451,3 +509,192 @@ window.switchCurrency = function(cur, btn) {
 window.openCommandPalette = openCommandPalette;
 window.closeCommandPalette = closeCommandPalette;
 window.showToast = showToast;
+
+/* ─── TOOLTIPS EXPLICATIVOS PARA LEYENDA DEL HEADER ─────── */
+function initChartLegendTooltips() {
+    const legendContainer = document.getElementById('chartEvoLegend');
+    if (!legendContainer) return;
+
+    const legendExplanations = {
+        asignaciones: {
+            title: 'Asignaciones Totales',
+            dotColor: '#0f766e',
+            badge: '+ Ingresos',
+            badgeBg: 'rgba(15, 118, 110, 0.25)',
+            badgeColor: '#2dd4bf',
+            pointInfo: '🟢 Puntos verdes: Marcan el total bruto devengado en la quincena.',
+            desc: 'Suma de todas las percepciones económicas generadas por los trabajadores antes de cualquier deducción legal o laboral.',
+            items: [
+                '<strong>Sueldo base:</strong> Días efectivamente laborados en la quincena.',
+                '<strong>Horas extras:</strong> Diurnas y nocturnas con recargo legal.',
+                '<strong>Feriados y descansos:</strong> Compensados según la LOTTT.',
+                '<strong>Bonos y primas:</strong> Bonos especiales y complementos salariales.'
+            ],
+            hint: 'Haz clic para alternar la línea verde · Puntos = total devengado'
+        },
+        deducciones: {
+            title: 'Deducciones Totales',
+            dotColor: '#e11d48',
+            badge: '− Retenciones',
+            badgeBg: 'rgba(225, 29, 72, 0.25)',
+            badgeColor: '#fb7185',
+            pointInfo: '🔴 Puntos rojos: Marcan los descuentos y retenciones del ciclo.',
+            desc: 'Total de retenciones obligatorias de ley venezolana y descuentos autorizados aplicados a los salarios.',
+            items: [
+                '<strong>IVSS (SSO):</strong> 4% retención de seguro social.',
+                '<strong>RPE (Paro Forzoso):</strong> 0.5% régimen prestacional de empleo.',
+                '<strong>FAOV (Banavih):</strong> 1% ahorro habitacional obligatorio.',
+                '<strong>Otras deducciones:</strong> Inasistencias, cuotas de préstamos o anticipos.'
+            ],
+            hint: 'Haz clic para alternar la línea roja · Puntos = total retenido'
+        },
+        neto: {
+            title: 'Neto a Pagar',
+            dotColor: '#0284c7',
+            badge: '= Desembolso Real',
+            badgeBg: 'rgba(2, 132, 199, 0.25)',
+            badgeColor: '#38bdf8',
+            pointInfo: '🔵 Puntos azules: Marcan el monto líquido definitivo pagado.',
+            desc: 'Monto líquido y definitivo efectivamente desembolsado o transferido a las cuentas bancarias de los empleados.',
+            formula: 'Neto = Total Asignaciones − Total Deducciones',
+            items: [
+                '<strong>Desembolso efectivo:</strong> Saldo líquido transferido al personal.',
+                '<strong>Garantía salarial:</strong> Si las deducciones igualan o superan asignaciones, el neto es $0.'
+            ],
+            hint: 'Haz clic para alternar la línea azul · Puntos = monto a cobrar'
+        }
+    };
+
+    function getPopover() {
+        let pop = document.getElementById('legendFloatingPopover');
+        if (!pop) {
+            pop = document.createElement('div');
+            pop.id = 'legendFloatingPopover';
+            pop.className = 'legend-floating-popover';
+            pop.setAttribute('role', 'tooltip');
+            pop.setAttribute('aria-live', 'polite');
+            document.body.appendChild(pop);
+        }
+        return pop;
+    }
+
+    function positionPopover(targetEl, popEl) {
+        const rect = targetEl.getBoundingClientRect();
+        const popRect = popEl.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        let left = rect.left + (rect.width / 2) - (popRect.width / 2);
+        if (left + popRect.width > vw - 14) {
+            left = vw - popRect.width - 14;
+        }
+        if (left < 14) {
+            left = 14;
+        }
+
+        let top = rect.bottom + 8;
+        if (top + popRect.height > vh - 14) {
+            top = Math.max(14, rect.top - popRect.height - 8);
+        }
+
+        popEl.style.top = `${Math.round(top)}px`;
+        popEl.style.left = `${Math.round(left)}px`;
+    }
+
+    function buildPopoverHtml(data) {
+        let itemsHtml = '';
+        if (data.items && data.items.length) {
+            itemsHtml = `<ul class="popover-list">${data.items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+        }
+
+        let formulaHtml = '';
+        if (data.formula) {
+            formulaHtml = `<div class="popover-formula"><i class="fa-solid fa-calculator" style="margin-right:5px;"></i>${data.formula}</div>`;
+        }
+
+        return `
+            <div class="popover-header">
+                <div class="popover-title-wrap">
+                    <span class="popover-title-dot" style="background:${data.dotColor};"></span>
+                    <span>${data.title}</span>
+                </div>
+                <span class="popover-badge" style="background:${data.badgeBg};color:${data.badgeColor};">${data.badge}</span>
+            </div>
+            <div class="popover-point-badge">
+                <span>${data.pointInfo}</span>
+            </div>
+            <p class="popover-desc">${data.desc}</p>
+            ${itemsHtml}
+            ${formulaHtml}
+            <div class="popover-footer-hint">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>${data.hint}</span>
+            </div>
+        `;
+    }
+
+    let hideTimer = null;
+
+    function showTooltip(el) {
+        const key = el.dataset.legend;
+        const data = legendExplanations[key];
+        if (!data) return;
+
+        clearTimeout(hideTimer);
+        const pop = getPopover();
+        pop.innerHTML = buildPopoverHtml(data);
+        pop.classList.add('show');
+        positionPopover(el, pop);
+    }
+
+    function scheduleHide() {
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+            const pop = document.getElementById('legendFloatingPopover');
+            if (pop) {
+                pop.classList.remove('show');
+            }
+        }, 150);
+    }
+
+    const items = legendContainer.querySelectorAll('.lg-item');
+    items.forEach(item => {
+        // Hover
+        item.addEventListener('mouseenter', () => showTooltip(item));
+        item.addEventListener('mouseleave', scheduleHide);
+
+        // Accesibilidad teclado
+        item.addEventListener('focus', () => showTooltip(item));
+        item.addEventListener('blur', scheduleHide);
+
+        // Click / Touch: alternar dataset en la gráfica
+        item.addEventListener('click', (e) => {
+            const dsIdx = parseInt(item.dataset.datasetIndex);
+            if (window._chartEvo && !isNaN(dsIdx)) {
+                const isVisible = window._chartEvo.isDatasetVisible(dsIdx);
+                window._chartEvo.setDatasetVisibility(dsIdx, !isVisible);
+                window._chartEvo.update();
+                item.classList.toggle('is-hidden', isVisible);
+            }
+        });
+    });
+
+    const pop = getPopover();
+    pop.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+    pop.addEventListener('mouseleave', scheduleHide);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const pop = document.getElementById('legendFloatingPopover');
+            if (pop) pop.classList.remove('show');
+        }
+    });
+
+    window.addEventListener('scroll', () => {
+        const pop = document.getElementById('legendFloatingPopover');
+        if (pop && pop.classList.contains('show')) {
+            pop.classList.remove('show');
+        }
+    }, { passive: true });
+}
+

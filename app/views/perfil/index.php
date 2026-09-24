@@ -100,7 +100,10 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
               Nombre de Usuario
             </label>
             <input type="text" id="nombre_usuario" name="nombre_usuario" class="form-control-perfil" 
-                   value="<?= htmlspecialchars($nombre) ?>" required minlength="3" maxlength="50" autocomplete="username">
+                   value="<?= htmlspecialchars($nombre) ?>" required minlength="3" maxlength="30"
+                   pattern="^[a-zA-Z0-9._-]+$" title="Solo letras, números, puntos, guiones y guiones bajos (sin espacios)"
+                   oninput="this.value = this.value.replace(/[^a-zA-Z0-9._-]/g, '')"
+                   autocomplete="username">
           </div>
 
           <div class="form-group-perfil">
@@ -141,7 +144,7 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
           <div class="form-group-perfil">
             <label class="form-label-perfil" for="password_actual">Contraseña Actual</label>
             <div class="password-input-wrap">
-              <input type="password" id="password_actual" name="password_actual" class="form-control-perfil" required autocomplete="current-password" placeholder="Tu contraseña actual">
+              <input type="password" id="password_actual" name="password_actual" class="form-control-perfil" required maxlength="64" autocomplete="current-password" placeholder="Tu contraseña actual">
               <button type="button" class="password-toggle-btn" onclick="togglePasswordVis('password_actual', this)" title="Ver / Ocultar">
                 <i class="fa-solid fa-eye"></i>
               </button>
@@ -151,7 +154,7 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
           <div class="form-group-perfil">
             <label class="form-label-perfil" for="password_nueva">Nueva Contraseña</label>
             <div class="password-input-wrap">
-              <input type="password" id="password_nueva" name="password_nueva" class="form-control-perfil" required minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres" oninput="checkPasswordStrength(this.value)">
+              <input type="password" id="password_nueva" name="password_nueva" class="form-control-perfil" required minlength="8" maxlength="64" autocomplete="new-password" placeholder="Mínimo 8 caracteres" oninput="checkPasswordStrength(this.value)">
               <button type="button" class="password-toggle-btn" onclick="togglePasswordVis('password_nueva', this)" title="Ver / Ocultar">
                 <i class="fa-solid fa-eye"></i>
               </button>
@@ -167,7 +170,7 @@ $fechaCreacion = !empty($user['fecha_creacion']) ? date('d/m/Y', strtotime($user
           <div class="form-group-perfil">
             <label class="form-label-perfil" for="password_confirmar">Confirmar Nueva Contraseña</label>
             <div class="password-input-wrap">
-              <input type="password" id="password_confirmar" name="password_confirmar" class="form-control-perfil" required minlength="8" autocomplete="new-password" placeholder="Repite la nueva contraseña">
+              <input type="password" id="password_confirmar" name="password_confirmar" class="form-control-perfil" required minlength="8" maxlength="64" autocomplete="new-password" placeholder="Repite la nueva contraseña">
               <button type="button" class="password-toggle-btn" onclick="togglePasswordVis('password_confirmar', this)" title="Ver / Ocultar">
                 <i class="fa-solid fa-eye"></i>
               </button>

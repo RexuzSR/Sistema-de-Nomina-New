@@ -365,6 +365,12 @@
   border: 1px solid #99f6e4;
 }
 
+.audit-action-badge.badge-cyan {
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+}
+
 .audit-action-badge.badge-other {
   background: #f1f5f9;
   color: #475569;
@@ -555,6 +561,12 @@
   background: rgba(20, 184, 166, 0.18);
   color: #2dd4bf;
   border-color: rgba(20, 184, 166, 0.35);
+}
+
+.dark-theme .audit-action-badge.badge-cyan {
+  background: rgba(2, 132, 199, 0.20);
+  color: #38bdf8;
+  border-color: rgba(2, 132, 199, 0.40);
 }
 
 /* ─── RESPONSIVIDAD ─── */

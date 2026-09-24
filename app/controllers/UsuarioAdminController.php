@@ -53,14 +53,16 @@ class UsuarioAdminController extends Controller {
 
         // Validaciones
         $errors = [];
-        if (empty($username) || strlen($username) < 3) {
-            $errors[] = 'El nombre de usuario debe tener al menos 3 caracteres.';
+        if (empty($username) || strlen($username) < 3 || strlen($username) > 30) {
+            $errors[] = 'El nombre de usuario debe tener entre 3 y 30 caracteres.';
+        } elseif (!preg_match('/^[a-zA-Z0-9._-]+$/', $username)) {
+            $errors[] = 'El nombre de usuario solo puede contener letras, números, puntos (.), guiones (-) y guiones bajos (_), sin espacios.';
         }
-        if (empty($correo) || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Ingresa un correo electrónico válido.';
+        if (empty($correo) || strlen($correo) > 100 || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Ingresa un correo electrónico válido de hasta 100 caracteres.';
         }
-        if (empty($password) || strlen($password) < 6) {
-            $errors[] = 'La contraseña debe tener al menos 6 caracteres.';
+        if (empty($password) || strlen($password) < 6 || strlen($password) > 64) {
+            $errors[] = 'La contraseña debe tener entre 6 y 64 caracteres.';
         }
         if ($idRol < 1 || $idRol > 3) {
             $errors[] = 'Selecciona un rol válido.';
@@ -160,11 +162,13 @@ class UsuarioAdminController extends Controller {
 
         // Validaciones
         $errors = [];
-        if (empty($username) || strlen($username) < 3) {
-            $errors[] = 'El nombre de usuario debe tener al menos 3 caracteres.';
+        if (empty($username) || strlen($username) < 3 || strlen($username) > 30) {
+            $errors[] = 'El nombre de usuario debe tener entre 3 y 30 caracteres.';
+        } elseif (!preg_match('/^[a-zA-Z0-9._-]+$/', $username)) {
+            $errors[] = 'El nombre de usuario solo puede contener letras, números, puntos (.), guiones (-) y guiones bajos (_), sin espacios.';
         }
-        if (empty($correo) || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Ingresa un correo electrónico válido.';
+        if (empty($correo) || strlen($correo) > 100 || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Ingresa un correo electrónico válido de hasta 100 caracteres.';
         }
         if ($idRol < 1 || $idRol > 3) {
             $errors[] = 'Selecciona un rol válido.';
@@ -185,8 +189,8 @@ class UsuarioAdminController extends Controller {
 
         // Actualizar contraseña si se proporcionó una nueva
         if ($result && !empty($newPassword)) {
-            if (strlen($newPassword) < 6) {
-                echo json_encode(['success' => false, 'error' => 'La nueva contraseña debe tener al menos 6 caracteres.']);
+            if (strlen($newPassword) < 6 || strlen($newPassword) > 64) {
+                echo json_encode(['success' => false, 'error' => 'La nueva contraseña debe tener entre 6 y 64 caracteres.']);
                 exit;
             }
             $this->usuarioModel->actualizarPassword($idUsuario, $newPassword);

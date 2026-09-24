@@ -189,40 +189,24 @@ class AuthController extends Controller {
         }
 
         $now = microtime(true);
-        if (isset($_SESSION['last_ping_time']) && ($now - $_SESSION['last_ping_time'] < 5.0)) {
+        if (isset($_SESSION['last_ping_time']) && ($now - $_SESSION['last_ping_time'] < 3.0)) {
             // Throttling: responder afirmativo sin sobrecargar I/O
-            echo json_encode(['success' => true, 'throttled' => true, 'expires_in' => 900]);
+            echo json_encode(['success' => true, 'throttled' => true, 'expires_in' => 1800]);
             exit;
         }
 
         $_SESSION['last_ping_time'] = $now;
         $_SESSION['last_activity'] = time();
 
-        echo json_encode(['success' => true, 'throttled' => false, 'expires_in' => 900]);
+        echo json_encode(['success' => true, 'throttled' => false, 'expires_in' => 1800]);
         exit;
     }
 
     /**
-     * Cierre de sesión silencioso y seguro mediante baliza (navigator.sendBeacon)
-     * al cerrar la última ventana activa.
+     * Endpoint de baliza neutralizado para evitar cierres involuntarios al hibernar pestañas.
      */
     public function beaconLogout(): void {
         Security::initSecureSession();
-
-        if (!Security::validateBeaconRequest()) {
-            Security::logSecurityEvent(
-                'SUSPICIOUS_BEACON_ATTEMPT',
-                'Petición beaconLogout rechazada por Origin o token CSRF no coincidente'
-            );
-            http_response_code(403);
-            exit;
-        }
-
-        // Marcar logout pendiente con marca de tiempo.
-        // Si el usuario simplemente recargó la página (F5), la siguiente petición inmediata cancelará el logout.
-        // Si efectivamente cerró la pestaña, la sesión caducará inmediatamente tras la ventana de gracia.
-        $_SESSION['pending_beacon_logout'] = time();
-
         http_response_code(204);
         exit;
     }

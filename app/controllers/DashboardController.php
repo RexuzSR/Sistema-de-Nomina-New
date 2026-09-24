@@ -196,37 +196,78 @@ class DashboardController extends Controller {
             $stmtEmp->execute([$term, $term, $term, $term, $term]);
             $empleados = $stmtEmp->fetchAll();
 
-            // Buscar periodos y nóminas
-            $isNominaSearch = stripos($q, 'nom') !== false || stripos($q, 'nóm') !== false;
-            if ($isNominaSearch) {
-                $stmtPer = $db->prepare("
-                    SELECT p.id_periodo, p.tipo_periodo, p.fecha_inicio, p.fecha_fin, p.anio, p.mes, p.numero_quincena,
-                           n.id_nomina, n.estado AS estado_nomina,
-                           CONCAT(IF(p.numero_quincena IS NOT NULL, CONCAT(p.numero_quincena, 'ra Quincena '), ''), p.tipo_periodo, ' ', p.mes, '/', p.anio) AS descripcion
-                    FROM tb_periodo_nomina p
-                    LEFT JOIN tb_nomina n ON n.id_periodo = p.id_periodo
-                    WHERE n.id_nomina IS NOT NULL
-                    ORDER BY p.fecha_inicio DESC
-                    LIMIT 8
-                ");
-                $stmtPer->execute();
-            } else {
-                $stmtPer = $db->prepare("
-                    SELECT p.id_periodo, p.tipo_periodo, p.fecha_inicio, p.fecha_fin, p.anio, p.mes, p.numero_quincena,
-                           n.id_nomina, n.estado AS estado_nomina,
-                           CONCAT(IF(p.numero_quincena IS NOT NULL, CONCAT(p.numero_quincena, 'ra Quincena '), ''), p.tipo_periodo, ' ', p.mes, '/', p.anio) AS descripcion
-                    FROM tb_periodo_nomina p
-                    LEFT JOIN tb_nomina n ON n.id_periodo = p.id_periodo
-                    WHERE p.tipo_periodo LIKE ?
-                       OR p.fecha_inicio LIKE ?
-                       OR p.fecha_fin LIKE ?
-                       OR p.anio LIKE ?
-                       OR p.mes LIKE ?
-                    ORDER BY p.fecha_inicio DESC
-                    LIMIT 8
-                ");
-                $stmtPer->execute([$term, $term, $term, $term, $term]);
+            // Buscar periodos y nóminas (soporte completo para 2da, 2ra, 1ra, meses en español y descripción)
+            $qLower = mb_strtolower($q, 'UTF-8');
+            $altQ = $q;
+            if (strpos($qLower, '2ra') !== false) {
+                $altQ = str_ireplace('2ra', '2da', $q);
+            } elseif (strpos($qLower, '2da') !== false) {
+                $altQ = str_ireplace('2da', '2ra', $q);
             }
+            $altTerm = '%' . $altQ . '%';
+
+            $mesesMap = [
+                'ene' => 1, 'enero' => 1,
+                'feb' => 2, 'febrero' => 2,
+                'mar' => 3, 'marzo' => 3,
+                'abr' => 4, 'abril' => 4,
+                'may' => 5, 'mayo' => 5,
+                'jun' => 6, 'junio' => 6,
+                'jul' => 7, 'julio' => 7,
+                'ago' => 8, 'agosto' => 8,
+                'sep' => 9, 'sept' => 9, 'septiembre' => 9,
+                'oct' => 10, 'octubre' => 10,
+                'nov' => 11, 'noviembre' => 11,
+                'dic' => 12, 'diciembre' => 12
+            ];
+            $matchedMes = null;
+            foreach ($mesesMap as $k => $mNum) {
+                if (strpos($qLower, $k) !== false) {
+                    $matchedMes = $mNum;
+                    break;
+                }
+            }
+
+            $matchedQuincena = null;
+            if (preg_match('/\b(1|1ra|primera)\b/i', $qLower)) {
+                $matchedQuincena = 1;
+            } elseif (preg_match('/\b(2|2da|2ra|segunda)\b/i', $qLower)) {
+                $matchedQuincena = 2;
+            }
+
+            $sqlPer = "
+                SELECT p.id_periodo, p.tipo_periodo, p.fecha_inicio, p.fecha_fin, p.anio, p.mes, p.numero_quincena,
+                       n.id_nomina, n.estado AS estado_nomina,
+                       COALESCE(NULLIF(TRIM(p.descripcion), ''), CONCAT(IF(p.numero_quincena = 2, '2da Quincena ', IF(p.numero_quincena = 1, '1ra Quincena ', '')), p.tipo_periodo, ' ', p.mes, '/', p.anio)) AS descripcion
+                FROM tb_periodo_nomina p
+                LEFT JOIN tb_nomina n ON n.id_periodo = p.id_periodo
+                WHERE p.descripcion LIKE ?
+                   OR p.descripcion LIKE ?
+                   OR p.tipo_periodo LIKE ?
+                   OR p.fecha_inicio LIKE ?
+                   OR p.fecha_fin LIKE ?
+                   OR p.anio LIKE ?
+                   OR p.mes LIKE ?
+            ";
+            $perParams = [$term, $altTerm, $term, $term, $term, $term, $term];
+
+            if ($matchedMes !== null) {
+                $sqlPer .= " OR p.mes = ? ";
+                $perParams[] = $matchedMes;
+            }
+            if ($matchedQuincena !== null) {
+                $sqlPer .= " OR p.numero_quincena = ? ";
+                $perParams[] = $matchedQuincena;
+            }
+
+            if (stripos($q, 'nom') !== false || stripos($q, 'nóm') !== false) {
+                $sqlPer .= " OR n.id_nomina IS NOT NULL ";
+            }
+
+            $sqlPer .= " ORDER BY p.fecha_inicio DESC LIMIT 8";
+
+            $stmtPer = $db->prepare($sqlPer);
+            $stmtPer->execute($perParams);
             $periodos = $stmtPer->fetchAll();
 
             echo json_encode([

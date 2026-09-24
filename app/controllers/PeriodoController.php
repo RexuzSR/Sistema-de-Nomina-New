@@ -2,18 +2,24 @@
 
 require_once __DIR__ . '/../../core/Controller.php';
 require_once __DIR__ . '/../models/PeriodoModel.php';
+require_once __DIR__ . '/../models/NominaModel.php';
+require_once __DIR__ . '/../models/TasaModel.php';
 
 class PeriodoController extends Controller {
     public function index(): void {
         $this->requireLogin();
 
         $periodoModel = new PeriodoModel();
+        $nominaModel = new NominaModel();
         $periodos = $periodoModel->getAll();
         $msg = $_GET['msg'] ?? '';
+        $error = $_GET['error'] ?? '';
 
         $this->render('periodos/listar', [
             'periodos' => $periodos,
-            'msg' => $msg
+            'nominaModel' => $nominaModel,
+            'msg' => $msg,
+            'error' => $error
         ], 'Periodos de Nomina');
     }
 
@@ -23,45 +29,64 @@ class PeriodoController extends Controller {
         $periodoModel = new PeriodoModel();
         $error = '';
 
-        $hoy = date('Y-m-d');
-        $sugerencias = [
-            'tipo_periodo' => 'Quincenal',
-            'fecha_inicio' => $hoy,
-            'fecha_fin' => date('Y-m-d', strtotime('+14 days')),
-            'anio' => (int)date('Y'),
-            'mes' => (int)date('n'),
-            'numero_quincena' => ((int)date('j') <= 15) ? 1 : 2,
-            'descripcion' => ''
+        $mesesEspanol = [
+            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+            5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+            9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
         ];
 
         $ultimoPeriodo = $periodoModel->getUltimo();
-        if ($ultimoPeriodo) {
-            $sugerencias['tipo_periodo'] = $ultimoPeriodo['tipo_periodo'];
-            $inicioAnterior = strtotime($ultimoPeriodo['fecha_inicio']);
-            $finAnterior = strtotime($ultimoPeriodo['fecha_fin']);
 
-            $diffDias = max(1, round(($finAnterior - $inicioAnterior) / 86400) + 1);
+        if ($ultimoPeriodo && !empty($ultimoPeriodo['tipo_periodo']) && $ultimoPeriodo['tipo_periodo'] === 'Quincenal' && !empty($ultimoPeriodo['numero_quincena'])) {
+            $tipo = 'Quincenal';
+            $ultQuincena = (int)$ultimoPeriodo['numero_quincena'];
+            $ultMes = (int)($ultimoPeriodo['mes'] ?? date('n'));
+            $ultAnio = (int)($ultimoPeriodo['anio'] ?? date('Y'));
 
-            // La fecha de inicio SIEMPRE debe ser hoy (fecha actual)
-            $sugerencias['fecha_inicio'] = $hoy;
-            $sugerencias['fecha_fin'] = date('Y-m-d', strtotime($hoy . ' +' . ($diffDias - 1) . ' days'));
-
-            // Actualizar mes/año/quincena según la fecha de hoy
-            $sugerencias['anio'] = (int)date('Y', strtotime($hoy));
-            $sugerencias['mes'] = (int)date('n', strtotime($hoy));
-
-            if ($sugerencias['tipo_periodo'] === 'Quincenal') {
-                $dia = (int)date('j', strtotime($hoy));
-                $sugerencias['numero_quincena'] = ($dia <= 15) ? 1 : 2;
-                $sugerencias['descripcion'] = $sugerencias['numero_quincena'] . 'ra Quincena ' . date('M Y', strtotime($hoy));
-            } elseif ($sugerencias['tipo_periodo'] === 'Mensual') {
-                $sugerencias['descripcion'] = 'Mes ' . date('M Y', strtotime($hoy));
+            if ($ultQuincena === 1) {
+                // Siguiente es la 2da quincena del mismo mes
+                $numQuincena = 2;
+                $mes = $ultMes;
+                $anio = $ultAnio;
+            } else {
+                // Siguiente es la 1ra quincena del mes siguiente
+                $numQuincena = 1;
+                $mes = $ultMes + 1;
+                $anio = $ultAnio;
+                if ($mes > 12) {
+                    $mes = 1;
+                    $anio++;
+                }
             }
         } else {
-            $dia = (int)date('j', strtotime($hoy));
-            $sugerencias['numero_quincena'] = ($dia <= 15) ? 1 : 2;
-            $sugerencias['descripcion'] = $sugerencias['numero_quincena'] . 'ra Quincena ' . date('M Y', strtotime($hoy));
+            $tipo = 'Quincenal';
+            $anio = (int)date('Y');
+            $mes = (int)date('n');
+            $dia = (int)date('j');
+            $numQuincena = ($dia <= 15) ? 1 : 2;
         }
+
+        if ($numQuincena === 1) {
+            $fecha_inicio = sprintf('%04d-%02d-01', $anio, $mes);
+            $fecha_fin = sprintf('%04d-%02d-15', $anio, $mes);
+            $nombreMes = $mesesEspanol[$mes] ?? date('M');
+            $descripcion = "1ra Quincena {$nombreMes} {$anio}";
+        } else {
+            $fecha_inicio = sprintf('%04d-%02d-16', $anio, $mes);
+            $fecha_fin = date('Y-m-t', strtotime(sprintf('%04d-%02d-01', $anio, $mes)));
+            $nombreMes = $mesesEspanol[$mes] ?? date('M');
+            $descripcion = "2da Quincena {$nombreMes} {$anio}";
+        }
+
+        $sugerencias = [
+            'tipo_periodo' => $tipo,
+            'fecha_inicio' => $fecha_inicio,
+            'fecha_fin' => $fecha_fin,
+            'anio' => $anio,
+            'mes' => $mes,
+            'numero_quincena' => $numQuincena,
+            'descripcion' => $descripcion
+        ];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
@@ -74,7 +99,24 @@ class PeriodoController extends Controller {
             $quincena = isset($_POST['numero_quincena']) && $_POST['numero_quincena'] !== '' ? (int)$_POST['numero_quincena'] : null;
 
             if ($tipo === '' || !$inicio || !$fin || !$anio || !$mes) {
-                $error = 'Completa todos los campos obligatorios.';
+                $error = 'Completa todos los campos obligatorios (*).';
+            } elseif (!in_array($tipo, ['Quincenal', 'Semanal', 'Mensual'], true)) {
+                $error = 'El tipo de periodo seleccionado no es válido.';
+            } elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $inicio) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fin) || strtotime($inicio) === false || strtotime($fin) === false) {
+                $error = 'Las fechas ingresadas no tienen un formato válido.';
+            } elseif ($fin < $inicio) {
+                $error = 'La fecha de fin no puede ser anterior a la fecha de inicio.';
+            } elseif ($anio < 2000 || $anio > 2100) {
+                $error = 'El año debe estar comprendido entre 2000 y 2100.';
+            } elseif ($mes < 1 || $mes > 12) {
+                $error = 'El mes debe ser un valor entre 1 y 12.';
+            } elseif ($tipo === 'Quincenal' && $quincena !== 1 && $quincena !== 2) {
+                $error = 'Para periodos quincenales, el número de quincena debe ser 1 o 2.';
+            } elseif ($tipo === 'Quincenal' && ((round((strtotime($fin) - strtotime($inicio)) / 86400) + 1) < 13 || (round((strtotime($fin) - strtotime($inicio)) / 86400) + 1) > 16)) {
+                $diasCalc = round((strtotime($fin) - strtotime($inicio)) / 86400) + 1;
+                $error = "Un periodo quincenal debe abarcar los 15 días correspondientes del ciclo (actualmente abarca {$diasCalc} días).";
+            } elseif (mb_strlen($descripcion) > 100) {
+                $error = 'La descripción del periodo no puede exceder los 100 caracteres.';
             } else {
                 try {
                     $periodoModel->create([
@@ -89,7 +131,7 @@ class PeriodoController extends Controller {
                     $this->redirect('index.php?r=periodos&msg=' . urlencode('Periodo creado correctamente.'));
                 } catch (PDOException $e) {
                     if ($e->getCode() == 23000 || strpos($e->getMessage(), 'Duplicate entry') !== false) {
-                        $error = 'Ya existe un periodo con ese año, mes y número de quincena.';
+                        $error = 'Ya existe un periodo registrado con ese año, mes y número de quincena.';
                     } else {
                         $error = 'Error al registrar el periodo: ' . $e->getMessage();
                     }
@@ -206,5 +248,136 @@ class PeriodoController extends Controller {
         }
 
         $this->redirect('index.php?r=periodos&msg=' . urlencode($msg));
+    }
+
+    public function reporteNomina(): void {
+        $this->requireLogin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $idPeriodo = (int)($_GET['id_periodo'] ?? 0);
+        $periodoModel = new PeriodoModel();
+        $periodo = $periodoModel->getById($idPeriodo);
+
+        if (!$periodo) {
+            echo json_encode(['success' => false, 'error' => 'Periodo no encontrado']);
+            exit;
+        }
+
+        $nominaModel = new NominaModel();
+        $nomina = $nominaModel->getByPeriodo($idPeriodo);
+
+        if (!$nomina) {
+            echo json_encode([
+                'success' => true,
+                'tiene_nomina' => false,
+                'mensaje' => 'Aún no se ha generado la nómina para este periodo.'
+            ]);
+            exit;
+        }
+
+        $idNomina = (int)$nomina['id_nomina'];
+        $tasaModel = new TasaModel();
+        $ultimaTasa = $tasaModel->getUltima();
+        $valorTasa = $ultimaTasa ? (float)$ultimaTasa['valor_tasa'] : 0.0;
+        $fechaTasa = $ultimaTasa ? $ultimaTasa['fecha'] : null;
+
+        $db = Database::getInstance();
+
+        // 1. Totales generales de la nómina
+        $stmtTot = $db->prepare("
+            SELECT 
+                COUNT(*) as total_empleados,
+                COALESCE(SUM(sueldo_diario * dias_trabajados), 0) as total_sueldo_base,
+                COALESCE(SUM(total_asignaciones), 0) as total_asignaciones,
+                COALESCE(SUM(total_deducciones), 0) as total_deducciones,
+                COALESCE(SUM(neto_pagar), 0) as total_neto,
+                COALESCE(AVG(dias_trabajados), 0) as promedio_dias_trabajados,
+                COALESCE(SUM(dias_inasistencia), 0) as total_inasistencias
+            FROM tb_nomina_detalle
+            WHERE id_nomina = ?
+        ");
+        $stmtTot->execute([$idNomina]);
+        $tot = $stmtTot->fetch() ?: [];
+
+        $totalEmp = (int)($tot['total_empleados'] ?? 0);
+        $totalAsig = round((float)($tot['total_asignaciones'] ?? 0), 2);
+        $totalDed = round((float)($tot['total_deducciones'] ?? 0), 2);
+        $totalNeto = round((float)($tot['total_neto'] ?? 0), 2);
+        $promNetoUsd = $totalEmp > 0 ? round($totalNeto / $totalEmp, 2) : 0.0;
+
+        $asigBs = $valorTasa > 0 ? round($totalAsig * $valorTasa, 2) : 0.0;
+        $dedBs = $valorTasa > 0 ? round($totalDed * $valorTasa, 2) : 0.0;
+        $netoBs = $valorTasa > 0 ? round($totalNeto * $valorTasa, 2) : 0.0;
+        $promNetoBs = $valorTasa > 0 ? round($promNetoUsd * $valorTasa, 2) : 0.0;
+
+        // 2. Desglose de Asignaciones por Concepto
+        $stmtAsig = $db->prepare("
+            SELECT c.nombre, COALESCE(SUM(a.monto), 0) as total_monto
+            FROM tb_nomina_asignacion a
+            JOIN tb_concepto_asignacion c ON c.id_concepto = a.id_concepto
+            JOIN tb_nomina_detalle d ON d.id_detalle = a.id_detalle
+            WHERE d.id_nomina = ?
+            GROUP BY c.id_concepto
+            ORDER BY total_monto DESC
+        ");
+        $stmtAsig->execute([$idNomina]);
+        $asignacionesDesglose = $stmtAsig->fetchAll();
+
+        // 3. Desglose de Deducciones por Concepto
+        $stmtDed = $db->prepare("
+            SELECT c.nombre, COALESCE(SUM(ded.monto), 0) as total_monto
+            FROM tb_nomina_deduccion ded
+            JOIN tb_concepto_deduccion c ON c.id_concepto = ded.id_concepto
+            JOIN tb_nomina_detalle d ON d.id_detalle = ded.id_detalle
+            WHERE d.id_nomina = ?
+            GROUP BY c.id_concepto
+            ORDER BY total_monto DESC
+        ");
+        $stmtDed->execute([$idNomina]);
+        $deduccionesDesglose = $stmtDed->fetchAll();
+
+        // 4. Distribución por Cargo (Presupuesto y Headcount)
+        $stmtCargos = $db->prepare("
+            SELECT 
+                COALESCE(c.nombre_cargo, 'Sin cargo asignado') as cargo,
+                COUNT(*) as headcount,
+                COALESCE(SUM(d.neto_pagar), 0) as total_neto,
+                COALESCE(SUM(d.total_asignaciones), 0) as total_asig
+            FROM tb_nomina_detalle d
+            LEFT JOIN tb_cargo c ON c.id_cargo = d.id_cargo
+            WHERE d.id_nomina = ?
+            GROUP BY c.id_cargo
+            ORDER BY total_neto DESC
+        ");
+        $stmtCargos->execute([$idNomina]);
+        $cargosDesglose = $stmtCargos->fetchAll();
+
+        echo json_encode([
+            'success' => true,
+            'tiene_nomina' => true,
+            'id_nomina' => $idNomina,
+            'estado' => $nomina['estado'] ?? 'Generada',
+            'fecha_generacion' => $nomina['fecha_generacion'] ?? null,
+            'modificada' => (int)($nomina['modificada'] ?? 0),
+            'totales' => [
+                'total_empleados' => $totalEmp,
+                'total_asignaciones' => $totalAsig,
+                'total_deducciones' => $totalDed,
+                'neto_pagar' => $totalNeto,
+                'promedio_neto_usd' => $promNetoUsd,
+                'asignaciones_bs' => $asigBs,
+                'deducciones_bs' => $dedBs,
+                'neto_bs' => $netoBs,
+                'promedio_neto_bs' => $promNetoBs,
+                'promedio_dias' => round((float)($tot['promedio_dias_trabajados'] ?? 0), 1),
+                'total_inasistencias' => (int)($tot['total_inasistencias'] ?? 0),
+                'tasa_bcv' => $valorTasa,
+                'fecha_tasa' => $fechaTasa
+            ],
+            'asignaciones_desglose' => $asignacionesDesglose,
+            'deducciones_desglose' => $deduccionesDesglose,
+            'cargos' => $cargosDesglose
+        ]);
+        exit;
     }
 }

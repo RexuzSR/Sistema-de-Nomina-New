@@ -31,6 +31,7 @@ $router->add('empleados', 'EmpleadoController', 'index');
 $router->add('empleados/crear', 'EmpleadoController', 'crear');
 $router->add('empleados/editar', 'EmpleadoController', 'editar');
 $router->add('empleados/cambiarEstado', 'EmpleadoController', 'cambiarEstado');
+$router->add('empleados/verificarCedula', 'EmpleadoController', 'verificarCedula');
 
 $router->add('permisos', 'PermisoController', 'index');
 $router->add('permisos/solicitar', 'PermisoController', 'solicitar');
@@ -43,6 +44,7 @@ $router->add('tasas/sincronizar', 'TasaController', 'sincronizar');
 $router->add('periodos', 'PeriodoController', 'index');
 $router->add('periodos/crear', 'PeriodoController', 'crear');
 $router->add('periodos/enviarCorreos', 'PeriodoController', 'enviarCorreos');
+$router->add('periodos/reporteNomina', 'PeriodoController', 'reporteNomina');
 
 $router->add('nomina/generar', 'NominaController', 'generar');
 $router->add('nomina/detalle', 'NominaController', 'detalle');
@@ -50,6 +52,8 @@ $router->add('nomina/ver', 'NominaController', 'ver');
 $router->add('nomina/recibo', 'NominaController', 'recibo');
 $router->add('nomina/reportePdf', 'NominaController', 'reportePdf');
 $router->add('nomina/exportExcel', 'NominaController', 'exportExcel');
+$router->add('nomina/eliminar', 'NominaController', 'eliminar');
+$router->add('nomina/logImpresionRecibo', 'NominaController', 'logImpresionRecibo');
 
 // Perfil de Usuario y Preferencias de Diseño
 $router->add('perfil', 'PerfilController', 'index');

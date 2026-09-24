@@ -330,7 +330,9 @@ $csrfToken = Security::csrfToken();
             <label for="inputNombreUsuario">
               <i class="fa-solid fa-user"></i> Nombre de Usuario <span class="req">*</span>
             </label>
-            <input type="text" id="inputNombreUsuario" name="nombre_usuario" required minlength="3"
+            <input type="text" id="inputNombreUsuario" name="nombre_usuario" required minlength="3" maxlength="30"
+              pattern="^[a-zA-Z0-9._-]+$" title="Letras, números, puntos, guiones y guiones bajos (3-30 caracteres, sin espacios)"
+              oninput="this.value = this.value.replace(/[^a-zA-Z0-9._-]/g, '')"
               placeholder="Ej: carlos.lopez" autocomplete="off">
           </div>
 
@@ -339,7 +341,7 @@ $csrfToken = Security::csrfToken();
             <label for="inputCorreo">
               <i class="fa-solid fa-envelope"></i> Correo Electrónico <span class="req">*</span>
             </label>
-            <input type="email" id="inputCorreo" name="correo" required
+            <input type="email" id="inputCorreo" name="correo" required maxlength="100"
               placeholder="Ej: carlos@empresa.com" autocomplete="off">
           </div>
 
@@ -349,13 +351,13 @@ $csrfToken = Security::csrfToken();
               <i class="fa-solid fa-lock"></i> Contraseña <span class="req" id="passRequired">*</span>
             </label>
             <div class="password-input-wrap">
-              <input type="password" id="inputPassword" name="password" minlength="6"
+              <input type="password" id="inputPassword" name="password" minlength="6" maxlength="64"
                 placeholder="Mínimo 6 caracteres" autocomplete="new-password">
               <button type="button" class="toggle-pass-btn" onclick="togglePasswordVis()" tabindex="-1">
                 <i class="fa-solid fa-eye" id="passToggleIcon"></i>
               </button>
             </div>
-            <small class="form-hint" id="passHint" style="display:none;">Déjalo vacío para mantener la contraseña actual</small>
+            <small class="form-hint" id="passHint" style="display:none;">Déjalo vacío para mantener la contraseña actual (6 a 64 caracteres si se cambia)</small>
           </div>
 
           <!-- Rol -->
@@ -627,6 +629,47 @@ function cerrarModalUsuario() {
 // ─── GUARDAR ───
 async function guardarUsuario(e) {
   e.preventDefault();
+
+  const inputUser = document.getElementById('inputNombreUsuario');
+  const inputMail = document.getElementById('inputCorreo');
+  const inputPass = document.getElementById('inputPassword');
+
+  const usernameVal = inputUser.value.trim();
+  const mailVal = inputMail.value.trim();
+  const passVal = inputPass.value;
+
+  if (usernameVal.length < 3 || usernameVal.length > 30) {
+    mostrarToast('El nombre de usuario debe tener entre 3 y 30 caracteres.', 'error');
+    inputUser.focus();
+    return false;
+  }
+  if (!/^[a-zA-Z0-9._-]+$/.test(usernameVal)) {
+    mostrarToast('El nombre de usuario solo puede tener letras, números, puntos, guiones y guiones bajos (sin espacios).', 'error');
+    inputUser.focus();
+    return false;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(mailVal) || mailVal.length > 100) {
+    mostrarToast('Ingresa un correo electrónico válido de hasta 100 caracteres.', 'error');
+    inputMail.focus();
+    return false;
+  }
+
+  if (!modoEdicion) {
+    if (!passVal || passVal.length < 6 || passVal.length > 64) {
+      mostrarToast('La contraseña debe tener entre 6 y 64 caracteres.', 'error');
+      inputPass.focus();
+      return false;
+    }
+  } else {
+    if (passVal && (passVal.length < 6 || passVal.length > 64)) {
+      mostrarToast('La nueva contraseña debe tener entre 6 y 64 caracteres.', 'error');
+      inputPass.focus();
+      return false;
+    }
+  }
+
   const btn = document.getElementById('btnGuardarUsuario');
   const btnTexto = document.getElementById('btnGuardarTexto');
   const textoOriginal = btnTexto.textContent;

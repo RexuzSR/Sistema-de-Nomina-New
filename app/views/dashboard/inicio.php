@@ -435,10 +435,22 @@
             <span class="chart-sub">Asignaciones vs Deducciones vs Neto</span>
           </div>
         </div>
-        <div class="chart-legend-custom">
-          <span class="lg-item"><span class="lg-dot" style="background:#0f766e;"></span>Asignaciones</span>
-          <span class="lg-item"><span class="lg-dot" style="background:#e11d48;"></span>Deducciones</span>
-          <span class="lg-item"><span class="lg-dot" style="background:#0284c7;"></span>Neto</span>
+        <div class="chart-legend-custom" id="chartEvoLegend">
+          <span class="lg-item" data-dataset-index="1" data-legend="asignaciones" tabindex="0" role="button" title="Haz clic para alternar · Pasa el cursor para ver detalles">
+            <span class="lg-dot" style="background:#0f766e;"></span>
+            <span>Asignaciones</span>
+            <i class="fa-solid fa-circle-question lg-help-icon"></i>
+          </span>
+          <span class="lg-item" data-dataset-index="2" data-legend="deducciones" tabindex="0" role="button" title="Haz clic para alternar · Pasa el cursor para ver detalles">
+            <span class="lg-dot" style="background:#e11d48;"></span>
+            <span>Deducciones</span>
+            <i class="fa-solid fa-circle-question lg-help-icon"></i>
+          </span>
+          <span class="lg-item" data-dataset-index="0" data-legend="neto" tabindex="0" role="button" title="Haz clic para alternar · Pasa el cursor para ver detalles">
+            <span class="lg-dot" style="background:#0284c7;"></span>
+            <span>Neto</span>
+            <i class="fa-solid fa-circle-question lg-help-icon"></i>
+          </span>
         </div>
       </div>
       <div class="chart-canvas-wrap">
@@ -655,7 +667,8 @@
     asignaciones: <?= $chartAsignacionesJson ?>,
     deducciones: <?= $chartDeduccionesJson ?>,
     neto: <?= $chartNetoJson ?>,
-    empleados: <?= $chartEmpleadosJson ?>
+    empleados: <?= $chartEmpleadosJson ?>,
+    tasaBcv: <?= (float)($valorTasaBcv ?? 0) ?>
   };
   window.dashboardCargosData = {
     labels: <?= $cargoLabelsJson ?>,
@@ -663,4 +676,4 @@
     headcount: <?= $cargoHeadcountJson ?>
   };
 </script>
-<script src="assets/js/dashboard.js?v=2.3"></script>
+<script src="assets/js/dashboard.js?v=2.4"></script>

@@ -372,7 +372,7 @@ window.updateThemeButtonState = updateThemeButtonState;
 
     <div class="timeout-countdown-badge">
       <i class="fa-solid fa-hourglass-half"></i>
-      <span>Expira en 00:<span id="timeout-countdown-seconds">60</span></span>
+      <span>Expira en <span id="timeout-countdown-seconds">02:00</span></span>
     </div>
 
     <div class="timeout-progress-track">

@@ -425,7 +425,7 @@ $refUsd = ($tasaBcvMonto > 0) ? round($netoPagar / $tasaBcvMonto, 2) : 0;
       <span style="font-size:13px; font-weight:700; color:#0f172a;">Vista Previa de Comprobante Oficial</span>
     </div>
     <div style="display:flex; gap:10px; align-items:center;">
-      <button class="btn-print-cta" onclick="window.print()">
+      <button class="btn-print-cta" onclick="imprimirReciboConAuditoria(<?= (int)$id_nomina ?>, <?= (int)$empleado['id_empleado'] ?>)">
         <i class="fa-solid fa-print"></i> Imprimir / Guardar como PDF
       </button>
       <a class="btn-back-link" href="index.php?r=nomina/detalle&id_nomina=<?= $id_nomina ?>">
@@ -664,5 +664,17 @@ $refUsd = ($tasaBcvMonto > 0) ? round($netoPagar / $tasaBcvMonto, 2) : 0;
 
   </div>
 
+  <script nonce="<?= class_exists('Security') ? Security::getCspNonce() : '' ?>">
+  function imprimirReciboConAuditoria(idNomina, idEmpleado) {
+    try {
+      fetch('index.php?r=nomina/logImpresionRecibo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id_nomina=' + encodeURIComponent(idNomina) + '&id_empleado=' + encodeURIComponent(idEmpleado) + '&tipo=individual'
+      }).catch(function(){});
+    } catch(e){}
+    window.print();
+  }
+  </script>
 </body>
 </html>

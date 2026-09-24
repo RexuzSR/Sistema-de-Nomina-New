@@ -62,9 +62,19 @@ class NominaController extends Controller {
                 $tasa_sso_input === '' || !is_numeric($tasa_sso_input) ||
                 $tasa_rpe_input === '' || !is_numeric($tasa_rpe_input) ||
                 $tasa_lph_input === '' || !is_numeric($tasa_lph_input)) {
-                $error = 'Completa el salario minimo vigente, las semanas a descontar IVSS, el factor de semanas por mes y todas las tasas de deducción.';
+                $error = 'Completa el salario mínimo vigente, las semanas a descontar IVSS, el factor de semanas por mes y todas las tasas de deducción.';
+            } elseif ((float)$salario_minimo <= 0 || (float)$salario_minimo > 1000000) {
+                $error = 'El salario mínimo vigente debe ser un número positivo (hasta 1.000.000).';
+            } elseif ((float)$semanas < 0 || (float)$semanas > 5) {
+                $error = 'Las semanas a descontar IVSS deben encontrarse entre 0 y 5.';
+            } elseif ((float)$factor_semanas <= 0 || (float)$factor_semanas > 6) {
+                $error = 'El factor de semanas por mes debe ser mayor a 0 y menor o igual a 6.';
+            } elseif ((float)$tasa_sso_input < 0 || (float)$tasa_sso_input > 50 ||
+                      (float)$tasa_rpe_input < 0 || (float)$tasa_rpe_input > 50 ||
+                      (float)$tasa_lph_input < 0 || (float)$tasa_lph_input > 50) {
+                $error = 'Las tasas legales (SSO, RPE, LPH) deben ubicarse entre 0% y 50%.';
             } elseif (!$ultimaTasa) {
-                $error = 'Debes registrar al menos una tasa de cambio antes de generar la nomina.';
+                $error = 'Debes registrar al menos una tasa de cambio antes de generar la nómina.';
             } else {
                 // Convert percentage values to decimals (e.g. 4.0% -> 0.04)
                 $tasa_sso = (float)$tasa_sso_input / 100;
@@ -159,9 +169,24 @@ class NominaController extends Controller {
             } else {
                 // Save worker detail calculations
                 $id_empleado = (int)($_POST['id_empleado'] ?? 0);
+                $res = null;
                 if ($id_empleado > 0) {
-                    $nominaModel->calcularYGuardarDetalle($id_nomina, $id_empleado, $_POST);
+                    $res = $nominaModel->calcularYGuardarDetalle($id_nomina, $id_empleado, $_POST);
                 }
+
+                $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+                       || (isset($_POST['ajax']) && $_POST['ajax'] === '1');
+
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Fila guardada exitosamente.',
+                        'data' => $res
+                    ]);
+                    exit;
+                }
+
                 $this->redirect('index.php?r=nomina/detalle&id_nomina=' . $id_nomina . '&msg=' . urlencode('Detalle guardado y nómina recalculada.'));
             }
         }
@@ -176,6 +201,7 @@ class NominaController extends Controller {
         }
 
         $msg = $_GET['msg'] ?? '';
+        $error = $_GET['error'] ?? '';
         $configModel = new ConfiguracionModel();
         $empConfig = $configModel->getConfiguracion();
 
@@ -187,7 +213,8 @@ class NominaController extends Controller {
             'detalles' => $detalles,
             'nominaModel' => $nominaModel,
             'empConfig' => $empConfig,
-            'msg' => $msg
+            'msg' => $msg,
+            'error' => $error
         ], 'Cargar Detalle de Nomina');
     }
 
@@ -256,6 +283,28 @@ class NominaController extends Controller {
             $asignaciones = $nominaModel->getAsignacionesDetalle($detalle['id_detalle']);
             $deducciones = $nominaModel->getDeduccionesDetalle($detalle['id_detalle']);
 
+            $nomEmp = trim(($empleado['primer_nombre'] ?? '') . ' ' . ($empleado['primer_apellido'] ?? ''));
+            $ciEmp = $empleado['cedula'] ?? '';
+            $descPeriodo = $periodo ? ($periodo['descripcion'] ?? "Periodo #{$periodo['id_periodo']}") : "Nómina #{$id_nomina}";
+
+            // Registrar en auditoría la visualización/impresión del recibo individual
+            Audit::log(
+                'NOMINA',
+                'IMPRIMIR_RECIBO',
+                "Imprimió o visualizó el recibo de pago para el trabajador {$nomEmp} (C.I. {$ciEmp}) en {$descPeriodo}" . ($format === 'pdf' ? ' [PDF]' : ' [HTML]'),
+                'tb_nomina_detalle',
+                (int)$detalle['id_detalle'],
+                [
+                    'id_nomina' => $id_nomina,
+                    'id_empleado' => $id_empleado,
+                    'trabajador' => $nomEmp,
+                    'cedula' => $ciEmp,
+                    'neto_pagar' => (float)$detalle['neto_pagar'],
+                    'periodo' => $descPeriodo,
+                    'formato' => $format === 'pdf' ? 'PDF' : 'HTML'
+                ]
+            );
+
             if ($format === 'pdf') {
                 $pdf = ReciboPdfService::generarReciboIndividual(
                     $nomina, $periodo, $empleado, $cargo, $detalle, 
@@ -300,6 +349,24 @@ class NominaController extends Controller {
                     'deducciones' => $ded
                 ];
             }
+
+            $descPeriodo = $periodo ? ($periodo['descripcion'] ?? "Periodo #{$periodo['id_periodo']}") : "Nómina #{$id_nomina}";
+            $totalRecibos = count($recibos);
+
+            // Registrar en auditoría la generación de recibos masivos
+            Audit::log(
+                'NOMINA',
+                'IMPRIMIR_RECIBO',
+                "Imprimió o generó recibos de pago en lote para {$totalRecibos} trabajadores en {$descPeriodo}" . ($format === 'pdf' ? ' [PDF]' : ' [HTML]'),
+                'tb_nomina',
+                $id_nomina,
+                [
+                    'id_nomina' => $id_nomina,
+                    'total_trabajadores' => $totalRecibos,
+                    'periodo' => $descPeriodo,
+                    'formato' => $format === 'pdf' ? 'PDF' : 'HTML'
+                ]
+            );
 
             if ($format === 'pdf') {
                 $modo = $_GET['modo'] ?? 'carta6';
@@ -368,5 +435,107 @@ class NominaController extends Controller {
         header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
 
         require __DIR__ . '/../views/export/excel.php';
+    }
+
+    public function eliminar(): void {
+        $this->requireRole(['Administrador', 'Operador']);
+
+        $id_nomina = (int)($_GET['id_nomina'] ?? $_POST['id_nomina'] ?? 0);
+        $nominaModel = new NominaModel();
+        $nomina = $nominaModel->getById($id_nomina);
+
+        if (!$nomina) {
+            $this->redirect('index.php?r=periodos&error=' . urlencode('La nómina especificada no existe o ya fue removida.'));
+        }
+
+        $periodoModel = new PeriodoModel();
+        $periodo = $periodoModel->getById((int)$nomina['id_periodo']);
+        $descPeriodo = $periodo ? ($periodo['descripcion'] ?? "Periodo #{$periodo['id_periodo']}") : "Nómina #{$id_nomina}";
+
+        // Validar reglas: <24h y sin modificaciones
+        $val = $nominaModel->verificarPuedeEliminar($nomina);
+        if (!$val['puede']) {
+            $referer = $_SERVER['HTTP_REFERER'] ?? '';
+            $targetUrl = (strpos($referer, 'nomina/detalle') !== false) 
+                ? "index.php?r=nomina/detalle&id_nomina={$id_nomina}&error=" . urlencode($val['motivo'])
+                : "index.php?r=periodos&error=" . urlencode($val['motivo']);
+            $this->redirect($targetUrl);
+        }
+
+        $exito = $nominaModel->eliminarNomina($id_nomina);
+        if ($exito) {
+            Audit::log(
+                'NOMINA',
+                'ELIMINAR',
+                "Eliminó la nómina #{$id_nomina} del periodo '{$descPeriodo}' (dentro de las 24 horas iniciales y sin modificaciones guardadas).",
+                'tb_nomina',
+                $id_nomina,
+                [
+                    'id_nomina' => $id_nomina,
+                    'id_periodo' => $nomina['id_periodo'],
+                    'periodo' => $descPeriodo,
+                    'fecha_generacion' => $nomina['fecha_generacion']
+                ]
+            );
+            $this->redirect('index.php?r=periodos&msg=' . urlencode("Nómina eliminada exitosamente. El ciclo '{$descPeriodo}' está listo para volver a generarse."));
+        } else {
+            $this->redirect("index.php?r=nomina/detalle&id_nomina={$id_nomina}&error=" . urlencode('Ocurrió un error al intentar eliminar la nómina en la base de datos.'));
+        }
+    }
+
+    public function logImpresionRecibo(): void {
+        $this->requireLogin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $id_nomina = (int)($_POST['id_nomina'] ?? 0);
+        $id_empleado = (int)($_POST['id_empleado'] ?? 0);
+
+        $nominaModel = new NominaModel();
+        $nomina = $nominaModel->getById($id_nomina);
+        if (!$nomina) {
+            echo json_encode(['ok' => false, 'error' => 'Nómina no encontrada']);
+            exit;
+        }
+
+        $periodoModel = new PeriodoModel();
+        $periodo = $periodoModel->getById((int)$nomina['id_periodo']);
+        $descPeriodo = $periodo ? ($periodo['descripcion'] ?? "Periodo #{$periodo['id_periodo']}") : "Nómina #{$id_nomina}";
+
+        if ($id_empleado > 0) {
+            $empleadoModel = new EmpleadoModel();
+            $emp = $empleadoModel->getById($id_empleado);
+            $nomEmp = $emp ? trim($emp['primer_nombre'] . ' ' . $emp['primer_apellido']) : "Empleado #{$id_empleado}";
+            $ciEmp = $emp['cedula'] ?? '';
+
+            Audit::log(
+                'NOMINA',
+                'IMPRIMIR_RECIBO',
+                "Envió a la impresora física/PDF el recibo de pago de {$nomEmp} (C.I. {$ciEmp}) en {$descPeriodo}",
+                'tb_nomina',
+                $id_nomina,
+                [
+                    'id_nomina' => $id_nomina,
+                    'id_empleado' => $id_empleado,
+                    'trabajador' => $nomEmp,
+                    'cedula' => $ciEmp,
+                    'accion_origen' => 'dialogo_impresora'
+                ]
+            );
+        } else {
+            Audit::log(
+                'NOMINA',
+                'IMPRIMIR_RECIBO',
+                "Envió a la impresora física/PDF los recibos masivos de {$descPeriodo}",
+                'tb_nomina',
+                $id_nomina,
+                [
+                    'id_nomina' => $id_nomina,
+                    'accion_origen' => 'dialogo_impresora_masiva'
+                ]
+            );
+        }
+
+        echo json_encode(['ok' => true]);
+        exit;
     }
 }

@@ -83,7 +83,7 @@
         <select name="accion" onchange="this.form.submit()">
           <option value="">Todas las acciones</option>
           <?php 
-            $accionesCatalogo = ['CREAR', 'MODIFICAR', 'ELIMINAR', 'LOGIN', 'LOGOUT', 'APROBAR', 'RECHAZAR', 'CALCULAR', 'EXPORTAR', 'CAMBIAR_ESTADO'];
+            $accionesCatalogo = ['CREAR', 'MODIFICAR', 'ELIMINAR', 'LOGIN', 'LOGOUT', 'APROBAR', 'RECHAZAR', 'CALCULAR', 'EXPORTAR', 'IMPRIMIR_RECIBO', 'CAMBIAR_ESTADO'];
             foreach ($accionesCatalogo as $acc): 
           ?>
             <option value="<?= $acc ?>" <?= ($filtros['accion'] === $acc) ? 'selected' : '' ?>>
@@ -172,6 +172,7 @@
           elseif (in_array($accUpper, ['LOGIN', 'LOGOUT', 'TIMEOUT'])) $accionClase = 'badge-purple';
           elseif (in_array($accUpper, ['APROBAR', 'CALCULAR', 'GENERAR_NOMINA'])) $accionClase = 'badge-emerald';
           elseif (in_array($accUpper, ['EXPORTAR', 'SINCRONIZAR_BCV'])) $accionClase = 'badge-teal';
+          elseif (in_array($accUpper, ['IMPRIMIR_RECIBO', 'IMPRIMIR'])) $accionClase = 'badge-cyan';
         ?>
           <tr onclick="abrirDetalleAuditoria(<?= (int)$reg['id_auditoria'] ?>)" style="cursor: pointer;" title="Clic para ver detalle">
             <td>
@@ -204,6 +205,9 @@
             </td>
             <td>
               <span class="audit-action-badge <?= $accionClase ?>">
+                <?php if ($accUpper === 'IMPRIMIR_RECIBO'): ?>
+                  <i class="fa-solid fa-print" style="margin-right:4px;"></i>
+                <?php endif; ?>
                 <?= htmlspecialchars($reg['accion']) ?>
               </span>
             </td>

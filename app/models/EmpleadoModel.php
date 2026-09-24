@@ -5,16 +5,25 @@ require_once __DIR__ . '/../../core/Model.php';
 class EmpleadoModel extends Model {
     public function __construct() {
         parent::__construct();
-        $this->ensureFotoColumn();
+        $this->ensureColumns();
     }
 
-    private function ensureFotoColumn(): void {
+    private function ensureColumns(): void {
         try {
             $cols = $this->db->query("SHOW COLUMNS FROM tb_empleado LIKE 'foto'")->fetchAll();
             if (empty($cols)) {
                 $this->db->exec("ALTER TABLE tb_empleado ADD COLUMN foto LONGTEXT NULL DEFAULT NULL");
             } else {
                 $this->db->exec("ALTER TABLE tb_empleado MODIFY COLUMN foto LONGTEXT NULL DEFAULT NULL");
+            }
+        } catch (\Throwable $e) {
+            // Silently ignore if column already exists or table issue
+        }
+
+        try {
+            $cols = $this->db->query("SHOW COLUMNS FROM tb_empleado LIKE 'email'")->fetchAll();
+            if (empty($cols)) {
+                $this->db->exec("ALTER TABLE tb_empleado ADD COLUMN email VARCHAR(100) NULL DEFAULT NULL AFTER segundo_apellido");
             }
         } catch (\Throwable $e) {
             // Silently ignore if column already exists or table issue
@@ -58,6 +67,19 @@ class EmpleadoModel extends Model {
         $stmt->execute([$id]);
         $emp = $stmt->fetch();
         return $emp ?: null;
+    }
+
+    public function isCedulaTaken(string $cedula, int $excludeId = 0): bool {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM tb_empleado WHERE cedula = ? AND id_empleado != ?");
+        $stmt->execute([trim($cedula), $excludeId]);
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
+    public function getByCedula(string $cedula): ?array {
+        $stmt = $this->db->prepare("SELECT * FROM tb_empleado WHERE cedula = ? LIMIT 1");
+        $stmt->execute([trim($cedula)]);
+        $res = $stmt->fetch();
+        return $res ?: null;
     }
 
     public function getTipos(): array {

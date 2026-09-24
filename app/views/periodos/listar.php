@@ -1,6 +1,9 @@
 <?php if (!empty($msg)): ?>
   <div class="alert success"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($msg) ?></div>
 <?php endif; ?>
+<?php if (!empty($error)): ?>
+  <div class="alert danger"><i class="fa-solid fa-circle-exclamation"></i> <?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
 
 <div class="view-header-bar" style="margin-bottom:20px;">
   <div>
@@ -39,6 +42,18 @@
           'mes' => $p['mes'],
           'numero_quincena' => $p['numero_quincena'] ?? '—'
         ];
+
+        // Verificar nómina existente y si califica para borrado (<24h sin cambios)
+        $nominaP = isset($nominaModel) ? $nominaModel->getByPeriodo((int)$p['id_periodo']) : null;
+        $puedeEliminar = false;
+        $motivoEliminar = '';
+        $horasRestantes = 0;
+        if ($nominaP) {
+            $evaluacion = $nominaModel->verificarPuedeEliminar($nominaP);
+            $puedeEliminar = $evaluacion['puede'];
+            $motivoEliminar = $evaluacion['motivo'];
+            $horasRestantes = $evaluacion['horas_restantes'] ?? 0;
+        }
       ?>
         <tr class="periodo-row" onclick="abrirVerPeriodoModal(this)" data-periodo="<?= htmlspecialchars(json_encode($pJsonData), ENT_QUOTES, 'UTF-8') ?>" title="Clic para ver detalles completos del periodo">
           <td><strong style="color:var(--text); font-size:13.5px;"><?= htmlspecialchars($p['descripcion'] ?? 'Sin descripción') ?></strong></td>
@@ -49,6 +64,17 @@
           <td style="text-align:right;" onclick="event.stopPropagation()">
             <a class="btn small" href="index.php?r=nomina/generar&id_periodo=<?= $p['id_periodo'] ?>"><i class="fa-solid fa-folder-open"></i> Generar / Ver Nómina</a>
             <a class="btn small secondary" style="margin-left:4px;" href="index.php?r=periodos/enviarCorreos&id_periodo=<?= $p['id_periodo'] ?>" onclick="return confirm('¿Desea enviar el comprobante de pago individual por correo a todos los empleados de este periodo?');"><i class="fa-solid fa-paper-plane"></i> Enviar Correo</a>
+            <?php if ($nominaP): ?>
+              <?php if ($puedeEliminar): ?>
+                <a class="btn small danger" style="margin-left:4px; background:#fee2e2; color:#b91c1c; border:1px solid #fecaca;" href="index.php?r=nomina/eliminar&id_nomina=<?= $nominaP['id_nomina'] ?>" onclick="return confirm('¿Confirmas que deseas eliminar esta nómina? No tiene cambios guardados y estás dentro del plazo de 24 horas (quedan <?= $horasRestantes ?> h disponibles).');" title="Eliminar nómina (Quedan <?= $horasRestantes ?> h disponibles)">
+                  <i class="fa-solid fa-trash-can"></i>
+                </a>
+              <?php else: ?>
+                <button type="button" class="btn small" style="margin-left:4px; background:#f1f5f9; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.6; cursor:help;" onclick="alert('<?= addslashes(htmlspecialchars($motivoEliminar)) ?>')" title="<?= htmlspecialchars($motivoEliminar) ?>">
+                  <i class="fa-solid fa-lock"></i>
+                </button>
+              <?php endif; ?>
+            <?php endif; ?>
           </td>
         </tr>
       <?php endforeach; ?>
@@ -56,6 +82,7 @@
   </table>
 </div>
 
+<script src="assets/js/vendor/chart.umd.min.js"></script>
 <?php require __DIR__ . '/VerModal.php'; ?>
 
 <script nonce="<?= Security::getCspNonce() ?>">

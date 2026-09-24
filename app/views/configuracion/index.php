@@ -33,11 +33,12 @@
       <div class="form-grid">
         <div class="full">
           <label>Razón Social o Nombre de la Empresa *</label>
-          <input type="text" name="nombre_empresa" value="<?= htmlspecialchars($config['nombre_empresa'] ?? '') ?>" required placeholder="Ej: EMPRESA DEMO C.A.">
+          <input type="text" id="inputNombreEmpresa" name="nombre_empresa" maxlength="100" value="<?= htmlspecialchars($config['nombre_empresa'] ?? '') ?>" required placeholder="Ej: EMPRESA DEMO C.A.">
         </div>
         <div>
           <label>Número de R.I.F. *</label>
-          <input type="text" name="rif" value="<?= htmlspecialchars($config['rif'] ?? '') ?>" required placeholder="Ej: J-12345678-9">
+          <input type="text" id="inputRif" name="rif" maxlength="12" pattern="^[JVEGjveg]-?\d{7,9}-?\d$" title="Formato RIF: J-12345678-9" value="<?= htmlspecialchars($config['rif'] ?? '') ?>" required placeholder="Ej: J-12345678-9" autocomplete="off">
+          <small id="rifHint" style="font-size:11px; color:var(--text-muted); display:block; margin-top:3px;">Ejemplo: J-12345678-9 o V-12345678-0</small>
         </div>
         <div>
           <label>Jurisdicción / Localidad</label>
@@ -334,4 +335,53 @@ function actualizarTotalesLey() {
   const totalFaovEl = document.getElementById('totalFaov');
   if (totalFaovEl) totalFaovEl.textContent = (faovTrab + faovPat).toFixed(2).replace('.', ',') + '%';
 }
+
+// Autoformateo de RIF y validación client-side
+const rifInput = document.getElementById('inputRif');
+if (rifInput) {
+  rifInput.addEventListener('input', function() {
+    let v = this.value.toUpperCase().replace(/[^JVEG0-9-]/g, '');
+    this.value = v;
+  });
+}
+
+document.getElementById('formConfiguracion')?.addEventListener('submit', function(e) {
+  const nombre = document.getElementById('inputNombreEmpresa')?.value.trim();
+  let rif = rifInput?.value.trim().toUpperCase() || '';
+
+  if (!nombre || nombre.length > 100) {
+    e.preventDefault();
+    alert('El nombre de la empresa es obligatorio y no debe superar 100 caracteres.');
+    document.getElementById('inputNombreEmpresa')?.focus();
+    return false;
+  }
+
+  // Auto-completar guiones si viene sin ellos
+  const m = rif.match(/^([JVEG])(\d{7,9})(\d)$/);
+  if (m) {
+    rif = m[1] + '-' + m[2] + '-' + m[3];
+    rifInput.value = rif;
+  }
+
+  const rifRegex = /^[JVEG]-\d{7,9}-\d$/;
+  if (!rifRegex.test(rif)) {
+    e.preventDefault();
+    alert('El formato de RIF no es válido. Debe tener el formato J-12345678-9 (o prefijos V, E, G).');
+    rifInput.focus();
+    return false;
+  }
+
+  const ssoTrab = parseFloat(document.getElementById('inputSsoTrab')?.value) || 0;
+  const ssoPat = parseFloat(document.getElementById('inputSsoPat')?.value) || 0;
+  const rpeTrab = parseFloat(document.getElementById('inputRpeTrab')?.value) || 0;
+  const rpePat = parseFloat(document.getElementById('inputRpePat')?.value) || 0;
+  const faovTrab = parseFloat(document.getElementById('inputFaovTrab')?.value) || 0;
+  const faovPat = parseFloat(document.getElementById('inputFaovPat')?.value) || 0;
+
+  if ([ssoTrab, ssoPat, rpeTrab, rpePat, faovTrab, faovPat].some(t => t < 0 || t > 50)) {
+    e.preventDefault();
+    alert('Todas las tasas legales deben ser porcentajes entre 0% y 50%.');
+    return false;
+  }
+});
 </script>

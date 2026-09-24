@@ -68,8 +68,8 @@ class PerfilController extends Controller {
         $username = trim($_POST['nombre_usuario'] ?? '');
         $correo = trim($_POST['correo'] ?? '');
 
-        if (empty($username) || strlen($username) < 3 || strlen($username) > 50) {
-            $error = 'El nombre de usuario debe tener entre 3 y 50 caracteres.';
+        if (empty($username) || strlen($username) < 3 || strlen($username) > 30) {
+            $error = 'El nombre de usuario debe tener entre 3 y 30 caracteres.';
             if ($isAjax) {
                 header('Content-Type: application/json', true, 422);
                 echo json_encode(['success' => false, 'error' => $error]);
@@ -79,8 +79,19 @@ class PerfilController extends Controller {
             $this->redirect('index.php?r=perfil');
         }
 
-        if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-            $error = 'Por favor ingresa una dirección de correo electrónico válida.';
+        if (!preg_match('/^[a-zA-Z0-9._-]+$/', $username)) {
+            $error = 'El nombre de usuario solo puede contener letras, números, puntos (.), guiones (-) y guiones bajos (_), sin espacios.';
+            if ($isAjax) {
+                header('Content-Type: application/json', true, 422);
+                echo json_encode(['success' => false, 'error' => $error]);
+                exit;
+            }
+            $_SESSION['flash_error'] = $error;
+            $this->redirect('index.php?r=perfil');
+        }
+
+        if (strlen($correo) > 100 || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $error = 'Por favor ingresa una dirección de correo electrónico válida (máximo 100 caracteres).';
             if ($isAjax) {
                 header('Content-Type: application/json', true, 422);
                 echo json_encode(['success' => false, 'error' => $error]);
@@ -179,8 +190,8 @@ class PerfilController extends Controller {
             $this->redirect('index.php?r=perfil');
         }
 
-        if (strlen($passNueva) < 8) {
-            $error = 'La nueva contraseña debe tener al menos 8 caracteres.';
+        if (strlen($passNueva) < 8 || strlen($passNueva) > 64) {
+            $error = 'La nueva contraseña debe tener entre 8 y 64 caracteres.';
             if ($isAjax) {
                 header('Content-Type: application/json', true, 422);
                 echo json_encode(['success' => false, 'error' => $error]);

@@ -1306,7 +1306,7 @@ main.container>*:not(.aurora-bg) {
 
 .chart-legend-custom {
   display: flex;
-  gap: 14px;
+  gap: 8px;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -1319,6 +1319,29 @@ main.container>*:not(.aurora-bg) {
   font-weight: 700;
   color: var(--d-muted);
   white-space: nowrap;
+  padding: 4px 9px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  position: relative;
+}
+
+.lg-item:hover,
+.lg-item:focus-visible {
+  background: var(--d-card-hover, rgba(241, 245, 249, 0.9));
+  color: var(--d-text, #0f172a);
+  border-color: rgba(203, 213, 225, 0.6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  outline: none;
+}
+
+.lg-item.is-hidden {
+  opacity: 0.38;
+  text-decoration: line-through;
+  filter: grayscale(80%);
 }
 
 .lg-dot {
@@ -1326,6 +1349,151 @@ main.container>*:not(.aurora-bg) {
   height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+  transition: transform 0.2s ease;
+}
+
+.lg-item:hover .lg-dot {
+  transform: scale(1.25);
+}
+
+.lg-help-icon {
+  font-size: 11px;
+  color: var(--d-muted);
+  opacity: 0.6;
+  margin-left: 2px;
+  transition: all 0.2s ease;
+}
+
+.lg-item:hover .lg-help-icon {
+  opacity: 1;
+  color: #0284c7;
+  transform: scale(1.15);
+}
+
+/* Tooltip Popover flotante del header de la gráfica */
+.legend-floating-popover {
+  position: fixed;
+  z-index: 999999;
+  max-width: 320px;
+  width: calc(100vw - 32px);
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 13px 15px;
+  color: #f8fafc;
+  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px) scale(0.97);
+  transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.18s;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.legend-floating-popover.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.popover-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.popover-title-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.popover-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+}
+
+.popover-point-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.popover-desc {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #cbd5e1;
+  margin: 0 0 8px 0;
+}
+
+.popover-list {
+  margin: 0 0 8px 0;
+  padding: 0 0 0 15px;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.popover-list li {
+  margin-bottom: 3px;
+}
+
+.popover-list strong {
+  color: #e2e8f0;
+}
+
+.popover-formula {
+  margin: 7px 0 8px 0;
+  padding: 6px 9px;
+  background: rgba(2, 132, 199, 0.16);
+  border-left: 3px solid #0284c7;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #38bdf8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.popover-footer-hint {
+  font-size: 10px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-top: 6px;
+  margin-top: 4px;
 }
 
 .chart-canvas-wrap {

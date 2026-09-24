@@ -132,34 +132,19 @@ class Security {
      * @param int $inactivityTimeout Segundos máximos de inactividad (por defecto 15 min = 900 s)
      * @param int $rotationInterval Segundos para rotación periódica (por defecto 30 min = 1800 s)
      */
-    public static function checkSessionLifecycle(int $inactivityTimeout = 900, int $rotationInterval = 1800): array {
+    public static function checkSessionLifecycle(int $inactivityTimeout = 1800, int $rotationInterval = 3600): array {
         if (empty($_SESSION['usuario'])) {
             return ['valid' => true, 'authenticated' => false];
         }
 
         $now = time();
 
-        // 0. Validar si había un beacon de cierre pendiente
-        if (!empty($_SESSION['pending_beacon_logout'])) {
-            $beaconTime = (int)$_SESSION['pending_beacon_logout'];
-            // Si la petición llega dentro de los 15 segundos, fue una recarga de página (F5/refresco) o navegación rápida:
-            // cancelar el logout pendiente y mantener la sesión viva
-            if (($now - $beaconTime) < 15) {
-                unset($_SESSION['pending_beacon_logout']);
-            } else {
-                // Pasaron más de 15 segundos: el usuario efectivamente cerró la ventana
-                self::logSecurityEvent(
-                    'LOGOUT_BEACON',
-                    'Sesión cerrada automáticamente por baliza al abandonar la pestaña',
-                    $_SESSION['user_id'] ?? null,
-                    $_SESSION['usuario'] ?? null
-                );
-                self::destroySession();
-                return ['valid' => false, 'reason' => 'logout'];
-            }
+        // 0. Descartar balizas de cierre pendientes para prevenir cierres involuntarios al suspender pestañas
+        if (isset($_SESSION['pending_beacon_logout'])) {
+            unset($_SESSION['pending_beacon_logout']);
         }
 
-        // 1. Validar inactividad
+        // 1. Validar inactividad (30 minutos por defecto)
         $lastActivity = $_SESSION['last_activity'] ?? $now;
         if (($now - $lastActivity) > $inactivityTimeout) {
             self::logSecurityEvent(

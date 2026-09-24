@@ -35,6 +35,20 @@ $rpeText = (fmod($rpeVal, 1) == 0) ? number_format($rpeVal, 0) : number_format($
 $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($lphVal, 1, ',', '.');
 ?>
 
+<?php
+$evalDel = isset($nominaModel) ? $nominaModel->verificarPuedeEliminar($nomina) : ['puede' => false, 'motivo' => '', 'horas_restantes' => 0];
+$puedeEliminarDetalle = $evalDel['puede'];
+$motivoEliminarDetalle = $evalDel['motivo'];
+$horasRestantesDetalle = $evalDel['horas_restantes'] ?? 0;
+?>
+
+<?php if (!empty($msg)): ?>
+  <div class="alert success" style="margin-bottom:16px;"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($msg) ?></div>
+<?php endif; ?>
+<?php if (!empty($error)): ?>
+  <div class="alert danger" style="margin-bottom:16px;"><i class="fa-solid fa-circle-exclamation"></i> <?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
+
 <!-- BREADCRUMB & TOOLBAR -->
 <div class="view-header-bar">
   <div class="breadcrumb-trail">
@@ -42,9 +56,18 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
     <span class="sep">/</span>
     <span class="current">Carga de Nómina</span>
   </div>
-  <div class="header-actions">
+  <div class="header-actions" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
     <a class="btn secondary small" href="index.php?r=nomina/ver&id_nomina=<?= $nomina['id_nomina'] ?>"><i class="fa-solid fa-chart-pie"></i> Ver Totales / Exportar</a>
     <a class="btn secondary small" href="index.php?r=nomina/recibo&id_nomina=<?= $nomina['id_nomina'] ?>" target="_blank"><i class="fa-solid fa-receipt"></i> Recibos de Nómina</a>
+    <?php if ($puedeEliminarDetalle): ?>
+      <a class="btn danger small" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca;" href="index.php?r=nomina/eliminar&id_nomina=<?= $nomina['id_nomina'] ?>" onclick="return confirm('¿Confirmas que deseas eliminar esta nómina por completo? La nómina no tiene cambios guardados y está dentro de las 24 horas iniciales (quedan <?= $horasRestantesDetalle ?> h disponibles). El periodo volverá a quedar disponible.');" title="Eliminar nómina (Quedan <?= $horasRestantesDetalle ?> h disponibles)">
+        <i class="fa-solid fa-trash-can"></i> Eliminar Nómina
+      </a>
+    <?php else: ?>
+      <button type="button" class="btn small" style="background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; opacity:0.75; cursor:help;" onclick="alert('<?= addslashes(htmlspecialchars($motivoEliminarDetalle)) ?>')" title="<?= htmlspecialchars($motivoEliminarDetalle) ?>">
+        <i class="fa-solid fa-lock"></i> No eliminable
+      </button>
+    <?php endif; ?>
   </div>
 </div>
 
@@ -94,14 +117,14 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
     <div class="m-icon" style="background:#eff6ff; color:#1d4ed8;"><i class="fa-solid fa-file-invoice-dollar"></i></div>
     <div class="m-info">
       <span class="m-label">Total Asignaciones Brutas</span>
-      <strong class="m-val">Bs. <?= number_format($totalBrutoAcumulado, 2, ',', '.') ?></strong>
+      <strong class="m-val" id="metricTotalBruto">Bs. <?= number_format($totalBrutoAcumulado, 2, ',', '.') ?></strong>
     </div>
   </div>
   <div class="metric-card metric-card-highlight">
     <div class="m-icon" style="background:rgba(255,255,255,0.2); color:#fff;"><i class="fa-solid fa-money-bill-wave"></i></div>
     <div class="m-info">
       <span class="m-label" style="color:rgba(255,255,255,0.9);">Monto Total Neto a Pagar</span>
-      <strong class="m-val" style="color:#ffffff;">Bs. <?= number_format($totalNetoAcumulado, 2, ',', '.') ?></strong>
+      <strong class="m-val" id="metricTotalNeto" style="color:#ffffff;">Bs. <?= number_format($totalNetoAcumulado, 2, ',', '.') ?></strong>
     </div>
   </div>
 </div>
@@ -188,7 +211,11 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
           $inasist_monto = $nominaModel->getDeduccionMonto($id_detalle, 5);
           $islr_monto = $nominaModel->getDeduccionMonto($id_detalle, 6);
         ?>
-        <tr>
+        <tr class="nomina-row"
+            id="row_<?= $empId ?>"
+            data-emp-id="<?= $empId ?>"
+            data-sueldo-diario="<?= (float)$d['sueldo_diario'] ?>"
+            data-sueldo-mensual="<?= (float)($d['sueldo_divisa'] ?? 0) ?>">
             <td class="emp-cell sticky-col">
               <form id="form_row_<?= $empId ?>" method="post" action="index.php?r=nomina/detalle" style="display:none;">
                 <?= Security::csrfField() ?>
@@ -223,33 +250,33 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
             <td class="num-cell bold-text">Bs. <?= number_format((float)$d['sueldo_diario'], 2, ',', '.') ?></td>
 
             <!-- Carga Asignaciones (5) -->
-            <td class="input-cell"><input type="number" step="1" name="dias_trabajados" value="<?= (float)($d['dias_trabajados'] ?? 0) ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
-            <td class="input-cell"><input type="number" step="0.1" min="0" name="bono_nocturno_qty" value="<?= (float)$bono_noct_qty ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
-            <td class="input-cell"><input type="number" step="0.1" min="0" name="horas_extra_qty" value="<?= (float)$horas_extra_qty ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
-            <td class="input-cell"><input type="number" step="0.5" min="0" name="feriados_qty" value="<?= (float)$feriados_qty ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
-            <td class="input-cell"><input type="number" step="0.01" name="otras_asignaciones" value="0" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+            <td class="input-cell"><input type="number" step="1" min="0" max="31" name="dias_trabajados" class="calc-input" value="<?= (float)($d['dias_trabajados'] ?? 0) ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+            <td class="input-cell"><input type="number" step="0.1" min="0" max="200" name="bono_nocturno_qty" class="calc-input" value="<?= (float)$bono_noct_qty ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+            <td class="input-cell"><input type="number" step="0.1" min="0" max="200" name="horas_extra_qty" class="calc-input" value="<?= (float)$horas_extra_qty ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+            <td class="input-cell"><input type="number" step="0.5" min="0" max="15" name="feriados_qty" class="calc-input" value="<?= (float)$feriados_qty ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+            <td class="input-cell"><input type="number" step="0.01" min="0" name="otras_asignaciones" class="calc-input" value="0" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
 
             <!-- Asignaciones Calculadas (5) -->
-            <td class="num-cell cell-asig">Bs. <?= number_format((float)$d['sueldo_bss'], 2, ',', '.') ?></td>
-            <td class="num-cell cell-asig">Bs. <?= number_format((float)$bono_noct_monto, 2, ',', '.') ?></td>
-            <td class="num-cell cell-asig">Bs. <?= number_format((float)$horas_extra_monto, 2, ',', '.') ?></td>
-            <td class="num-cell cell-asig">Bs. <?= number_format((float)$feriados_monto, 2, ',', '.') ?></td>
-            <td class="num-cell cell-asig total-asig">Bs. <?= number_format((float)$d['total_asignaciones'], 2, ',', '.') ?></td>
+            <td class="num-cell cell-asig cell-sueldo-base">Bs. <?= number_format((float)$d['sueldo_bss'], 2, ',', '.') ?></td>
+            <td class="num-cell cell-asig cell-bono-noct">Bs. <?= number_format((float)$bono_noct_monto, 2, ',', '.') ?></td>
+            <td class="num-cell cell-asig cell-horas-extra">Bs. <?= number_format((float)$horas_extra_monto, 2, ',', '.') ?></td>
+            <td class="num-cell cell-asig cell-feriados">Bs. <?= number_format((float)$feriados_monto, 2, ',', '.') ?></td>
+            <td class="num-cell cell-asig total-asig cell-tot-bruto" data-raw="<?= (float)$d['total_asignaciones'] ?>">Bs. <?= number_format((float)$d['total_asignaciones'], 2, ',', '.') ?></td>
 
             <!-- Carga Deducciones Adicionales (3) -->
-            <td class="input-cell"><input type="number" step="1" min="0" name="dias_inasistencia" value="<?= (float)($d['dias_inasistencia'] ?? 0) ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
-            <td class="input-cell"><input type="number" step="0.01" name="prestamo" value="<?= (float)$prestamo_monto ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
-            <td class="input-cell"><input type="number" step="0.01" name="islr" value="<?= (float)$islr_monto ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+            <td class="input-cell"><input type="number" step="1" min="0" max="31" name="dias_inasistencia" class="calc-input" value="<?= (float)($d['dias_inasistencia'] ?? 0) ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+            <td class="input-cell"><input type="number" step="0.01" min="0" name="prestamo" class="calc-input" value="<?= (float)$prestamo_monto ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
+            <td class="input-cell"><input type="number" step="0.01" min="0" name="islr" class="calc-input" value="<?= (float)$islr_monto ?>" form="form_row_<?= $empId ?>" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='') this.value='0';"></td>
 
             <!-- Deducciones Calculadas (5) -->
-            <td class="num-cell cell-ded">Bs. <?= number_format((float)$sso_monto, 2, ',', '.') ?></td>
-            <td class="num-cell cell-ded">Bs. <?= number_format((float)$rpe_monto, 2, ',', '.') ?></td>
-            <td class="num-cell cell-ded">Bs. <?= number_format((float)$lph_monto, 2, ',', '.') ?></td>
-            <td class="num-cell cell-ded">Bs. <?= number_format((float)$inasist_monto, 2, ',', '.') ?></td>
-            <td class="num-cell cell-ded total-ded">Bs. <?= number_format((float)$d['total_deducciones'], 2, ',', '.') ?></td>
+            <td class="num-cell cell-ded cell-sso">Bs. <?= number_format((float)$sso_monto, 2, ',', '.') ?></td>
+            <td class="num-cell cell-ded cell-rpe">Bs. <?= number_format((float)$rpe_monto, 2, ',', '.') ?></td>
+            <td class="num-cell cell-ded cell-lph">Bs. <?= number_format((float)$lph_monto, 2, ',', '.') ?></td>
+            <td class="num-cell cell-ded cell-inasist">Bs. <?= number_format((float)$inasist_monto, 2, ',', '.') ?></td>
+            <td class="num-cell cell-ded total-ded cell-tot-deduc">Bs. <?= number_format((float)$d['total_deducciones'], 2, ',', '.') ?></td>
 
             <!-- Neto a pagar cell -->
-            <td class="neto-cell">Bs. <?= number_format((float)$d['neto_pagar'], 2, ',', '.') ?></td>
+            <td class="neto-cell cell-neto" data-raw="<?= (float)$d['neto_pagar'] ?>">Bs. <?= number_format((float)$d['neto_pagar'], 2, ',', '.') ?></td>
 
             <!-- Recibo PDF Individual -->
             <td style="text-align: center;">
@@ -260,7 +287,7 @@ $lphText = (fmod($lphVal, 1) == 0) ? number_format($lphVal, 0) : number_format($
 
             <!-- Action buttons -->
             <td style="text-align: center; white-space: nowrap;">
-              <button type="submit" class="btn-row-action btn-save" title="Guardar y recalcular asignaciones, deducciones y neto del trabajador" form="form_row_<?= $empId ?>"><i class="fa-solid fa-floppy-disk" style="color:var(--primary);"></i></button>
+              <button type="submit" class="btn-row-action btn-save" id="btn_save_<?= $empId ?>" title="Guardar y recalcular asignaciones, deducciones y neto del trabajador" form="form_row_<?= $empId ?>"><i class="fa-solid fa-floppy-disk" style="color:var(--primary);"></i></button>
               <form method="post" action="index.php?r=nomina/detalle" style="display:inline;" onsubmit="return confirm('¿Quitar a este trabajador de esta nómina?');">
                 <?= Security::csrfField() ?>
                 <input type="hidden" name="id_nomina" value="<?= $nomina['id_nomina'] ?>">
@@ -549,4 +576,202 @@ window.addEventListener('click', function(e) {
     cerrarModalTrabajadores();
   }
 });
+
+// ═══════════════ CÁLCULO REACTIVO AUTOMÁTICO EN VIVO (NETO Y TOTALES) ═══════════════
+const NOMINA_CONFIG = {
+  salarioMinimo: <?= (float)($empConfig['salario_minimo_legal'] ?? 130.00) ?>,
+  topeSso: <?= (int)($empConfig['tope_sso_salarios'] ?? 5) ?>,
+  topeRpe: <?= (int)($empConfig['tope_rpe_salarios'] ?? 5) ?>,
+  tasaSso: <?= (float)($empConfig['tasa_sso_trabajador'] ?? 0.04) ?>,
+  tasaRpe: <?= (float)($empConfig['tasa_rpe_trabajador'] ?? 0.005) ?>,
+  tasaLph: <?= (float)($empConfig['tasa_faov_trabajador'] ?? 0.01) ?>,
+  semanasPeriodo: <?= (float)($nomina['semanas_descontar_ivss'] ?? 2.0) ?>,
+  factorSemanasMes: <?= (float)($nomina['factor_semanas_mes'] ?? 4.333333) ?>,
+  prorrateo: <?= ((float)($nomina['semanas_descontar_ivss'] ?? 2.0) > 0 ? (float)($nomina['semanas_descontar_ivss'] ?? 2.0) : 2.0) / ((float)($nomina['factor_semanas_mes'] ?? 4.333333) > 0 ? (float)($nomina['factor_semanas_mes'] ?? 4.333333) : 4.333333) ?>
+};
+
+function formatBs(val) {
+  const parts = Number(val).toFixed(2).split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return parts.join(',');
+}
+
+function recalcularFila(row) {
+  const sueldoDiario = parseFloat(row.dataset.sueldoDiario) || 0;
+  const sueldoMensual = parseFloat(row.dataset.sueldoMensual) || 0;
+
+  const diasTrab = parseFloat(row.querySelector('input[name="dias_trabajados"]')?.value) || 0;
+  const bonoNoctQty = parseFloat(row.querySelector('input[name="bono_nocturno_qty"]')?.value) || 0;
+  const horasExtraQty = parseFloat(row.querySelector('input[name="horas_extra_qty"]')?.value) || 0;
+  const feriadosQty = parseFloat(row.querySelector('input[name="feriados_qty"]')?.value) || 0;
+  const otrasAsig = parseFloat(row.querySelector('input[name="otras_asignaciones"]')?.value) || 0;
+
+  const diasInasist = parseFloat(row.querySelector('input[name="dias_inasistencia"]')?.value) || 0;
+  const prestamo = parseFloat(row.querySelector('input[name="prestamo"]')?.value) || 0;
+  const islr = parseFloat(row.querySelector('input[name="islr"]')?.value) || 0;
+
+  // 1. Asignaciones
+  const sueldoBss = Math.round((sueldoDiario * diasTrab) * 100) / 100;
+  const bonoNoctMonto = Math.round(((sueldoDiario / 7.5) * 0.3 * bonoNoctQty) * 100) / 100;
+  const horasExtraMonto = Math.round((((sueldoDiario * 1.5) / 7.5) * horasExtraQty) * 100) / 100;
+  const feriadosMonto = Math.round(((sueldoDiario * 1.5) * feriadosQty) * 100) / 100;
+  const totalAsignaciones = Math.round((sueldoBss + bonoNoctMonto + horasExtraMonto + feriadosMonto + otrasAsig) * 100) / 100;
+
+  // 2. Deducciones
+  let sso = 0;
+  let rpe = 0;
+  if (diasTrab > 0) {
+    const baseCotizableSso = Math.max(NOMINA_CONFIG.salarioMinimo, Math.min(sueldoMensual, NOMINA_CONFIG.topeSso * NOMINA_CONFIG.salarioMinimo));
+    const baseCotizableRpe = Math.max(NOMINA_CONFIG.salarioMinimo, Math.min(sueldoMensual, NOMINA_CONFIG.topeRpe * NOMINA_CONFIG.salarioMinimo));
+    sso = Math.round((NOMINA_CONFIG.tasaSso * baseCotizableSso * NOMINA_CONFIG.prorrateo) * 100) / 100;
+    rpe = Math.round((NOMINA_CONFIG.tasaRpe * baseCotizableRpe * NOMINA_CONFIG.prorrateo) * 100) / 100;
+  }
+  const lph = Math.round((NOMINA_CONFIG.tasaLph * Math.max(NOMINA_CONFIG.salarioMinimo, totalAsignaciones)) * 100) / 100;
+  const inasistMonto = Math.round((sueldoDiario * diasInasist) * 100) / 100;
+  const totalDeducciones = Math.round((sso + rpe + lph + prestamo + inasistMonto + islr) * 100) / 100;
+
+  // 3. Neto
+  const netoPagar = Math.round((totalAsignaciones - totalDeducciones) * 100) / 100;
+
+  // Update DOM cells
+  const elSueldoBase = row.querySelector('.cell-sueldo-base');
+  const elBonoNoct = row.querySelector('.cell-bono-noct');
+  const elHorasExtra = row.querySelector('.cell-horas-extra');
+  const elFeriados = row.querySelector('.cell-feriados');
+  const elTotBruto = row.querySelector('.cell-tot-bruto');
+
+  const elSso = row.querySelector('.cell-sso');
+  const elRpe = row.querySelector('.cell-rpe');
+  const elLph = row.querySelector('.cell-lph');
+  const elInasist = row.querySelector('.cell-inasist');
+  const elTotDeduc = row.querySelector('.cell-tot-deduc');
+  const elNeto = row.querySelector('.cell-neto');
+
+  if (elSueldoBase) elSueldoBase.textContent = 'Bs. ' + formatBs(sueldoBss);
+  if (elBonoNoct) elBonoNoct.textContent = 'Bs. ' + formatBs(bonoNoctMonto);
+  if (elHorasExtra) elHorasExtra.textContent = 'Bs. ' + formatBs(horasExtraMonto);
+  if (elFeriados) elFeriados.textContent = 'Bs. ' + formatBs(feriadosMonto);
+  if (elTotBruto) {
+    elTotBruto.textContent = 'Bs. ' + formatBs(totalAsignaciones);
+    elTotBruto.dataset.raw = totalAsignaciones;
+  }
+
+  if (elSso) elSso.textContent = 'Bs. ' + formatBs(sso);
+  if (elRpe) elRpe.textContent = 'Bs. ' + formatBs(rpe);
+  if (elLph) elLph.textContent = 'Bs. ' + formatBs(lph);
+  if (elInasist) elInasist.textContent = 'Bs. ' + formatBs(inasistMonto);
+  if (elTotDeduc) elTotDeduc.textContent = 'Bs. ' + formatBs(totalDeducciones);
+
+  if (elNeto) {
+    elNeto.textContent = 'Bs. ' + formatBs(netoPagar);
+    elNeto.dataset.raw = netoPagar;
+    elNeto.classList.remove('neto-pulse');
+    void elNeto.offsetWidth;
+    elNeto.classList.add('neto-pulse');
+  }
+
+  recalcularTotalGeneral();
+}
+
+function recalcularTotalGeneral() {
+  let sumBruto = 0;
+  let sumNeto = 0;
+
+  document.querySelectorAll('.nomina-row').forEach(row => {
+    const b = parseFloat(row.querySelector('.cell-tot-bruto')?.dataset.raw);
+    const n = parseFloat(row.querySelector('.cell-neto')?.dataset.raw);
+
+    if (!isNaN(b)) sumBruto += b;
+    if (!isNaN(n)) sumNeto += n;
+  });
+
+  const mBruto = document.getElementById('metricTotalBruto');
+  const mNeto = document.getElementById('metricTotalNeto');
+
+  if (mBruto) mBruto.textContent = 'Bs. ' + formatBs(sumBruto);
+  if (mNeto) mNeto.textContent = 'Bs. ' + formatBs(sumNeto);
+}
+
+const saveTimers = {};
+
+function autoGuardarFila(row) {
+  const empId = row.dataset.empId;
+  const form = document.getElementById('form_row_' + empId);
+  const btnSave = document.getElementById('btn_save_' + empId);
+  if (!form) return;
+
+  const formData = new FormData(form);
+
+  row.querySelectorAll('.calc-input').forEach(inp => {
+    formData.append(inp.name, inp.value);
+  });
+  formData.append('ajax', '1');
+
+  if (btnSave) {
+    btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color:var(--primary);"></i>';
+  }
+
+  fetch('index.php?r=nomina/detalle', {
+    method: 'POST',
+    body: formData,
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (btnSave) {
+      btnSave.innerHTML = '<i class="fa-solid fa-check" style="color:var(--ok, #10b981);"></i>';
+      setTimeout(() => {
+        btnSave.innerHTML = '<i class="fa-solid fa-floppy-disk" style="color:var(--primary);"></i>';
+      }, 1200);
+    }
+  })
+  .catch(err => {
+    console.error('Error al guardar fila:', err);
+    if (btnSave) {
+      btnSave.innerHTML = '<i class="fa-solid fa-floppy-disk" style="color:var(--primary);"></i>';
+    }
+  });
+}
+
+document.querySelectorAll('.nomina-row').forEach(row => {
+  const empId = row.dataset.empId;
+  row.querySelectorAll('.calc-input').forEach(inp => {
+    inp.addEventListener('input', function() {
+      recalcularFila(row);
+
+      clearTimeout(saveTimers[empId]);
+      saveTimers[empId] = setTimeout(() => {
+        autoGuardarFila(row);
+      }, 700);
+    });
+
+    inp.addEventListener('blur', function() {
+      clearTimeout(saveTimers[empId]);
+      autoGuardarFila(row);
+    });
+  });
+});
+
+document.querySelectorAll('.btn-save').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    const row = this.closest('.nomina-row');
+    if (row) {
+      recalcularFila(row);
+      autoGuardarFila(row);
+    }
+  });
+});
 </script>
+
+<style>
+@keyframes pulseNetoGreen {
+  0% { transform: scale(1); background: rgba(16, 185, 129, 0.22); }
+  50% { transform: scale(1.06); background: rgba(16, 185, 129, 0.38); }
+  100% { transform: scale(1); }
+}
+.neto-pulse {
+  animation: pulseNetoGreen 0.35s ease-out;
+  border-radius: 6px;
+}
+</style>

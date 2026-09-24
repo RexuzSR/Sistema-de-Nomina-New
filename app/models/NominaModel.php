@@ -9,6 +9,7 @@ class NominaModel extends Model {
     public function __construct() {
         parent::__construct();
         $this->ensureDetalleColumns();
+        $this->ensureNominaColumns();
     }
 
     private function ensureDetalleColumns(): void {
@@ -19,6 +20,17 @@ class NominaModel extends Model {
             }
         } catch (\Throwable $e) {
             // Silently ignore if already exists or table issue
+        }
+    }
+
+    private function ensureNominaColumns(): void {
+        try {
+            $cols = $this->db->query("SHOW COLUMNS FROM tb_nomina LIKE 'modificada'")->fetchAll();
+            if (empty($cols)) {
+                $this->db->exec("ALTER TABLE tb_nomina ADD COLUMN modificada TINYINT(1) NOT NULL DEFAULT 0, ADD COLUMN fecha_modificacion DATETIME NULL DEFAULT NULL");
+            }
+        } catch (\Throwable $e) {
+            // Silently ignore if already exists
         }
     }
 
@@ -66,21 +78,24 @@ class NominaModel extends Model {
         }
 
         $idEmpleados = array_column($empleadosActivos, 'id_empleado');
-        $this->agregarTrabajadoresANomina($idNomina, $idEmpleados, $diasPeriodo);
+        $this->agregarTrabajadoresANomina($idNomina, $idEmpleados, $diasPeriodo, true);
 
         return $idNomina;
     }
 
-    public function agregarTrabajadoresANomina(int $idNomina, array $idEmpleados, int $diasTrabajadosPorDefecto = 0): void {
+    public function agregarTrabajadoresANomina(int $idNomina, array $idEmpleados, int $diasTrabajadosPorDefecto = 0, bool $esInicial = false): void {
         foreach ($idEmpleados as $idEmp) {
             $idEmp = (int)$idEmp;
             if ($idEmp > 0) {
                 $stmt = $this->db->prepare("SELECT id_detalle FROM tb_nomina_detalle WHERE id_nomina = ? AND id_empleado = ?");
                 $stmt->execute([$idNomina, $idEmp]);
                 if (!$stmt->fetch()) {
-                    $this->calcularYGuardarDetalle($idNomina, $idEmp, ['dias_trabajados' => $diasTrabajadosPorDefecto]);
+                    $this->calcularYGuardarDetalle($idNomina, $idEmp, ['dias_trabajados' => $diasTrabajadosPorDefecto], !$esInicial);
                 }
             }
+        }
+        if (!$esInicial) {
+            $this->marcarModificada($idNomina);
         }
     }
 
@@ -93,6 +108,7 @@ class NominaModel extends Model {
             $this->db->prepare("DELETE FROM tb_nomina_asignacion WHERE id_detalle = ?")->execute([$id_detalle]);
             $this->db->prepare("DELETE FROM tb_nomina_deduccion WHERE id_detalle = ?")->execute([$id_detalle]);
             $this->db->prepare("DELETE FROM tb_nomina_detalle WHERE id_detalle = ?")->execute([$id_detalle]);
+            $this->marcarModificada($idNomina);
         }
     }
 
@@ -177,7 +193,7 @@ class NominaModel extends Model {
         return $stmt->fetchAll();
     }
 
-    public function calcularYGuardarDetalle(int $idNomina, int $idEmpleado, array $datos): array {
+    public function calcularYGuardarDetalle(int $idNomina, int $idEmpleado, array $datos, bool $marcarComoModificada = true): array {
         $nomina = $this->getById($idNomina);
         $empleadoModel = new EmpleadoModel();
         $tasaModel = new TasaModel();
@@ -187,15 +203,15 @@ class NominaModel extends Model {
         $tasas = $this->getTasasDeduccion();
         $tasaCambio = $tasaModel->getUltima();
 
-        $dias_trabajados = (float)($datos['dias_trabajados'] ?? 0);
-        $dias_inasistencia = (float)($datos['dias_inasistencia'] ?? 0);
-        $horas_extra_qty = (float)($datos['horas_extra_qty'] ?? 0);
-        $bono_nocturno_qty = (float)($datos['bono_nocturno_qty'] ?? 0);
-        $feriados_qty = (float)($datos['feriados_qty'] ?? 0);
+        $dias_trabajados = max(0, min(31, (float)($datos['dias_trabajados'] ?? 0)));
+        $dias_inasistencia = max(0, min(31, (float)($datos['dias_inasistencia'] ?? 0)));
+        $horas_extra_qty = max(0, min(200, (float)($datos['horas_extra_qty'] ?? 0)));
+        $bono_nocturno_qty = max(0, min(200, (float)($datos['bono_nocturno_qty'] ?? 0)));
+        $feriados_qty = max(0, min(15, (float)($datos['feriados_qty'] ?? 0)));
 
-        $otras_asignaciones = (float)($datos['otras_asignaciones'] ?? 0);
-        $prestamo = (float)($datos['prestamo'] ?? 0);
-        $islr = (float)($datos['islr'] ?? 0);
+        $otras_asignaciones = max(0, (float)($datos['otras_asignaciones'] ?? 0));
+        $prestamo = max(0, (float)($datos['prestamo'] ?? 0));
+        $islr = max(0, (float)($datos['islr'] ?? 0));
 
         $sueldo_diario = round(($empleado['sueldo_divisa'] ?? 0) / 30, 4);
         $monto_dias_trabajados = round($sueldo_diario * $dias_trabajados, 2);
@@ -303,6 +319,10 @@ class NominaModel extends Model {
         if ($inasistencia_monto > 0) $ded->execute([$id_detalle, 5, null, $inasistencia_monto]);
         if ($islr > 0) $ded->execute([$id_detalle, 6, null, $islr]);
 
+        if ($marcarComoModificada) {
+            $this->marcarModificada($idNomina);
+        }
+
         return [
             'sueldo_diario' => $sueldo_diario, 'monto_dias_trabajados' => $monto_dias_trabajados,
             'total_asignaciones' => $total_asignaciones, 'sso' => $sso, 'rpe' => $rpe, 'lph' => $lph,
@@ -314,6 +334,7 @@ class NominaModel extends Model {
     public function actualizarTasasLey(int $idNomina, float $tasa_sso, float $tasa_rpe, float $tasa_lph): bool {
         $stmt = $this->db->prepare("UPDATE tb_nomina SET tasa_sso = ?, tasa_rpe = ?, tasa_lph = ? WHERE id_nomina = ?");
         $stmt->execute([$tasa_sso, $tasa_rpe, $tasa_lph, $idNomina]);
+        $this->marcarModificada($idNomina);
 
         $detalles = $this->getDetallesByNomina($idNomina);
         foreach ($detalles as $d) {
@@ -451,4 +472,75 @@ class NominaModel extends Model {
             $this->calcularYGuardarDetalle($idNomina, $idEmpleado, $inputs);
         }
     }
+
+    public function marcarModificada(int $idNomina): void {
+        try {
+            $stmt = $this->db->prepare("UPDATE tb_nomina SET modificada = 1, fecha_modificacion = NOW() WHERE id_nomina = ?");
+            $stmt->execute([$idNomina]);
+        } catch (\Throwable $e) {
+            error_log("Error al marcar nómina modificada: " . $e->getMessage());
+        }
+    }
+
+    public function verificarPuedeEliminar(array $nomina): array {
+        $fechaGen = !empty($nomina['fecha_generacion']) ? strtotime($nomina['fecha_generacion']) : 0;
+        $ahora = time();
+        $segundosTranscurridos = max(0, $ahora - $fechaGen);
+        $horasTranscurridas = $segundosTranscurridos / 3600;
+
+        // Regla 1: No deben haber transcurrido más de 24 horas
+        if ($horasTranscurridas > 24) {
+            $horasFormato = round($horasTranscurridas, 1);
+            $fechaFormato = $fechaGen > 0 ? date('d/m/Y h:i A', $fechaGen) : 'desconocida';
+            return [
+                'puede' => false,
+                'motivo' => "Han transcurrido {$horasFormato} horas desde la creación de la nómina (creada el {$fechaFormato}). El límite de seguridad para anulación es de 24 horas."
+            ];
+        }
+
+        // Regla 2: No debe tener modificaciones guardadas
+        if (!empty($nomina['modificada']) && (int)$nomina['modificada'] === 1) {
+            return [
+                'puede' => false,
+                'motivo' => "La nómina tiene modificaciones guardadas (ajustes de días, horas extras, deducciones o trabajadores). Al contener cambios confirmados, no se permite su anulación."
+            ];
+        }
+
+        $horasRestantes = max(0, round(24 - $horasTranscurridas, 1));
+        return [
+            'puede' => true,
+            'horas_restantes' => $horasRestantes,
+            'motivo' => "La nómina está en su estado inicial sin modificaciones y dentro del límite de 24 horas (quedan {$horasRestantes} h disponibles)."
+        ];
+    }
+
+    public function eliminarNomina(int $idNomina): bool {
+        try {
+            $this->db->beginTransaction();
+
+            $stmt = $this->db->prepare("SELECT id_detalle FROM tb_nomina_detalle WHERE id_nomina = ?");
+            $stmt->execute([$idNomina]);
+            $detalles = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            if (!empty($detalles)) {
+                $inQuery = implode(',', array_fill(0, count($detalles), '?'));
+                $this->db->prepare("DELETE FROM tb_nomina_asignacion WHERE id_detalle IN ($inQuery)")->execute($detalles);
+                $this->db->prepare("DELETE FROM tb_nomina_deduccion WHERE id_detalle IN ($inQuery)")->execute($detalles);
+                $this->db->prepare("DELETE FROM tb_nomina_detalle WHERE id_nomina = ?")->execute([$idNomina]);
+            }
+
+            $stmtDel = $this->db->prepare("DELETE FROM tb_nomina WHERE id_nomina = ?");
+            $stmtDel->execute([$idNomina]);
+
+            $this->db->commit();
+            return true;
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            error_log("Error al eliminar nómina {$idNomina}: " . $e->getMessage());
+            return false;
+        }
+    }
 }
+
